@@ -22,7 +22,7 @@ export default function Layout({ children }: LayoutProps) {
         {/* Sidebar */}
         <div className="fixed inset-y-0 flex w-64 flex-col bg-white shadow-lg">
           <div className="flex h-16 items-center px-4">
-            <h1 className="text-xl font-bold text-primary">Vend CRM</h1>
+            <h1 className="text-xl font-bold text-primary">AVS CRM</h1>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
             {navigation.map((item) => {
