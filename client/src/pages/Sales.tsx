@@ -45,7 +45,7 @@ export default function Sales() {
                 <TableCell>{opportunity.productId}</TableCell>
                 <TableCell>${opportunity.value.toLocaleString()}</TableCell>
                 <TableCell>{opportunity.status}</TableCell>
-                <TableCell>{new Date(opportunity.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell>{opportunity.createdAt ? new Date(opportunity.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
               </TableRow>
             ))}
           </TableBody>

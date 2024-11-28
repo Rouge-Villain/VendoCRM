@@ -21,7 +21,7 @@ export function ActivityLog() {
               <p className="text-sm font-medium">{activity.type}</p>
               <p className="text-sm text-gray-500">{activity.description}</p>
               <p className="text-xs text-gray-400">
-                {new Date(activity.createdAt).toLocaleString()}
+                {activity.createdAt ? new Date(activity.createdAt).toLocaleString() : 'N/A'}
               </p>
             </div>
           </div>
