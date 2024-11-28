@@ -23,6 +23,13 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
       email: "",
       phone: "",
       address: "",
+      website: "",
+      machineTypes: [],
+      businessLocations: "",
+      serviceTerritory: "",
+      serviceHours: "",
+      contractTerms: "",
+      maintenanceHistory: "",
     },
   });
 
@@ -103,6 +110,85 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Address</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="website"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Website</FormLabel>
+              <FormControl>
+                <Input type="url" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="machineTypes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Machine Types</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Enter machine types separated by commas" 
+                  {...field} 
+                  onChange={(e) => field.onChange(e.target.value.split(',').map(s => s.trim()))}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="businessLocations"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Business Locations</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Enter locations in JSON format"
+                  {...field}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="serviceTerritory"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Service Territory</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="serviceHours"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Service Hours</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="contractTerms"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contract Terms</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>

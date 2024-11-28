@@ -9,6 +9,13 @@ export const customers = pgTable("customers", {
   email: text("email").notNull(),
   phone: text("phone").notNull(),
   address: text("address").notNull(),
+  website: text("website"),
+  machineTypes: text("machine_types").array(),
+  businessLocations: text("business_locations"),  // JSON array as text
+  serviceTerritory: text("service_territory"),
+  serviceHours: text("service_hours"),
+  contractTerms: text("contract_terms"),
+  maintenanceHistory: text("maintenance_history"), // JSON array as text
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
