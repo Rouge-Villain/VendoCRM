@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
 import Products from "./pages/Products";
 import Sales from "./pages/Sales";
+import Analytics from "./pages/Analytics";
 
 function Router() {
   return (
@@ -19,6 +20,7 @@ function Router() {
         <Route path="/customers" component={Customers} />
         <Route path="/products" component={Products} />
         <Route path="/sales" component={Sales} />
+        <Route path="/analytics" component={Analytics} />
         <Route>404 Page Not Found</Route>
       </Switch>
     </Layout>

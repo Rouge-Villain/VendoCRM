@@ -28,18 +28,24 @@ ChartJS.register(
 );
 
 export function AdvancedAnalytics() {
-  const { data: customers } = useQuery({
+  const { data: customers, isError: isCustomersError, error: customersError } = useQuery({
     queryKey: ["customers"],
     queryFn: async () => {
       const response = await fetch("/api/customers");
+      if (!response.ok) {
+        throw new Error(`Error fetching customers: ${response.statusText}`);
+      }
       return response.json() as Promise<Customer[]>;
     },
   });
 
-  const { data: opportunities } = useQuery({
+  const { data: opportunities, isError: isOpportunitiesError, error: opportunitiesError } = useQuery({
     queryKey: ["opportunities"],
     queryFn: async () => {
       const response = await fetch("/api/opportunities");
+      if (!response.ok) {
+        throw new Error(`Error fetching opportunities: ${response.statusText}`);
+      }
       return response.json() as Promise<Opportunity[]>;
     },
   });
@@ -114,6 +120,32 @@ export function AdvancedAnalytics() {
       },
     ],
   };
+
+  if (isCustomersError || isOpportunitiesError) {
+    return (
+      <div className="p-4 text-red-500">
+        {isCustomersError && `Error loading customers: ${customersError?.message}`}
+        {isOpportunitiesError && `Error loading opportunities: ${opportunitiesError?.message}`}
+      </div>
+    );
+  }
+
+  if (!customers || !opportunities) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Loading analytics data...</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[400px] flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
