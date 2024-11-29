@@ -24,6 +24,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
       phone: "",
       address: "",
       website: "",
+      notes: "",
       machineTypes: [],
       businessLocations: "",
       serviceTerritory: "",
@@ -46,6 +47,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       toast({ title: "Customer created successfully" });
+      form.reset();
       onSuccess();
     },
     onError: () => {
@@ -55,12 +57,15 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
+      <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-8 p-6">
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Basic Information</h3>
+          <div className="grid grid-cols-2 gap-6">
         <FormField
           control={form.control}
           name="company"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="col-span-1">
               <FormLabel>Company Name</FormLabel>
               <FormControl>
                 <Input {...field} />
@@ -72,7 +77,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="col-span-1">
               <FormLabel>Contact Name</FormLabel>
               <FormControl>
                 <Input {...field} />
@@ -108,10 +113,25 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
           control={form.control}
           name="address"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="col-span-2">
               <FormLabel>Address</FormLabel>
               <FormControl>
                 <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem className="col-span-2">
+              <FormLabel>Notes</FormLabel>
+              <FormControl>
+                <textarea
+                  className="w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  {...field}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -195,8 +215,69 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
-          Create Customer
+        </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Contact Details</h3>
+          <div className="grid grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" {...field} className="transition-all duration-200 focus:scale-[1.01]" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone</FormLabel>
+                  <FormControl>
+                    <Input type="tel" {...field} className="transition-all duration-200 focus:scale-[1.01]" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Additional Information</h3>
+          <div className="grid grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="website"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Website</FormLabel>
+                  <FormControl>
+                    <Input type="url" {...field} className="transition-all duration-200 focus:scale-[1.01]" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <Button 
+          type="submit" 
+          className="w-full py-6 text-lg font-semibold hover:scale-[1.01] transition-transform duration-200"
+          disabled={mutation.isPending}
+        >
+          {mutation.isPending ? (
+            <span className="flex items-center gap-2">
+              <span className="animate-spin">⏳</span> Creating...
+            </span>
+          ) : (
+            "Create Customer"
+          )}
         </Button>
       </form>
     </Form>

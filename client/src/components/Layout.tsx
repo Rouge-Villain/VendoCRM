@@ -20,11 +20,11 @@ export default function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-gray-100">
       <div className="flex">
         {/* Sidebar */}
-        <div className="fixed inset-y-0 flex w-64 flex-col bg-white shadow-lg">
-          <div className="flex h-16 items-center px-4">
-            <h1 className="text-xl font-bold text-primary">AVS CRM</h1>
+        <div className="fixed inset-y-0 flex w-64 flex-col bg-white shadow-xl border-r border-gray-200">
+          <div className="flex h-16 items-center px-6">
+            <h1 className="text-2xl font-bold text-primary tracking-tight">AVS CRM</h1>
           </div>
-          <nav className="flex-1 space-y-1 px-2 py-4">
+          <nav className="flex-1 space-y-2 px-4 py-6">
             {navigation.map((item) => {
               const isActive = location === item.href;
               return (

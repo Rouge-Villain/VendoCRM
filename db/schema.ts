@@ -10,6 +10,7 @@ export const customers = pgTable("customers", {
   phone: text("phone").notNull(),
   address: text("address").notNull(),
   website: text("website"),
+  notes: text("notes"),
   machineTypes: text("machine_types").array(),
   businessLocations: text("business_locations"),  // JSON array as text
   serviceTerritory: text("service_territory"),

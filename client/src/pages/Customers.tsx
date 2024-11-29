@@ -22,13 +22,18 @@ export default function Customers() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-        <Button onClick={() => setIsOpen(true)}>Add Customer</Button>
+        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Customers</h1>
+        <Button 
+          onClick={() => setIsOpen(true)}
+          className="px-6 py-2 hover:scale-105 transition-transform duration-200"
+        >
+          Add Customer
+        </Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-lg border shadow-sm bg-white">
         <Table>
           <TableHeader>
             <TableRow>
@@ -37,6 +42,7 @@ export default function Customers() {
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Address</TableHead>
+              <TableHead>Notes</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -47,6 +53,7 @@ export default function Customers() {
                 <TableCell>{customer.email}</TableCell>
                 <TableCell>{customer.phone}</TableCell>
                 <TableCell>{customer.address}</TableCell>
+                <TableCell>{customer.notes}</TableCell>
               </TableRow>
             ))}
           </TableBody>
