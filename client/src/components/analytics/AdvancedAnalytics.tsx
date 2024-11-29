@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { exportToCSV, prepareAnalyticsData } from '@/lib/exportData';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -147,8 +148,23 @@ export function AdvancedAnalytics() {
     );
   }
 
+  const handleExportData = () => {
+    if (!customers || !opportunities) return;
+    const analyticsData = prepareAnalyticsData(customers, opportunities);
+    exportToCSV(analyticsData, 'territory-performance-analysis');
+  };
+
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Advanced Analytics Dashboard</h2>
+        <button
+          onClick={handleExportData}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+        >
+          Export Data
+        </button>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Territory Performance Analysis</CardTitle>
