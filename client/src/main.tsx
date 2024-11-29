@@ -11,6 +11,7 @@ import Customers from "./pages/Customers";
 import Products from "./pages/Products";
 import Sales from "./pages/Sales";
 import Analytics from "./pages/Analytics";
+import Timeline from "./pages/Timeline";
 
 function Router() {
   return (
@@ -21,6 +22,7 @@ function Router() {
         <Route path="/products" component={Products} />
         <Route path="/sales" component={Sales} />
         <Route path="/analytics" component={Analytics} />
+        <Route path="/timeline" component={Timeline} />
         <Route>404 Page Not Found</Route>
       </Switch>
     </Layout>
