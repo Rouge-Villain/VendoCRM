@@ -52,6 +52,7 @@ export const activities = pgTable("activities", {
   nextSteps: text("next_steps"),
   contactMethod: text("contact_method").notNull(),
   contactedBy: text("contacted_by").notNull(),
+  followUpDate: timestamp("follow_up_date"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

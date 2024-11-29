@@ -1,6 +1,10 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -39,6 +43,7 @@ export function NewActivityForm({ customerId, onSuccess }: NewActivityFormProps)
       nextSteps: "",
       contactMethod: "",
       contactedBy: "",
+      followUpDate: undefined,
     },
   });
 
@@ -131,7 +136,7 @@ export function NewActivityForm({ customerId, onSuccess }: NewActivityFormProps)
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value || ""} />
               </FormControl>
             </FormItem>
           )}
@@ -144,7 +149,7 @@ export function NewActivityForm({ customerId, onSuccess }: NewActivityFormProps)
             <FormItem>
               <FormLabel>Outcome</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value || ""} />
               </FormControl>
             </FormItem>
           )}
@@ -157,8 +162,44 @@ export function NewActivityForm({ customerId, onSuccess }: NewActivityFormProps)
             <FormItem>
               <FormLabel>Next Steps</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value || ""} />
               </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="followUpDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Follow-up Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={`w-full pl-3 text-left font-normal ${!field.value && "text-muted-foreground"}`}
+                    >
+                      {field.value ? (
+                        format(new Date(field.value), "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? new Date(field.value) : undefined}
+                    onSelect={field.onChange}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </FormItem>
           )}
         />
@@ -170,7 +211,7 @@ export function NewActivityForm({ customerId, onSuccess }: NewActivityFormProps)
             <FormItem>
               <FormLabel>Contacted By</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value || ""} />
               </FormControl>
             </FormItem>
           )}
