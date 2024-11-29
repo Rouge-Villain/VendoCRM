@@ -48,6 +48,10 @@ export const activities = pgTable("activities", {
   customerId: integer("customer_id").notNull(),
   type: text("type").notNull(), // call, email, meeting, etc.
   description: text("description").notNull(),
+  outcome: text("outcome"),
+  nextSteps: text("next_steps"),
+  contactMethod: text("contact_method").notNull(),
+  contactedBy: text("contacted_by").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
