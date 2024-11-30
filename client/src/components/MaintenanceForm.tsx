@@ -35,7 +35,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
   const form = useForm<InsertMaintenance>({
     resolver: zodResolver(insertMaintenanceSchema),
     defaultValues: {
-      customerId: 0,
+      customerId: 1,
       machineId: "",
       serialNumber: "",
       machineType: "",
@@ -43,7 +43,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
       description: "",
       status: "pending",
       technicianNotes: "",
-      partsUsed: [],
+      partsUsed: [] as Array<{ name: string; quantity: number }>,
       cost: "0.00",
       scheduledDate: new Date(),
     },
@@ -56,7 +56,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
-          cost: parseFloat(data.cost),
+          cost: data.cost ? parseFloat(data.cost) : 0.00,
           partsUsed: data.partsUsed || [],
         }),
       });
@@ -172,7 +172,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
         <FormField
           control={form.control}
           name="cost"
-          render={({ field }) => (
+          render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
               <FormLabel>Cost</FormLabel>
               <FormControl>
@@ -180,8 +180,10 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
                   {...field}
                   type="number"
                   step="0.01"
+                  min="0"
+                  value={value || "0.00"}
+                  onChange={(e) => onChange(e.target.value)}
                   placeholder="Enter cost"
-                  onChange={(e) => field.onChange(e.target.value)}
                 />
               </FormControl>
             </FormItem>
