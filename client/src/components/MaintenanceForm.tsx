@@ -43,8 +43,8 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
       description: "",
       status: "pending",
       technicianNotes: "",
-      partsUsed: [] as Array<{ name: string; quantity: number }>,
-      cost: "0",
+      partsUsed: [],
+      cost: "0.00",
       scheduledDate: new Date(),
     },
   });
@@ -54,7 +54,11 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
       const response = await fetch("/api/maintenance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          cost: parseFloat(data.cost),
+          partsUsed: data.partsUsed || [],
+        }),
       });
       if (!response.ok) throw new Error("Failed to create maintenance record");
       return response.json();
@@ -160,6 +164,25 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Input {...field} placeholder="Enter maintenance description" />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="cost"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cost</FormLabel>
+              <FormControl>
+                <Input 
+                  {...field}
+                  type="number"
+                  step="0.01"
+                  placeholder="Enter cost"
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
               </FormControl>
             </FormItem>
           )}

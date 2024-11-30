@@ -12,8 +12,8 @@ export const maintenanceRecords = pgTable("maintenance_records", {
   description: text("description").notNull(),
   status: text("status").notNull(), // pending, in_progress, completed
   technicianNotes: text("technician_notes"),
-  partsUsed: jsonb("parts_used").default([]),
-  cost: decimal("cost"),
+  partsUsed: jsonb("parts_used").$type<Array<{ name: string; quantity: number }>>().default([]),
+  cost: decimal("cost", { precision: 10, scale: 2 }),
   scheduledDate: timestamp("scheduled_date"),
   completedDate: timestamp("completed_date"),
   nextMaintenanceDate: timestamp("next_maintenance_date"),
