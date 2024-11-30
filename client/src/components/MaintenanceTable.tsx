@@ -20,6 +20,7 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Machine ID</TableHead>
+            <TableHead>Serial Number</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Description</TableHead>
             <TableHead>Status</TableHead>
@@ -32,6 +33,7 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
           {records.map((record) => (
             <TableRow key={record.id}>
               <TableCell>{record.machineId}</TableCell>
+              <TableCell>{record.serialNumber}</TableCell>
               <TableCell className="capitalize">{record.maintenanceType}</TableCell>
               <TableCell>{record.description}</TableCell>
               <TableCell className="capitalize">{record.status}</TableCell>

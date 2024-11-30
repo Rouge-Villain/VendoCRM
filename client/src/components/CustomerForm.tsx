@@ -139,13 +139,44 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Machine Types</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Enter machine types separated by commas" 
-                      value={Array.isArray(field.value) ? field.value.join(", ") : ""}
-                      onChange={(e) => field.onChange(e.target.value.split(',').map(s => s.trim()))}
-                    />
-                  </FormControl>
+                  <Select
+                    onValueChange={(value) => {
+                      const currentValues = Array.isArray(field.value) ? field.value : [];
+                      if (!currentValues.includes(value)) {
+                        field.onChange([...currentValues, value]);
+                      }
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select machine types" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="cooler">Cooler</SelectItem>
+                      <SelectItem value="snack">Snack</SelectItem>
+                      <SelectItem value="soda">Soda</SelectItem>
+                      <SelectItem value="freezer">Freezer</SelectItem>
+                      <SelectItem value="coffee">Coffee</SelectItem>
+                      <SelectItem value="micro market">Micro Market</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {Array.isArray(field.value) && field.value.map((type) => (
+                      <div key={type} className="flex items-center gap-1 bg-secondary text-secondary-foreground px-2 py-1 rounded-md">
+                        <span>{type}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            field.onChange(field.value.filter((t) => t !== type));
+                          }}
+                          className="text-secondary-foreground/50 hover:text-secondary-foreground"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </FormItem>
               )}
             />

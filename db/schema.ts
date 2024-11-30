@@ -6,6 +6,7 @@ export const maintenanceRecords = pgTable("maintenance_records", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   customerId: integer("customer_id").notNull(),
   machineId: text("machine_id").notNull(),
+  serialNumber: text("serial_number").notNull(),
   machineType: text("machine_type").notNull(),
   maintenanceType: text("maintenance_type").notNull(), // scheduled, repair, emergency
   description: text("description").notNull(),

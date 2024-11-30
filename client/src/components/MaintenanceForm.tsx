@@ -37,12 +37,13 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
     defaultValues: {
       customerId: 0,
       machineId: "",
+      serialNumber: "",
       machineType: "",
       maintenanceType: "",
       description: "",
       status: "pending",
       technicianNotes: "",
-      partsUsed: [] as any[],
+      partsUsed: [] as Array<{ name: string; quantity: number }>,
       cost: "0",
       scheduledDate: new Date(),
     },
@@ -106,9 +107,21 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Machine Type</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select machine type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="cooler">Cooler</SelectItem>
+                  <SelectItem value="snack">Snack</SelectItem>
+                  <SelectItem value="soda">Soda</SelectItem>
+                  <SelectItem value="freezer">Freezer</SelectItem>
+                  <SelectItem value="coffee">Coffee</SelectItem>
+                  <SelectItem value="micro market">Micro Market</SelectItem>
+                </SelectContent>
+              </Select>
             </FormItem>
           )}
         />
@@ -120,7 +133,20 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
             <FormItem>
               <FormLabel>Machine ID</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} placeholder="Enter machine ID" />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="serialNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Serial Number</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Enter machine serial number" />
               </FormControl>
             </FormItem>
           )}
@@ -133,7 +159,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} placeholder="Enter maintenance description" />
               </FormControl>
             </FormItem>
           )}
