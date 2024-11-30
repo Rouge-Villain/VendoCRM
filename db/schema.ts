@@ -1,6 +1,24 @@
-import { pgTable, text, integer, timestamp, decimal } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, timestamp, decimal, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
+
+export const maintenanceRecords = pgTable("maintenance_records", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  customerId: integer("customer_id").notNull(),
+  machineId: text("machine_id").notNull(),
+  machineType: text("machine_type").notNull(),
+  maintenanceType: text("maintenance_type").notNull(), // scheduled, repair, emergency
+  description: text("description").notNull(),
+  status: text("status").notNull(), // pending, in_progress, completed
+  technicianNotes: text("technician_notes"),
+  partsUsed: jsonb("parts_used").default([]),
+  cost: decimal("cost"),
+  scheduledDate: timestamp("scheduled_date"),
+  completedDate: timestamp("completed_date"),
+  nextMaintenanceDate: timestamp("next_maintenance_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 export const customers = pgTable("customers", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -76,3 +94,8 @@ export const insertActivitySchema = createInsertSchema(activities);
 export const selectActivitySchema = createSelectSchema(activities);
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Activity = z.infer<typeof selectActivitySchema>;
+
+export const insertMaintenanceSchema = createInsertSchema(maintenanceRecords);
+export const selectMaintenanceSchema = createSelectSchema(maintenanceRecords);
+export type InsertMaintenance = z.infer<typeof insertMaintenanceSchema>;
+export type Maintenance = z.infer<typeof selectMaintenanceSchema>;

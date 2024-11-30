@@ -25,7 +25,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
       address: "",
       website: "",
       notes: "",
-      machineTypes: [],
+      machineTypes: [] as string[],
       businessLocations: "",
       serviceTerritory: "",
       serviceHours: "",

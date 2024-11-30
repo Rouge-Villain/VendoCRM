@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Users, Package, TrendingUp, BarChart, History } from "lucide-react";
+import { LayoutDashboard, Users, Package, TrendingUp, BarChart, History, Wrench } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -16,6 +16,7 @@ export default function Layout({ children }: LayoutProps) {
     { name: "Sales", href: "/sales", icon: TrendingUp },
     { name: "Analytics", href: "/analytics", icon: BarChart },
     { name: "Timeline", href: "/timeline", icon: History },
+    { name: "Maintenance", href: "/maintenance", icon: Wrench },
   ];
 
   return (
