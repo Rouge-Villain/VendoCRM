@@ -84,7 +84,9 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
         ...data,
         cost: parseFloat(data.cost).toFixed(2),
         partsUsed: Array.isArray(data.partsUsed) ? data.partsUsed : [],
-        scheduledDate: new Date(data.scheduledDate),
+        scheduledDate: data.scheduledDate instanceof Date 
+          ? data.scheduledDate.toISOString() 
+          : new Date(data.scheduledDate).toISOString(),
       };
       console.log("Submitting maintenance record:", formattedData);
       const response = await fetch("/api/maintenance", {
@@ -107,6 +109,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
       onSuccess();
     },
     onError: (error) => {
+      console.error('Maintenance creation error:', error);
       toast({
         title: "Failed to schedule maintenance",
         description: error.message,
