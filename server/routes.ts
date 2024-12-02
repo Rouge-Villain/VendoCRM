@@ -110,4 +110,34 @@ export function registerRoutes(app: Express) {
       });
     }
   });
+  app.patch("/api/maintenance/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      const id = parseInt(req.params.id);
+      
+      const result = await db
+        .update(maintenanceRecords)
+        .set({ 
+          status,
+          completedDate: status === "done" ? new Date() : null,
+          updatedAt: new Date()
+        })
+        .where(eq(maintenanceRecords.id, id))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({ error: "Maintenance record not found" });
+      }
+
+      res.json(result[0]);
+    } catch (error: unknown) {
+      console.error("Status update error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      res.status(400).json({
+        error: "Failed to update status",
+        details: errorMessage
+      });
+    }
+  });
+
 }
