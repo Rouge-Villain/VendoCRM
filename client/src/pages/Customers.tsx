@@ -1,15 +1,19 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { CustomerForm } from "../components/CustomerForm";
 import { CustomerHistory } from "../components/CustomerHistory";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { type Customer } from "@db/schema";
 import { StatsOverview } from "../components/StatsOverview";
 import { CustomerDistribution } from "../components/CustomerDistribution";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Customers() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<{ id: number; name: string } | null>(null);
 
@@ -18,6 +22,31 @@ export default function Customers() {
     queryFn: async () => {
       const response = await fetch("/api/customers");
       return response.json() as Promise<Customer[]>;
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (customerId: number) => {
+      const response = await fetch(`/api/customers/${customerId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete customer");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      toast({ title: "Customer deleted successfully" });
+    },
+    onError: (error) => {
+      console.error('Customer deletion error:', error);
+      toast({
+        title: "Failed to delete customer",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -72,13 +101,36 @@ export default function Customers() {
                 <TableCell>{customer.phone}</TableCell>
                 <TableCell>{customer.address}</TableCell>
                 <TableCell>{customer.notes}</TableCell>
-                <TableCell>
+                <TableCell className="space-x-2">
                   <Button
                     variant="outline"
                     onClick={() => setSelectedCustomer({ id: customer.id, name: customer.name })}
                   >
                     View History
                   </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive">Delete</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete {customer.company}'s
+                          account and remove their data from our servers.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteMutation.mutate(customer.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </TableCell>
               </TableRow>
             ))}

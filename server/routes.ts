@@ -19,6 +19,17 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  app.delete("/api/customers/:id", async (req, res) => {
+    try {
+      const result = await db.delete(customers)
+        .where(eq(customers.id, parseInt(req.params.id)))
+        .returning();
+      res.json(result[0]);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to delete customer" });
+    }
+  });
+
   // Products
   app.get("/api/products", async (req, res) => {
     const result = await db.select().from(products);
