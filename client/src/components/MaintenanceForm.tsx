@@ -84,7 +84,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
         ...data,
         cost: parseFloat(data.cost).toFixed(2),
         partsUsed: Array.isArray(data.partsUsed) ? data.partsUsed : [],
-        scheduledDate: new Date(data.scheduledDate).toISOString(),
+        scheduledDate: data.scheduledDate,
       };
       console.log("Submitting maintenance record:", formattedData);
       const response = await fetch("/api/maintenance", {
