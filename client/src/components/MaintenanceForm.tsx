@@ -40,7 +40,7 @@ const maintenanceFormSchema = z.object({
     quantity: z.number()
   })).default([]),
   cost: z.string().regex(/^\d+\.?\d{0,2}$/, "Invalid cost format"),
-  scheduledDate: z.date().transform(date => new Date(date)),
+  scheduledDate: z.date(),
 });
 
 type MaintenanceFormData = z.infer<typeof maintenanceFormSchema>;
@@ -82,9 +82,10 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
     mutationFn: async (data: MaintenanceFormData) => {
       const formattedData = {
         ...data,
-        cost: parseFloat(data.cost).toFixed(2),
+        cost: data.cost,
         partsUsed: Array.isArray(data.partsUsed) ? data.partsUsed : [],
-        scheduledDate: data.scheduledDate,
+        // Convert the scheduledDate to a proper date string
+        scheduledDate: data.scheduledDate.toISOString(),
       };
       console.log("Submitting maintenance record:", formattedData);
       const response = await fetch("/api/maintenance", {
