@@ -80,14 +80,16 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: MaintenanceFormData) => {
-      console.log("Submitting maintenance record:", data);
+      const formattedData = {
+        ...data,
+        cost: parseFloat(data.cost).toFixed(2),
+        partsUsed: Array.isArray(data.partsUsed) ? data.partsUsed : [],
+      };
+      console.log("Submitting maintenance record:", formattedData);
       const response = await fetch("/api/maintenance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...data,
-          cost: parseFloat(data.cost).toFixed(2),
-        }),
+        body: JSON.stringify(formattedData),
       });
       
       if (!response.ok) {
@@ -250,8 +252,9 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
                   step="0.01"
                   min="0"
                   onChange={(e) => {
-                    const value = parseFloat(e.target.value);
-                    field.onChange(isNaN(value) ? "0.00" : value.toFixed(2));
+                    const value = e.target.value.replace(/[^\d.]/g, '');
+                    const parsed = parseFloat(value);
+                    field.onChange(isNaN(parsed) ? "0.00" : parsed.toFixed(2));
                   }}
                   placeholder="Enter cost"
                 />

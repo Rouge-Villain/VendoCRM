@@ -83,10 +83,12 @@ export function registerRoutes(app: Express) {
 
   app.post("/api/maintenance", async (req, res) => {
     try {
+      console.log("Received maintenance data:", req.body);
       const result = await db.insert(maintenanceRecords).values(req.body).returning();
       res.json(result[0]);
     } catch (error) {
-      res.status(400).json({ error: "Invalid maintenance record data" });
+      console.error("Maintenance creation error:", error);
+      res.status(400).json({ error: "Invalid maintenance record data", details: error.message });
     }
   });
 }
