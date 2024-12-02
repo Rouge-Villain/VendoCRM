@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
@@ -12,6 +12,7 @@ import {
   FormItem,
   FormLabel,
   FormControl,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,7 +23,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { type InsertMaintenance, insertMaintenanceSchema } from "@db/schema";
+import { z } from "zod";
+import { type Customer } from "@db/schema";
+
+const maintenanceFormSchema = z.object({
+  customerId: z.number().positive(),
+  machineId: z.string().min(1, "Machine ID is required"),
+  serialNumber: z.string().min(1, "Serial number is required"),
+  machineType: z.string().min(1, "Machine type is required"),
+  maintenanceType: z.string().min(1, "Maintenance type is required"),
+  description: z.string().min(1, "Description is required"),
+  status: z.string().default("pending"),
+  technicianNotes: z.string().optional(),
+  partsUsed: z.array(z.object({
+    name: z.string(),
+    quantity: z.number()
+  })).default([]),
+  cost: z.string().regex(/^\d+\.?\d{0,2}$/, "Invalid cost format"),
+  scheduledDate: z.date(),
+});
+
+type MaintenanceFormData = z.infer<typeof maintenanceFormSchema>;
 
 interface MaintenanceFormProps {
   onSuccess: () => void;
@@ -32,10 +53,18 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<InsertMaintenance>({
-    resolver: zodResolver(insertMaintenanceSchema),
+  const { data: customers } = useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      const response = await fetch("/api/customers");
+      return response.json() as Promise<Customer[]>;
+    },
+  });
+
+  const form = useForm<MaintenanceFormData>({
+    resolver: zodResolver(maintenanceFormSchema),
     defaultValues: {
-      customerId: 1,
+      customerId: customers?.[0]?.id || 1,
       machineId: "",
       serialNumber: "",
       machineType: "",
@@ -43,24 +72,29 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
       description: "",
       status: "pending",
       technicianNotes: "",
-      partsUsed: [] as Array<{ name: string; quantity: number }>,
+      partsUsed: [],
       cost: "0.00",
       scheduledDate: new Date(),
     },
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: InsertMaintenance) => {
+    mutationFn: async (data: MaintenanceFormData) => {
+      console.log("Submitting maintenance record:", data);
       const response = await fetch("/api/maintenance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
-          cost: data.cost ? parseFloat(data.cost) : 0.00,
-          partsUsed: data.partsUsed || [],
+          cost: parseFloat(data.cost).toFixed(2),
         }),
       });
-      if (!response.ok) throw new Error("Failed to create maintenance record");
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create maintenance record");
+      }
+      
       return response.json();
     },
     onSuccess: () => {
@@ -69,9 +103,10 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
       form.reset();
       onSuccess();
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: "Failed to schedule maintenance",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -83,6 +118,34 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
         onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
         className="space-y-4 p-6"
       >
+        <FormField
+          control={form.control}
+          name="customerId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Customer</FormLabel>
+              <Select
+                onValueChange={(value) => field.onChange(parseInt(value))}
+                defaultValue={String(field.value)}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select customer" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {customers?.map((customer) => (
+                    <SelectItem key={customer.id} value={String(customer.id)}>
+                      {customer.company}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="maintenanceType"
@@ -101,6 +164,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
                   <SelectItem value="emergency">Emergency</SelectItem>
                 </SelectContent>
               </Select>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -126,6 +190,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
                   <SelectItem value="micro market">Micro Market</SelectItem>
                 </SelectContent>
               </Select>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -139,6 +204,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
               <FormControl>
                 <Input {...field} placeholder="Enter machine ID" />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -152,6 +218,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
               <FormControl>
                 <Input {...field} placeholder="Enter machine serial number" />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -165,6 +232,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
               <FormControl>
                 <Input {...field} placeholder="Enter maintenance description" />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -172,7 +240,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
         <FormField
           control={form.control}
           name="cost"
-          render={({ field: { value, onChange, ...field } }) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Cost</FormLabel>
               <FormControl>
@@ -181,11 +249,14 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
                   type="number"
                   step="0.01"
                   min="0"
-                  value={value || "0.00"}
-                  onChange={(e) => onChange(e.target.value)}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    field.onChange(isNaN(value) ? "0.00" : value.toFixed(2));
+                  }}
                   placeholder="Enter cost"
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -204,7 +275,7 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
                       className={`w-full pl-3 text-left font-normal ${!field.value && "text-muted-foreground"}`}
                     >
                       {field.value ? (
-                        format(new Date(field.value), "PPP")
+                        format(field.value, "PPP")
                       ) : (
                         <span>Pick a date</span>
                       )}
@@ -215,12 +286,13 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={field.value ? new Date(field.value) : undefined}
+                    selected={field.value}
                     onSelect={field.onChange}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
+              <FormMessage />
             </FormItem>
           )}
         />

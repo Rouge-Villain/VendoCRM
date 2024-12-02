@@ -8,13 +8,13 @@ export const maintenanceRecords = pgTable("maintenance_records", {
   machineId: text("machine_id").notNull(),
   serialNumber: text("serial_number").notNull(),
   machineType: text("machine_type").notNull(),
-  maintenanceType: text("maintenance_type").notNull(), // scheduled, repair, emergency
+  maintenanceType: text("maintenance_type").notNull(),
   description: text("description").notNull(),
-  status: text("status").notNull(), // pending, in_progress, completed
-  technicianNotes: text("technician_notes"),
+  status: text("status").notNull().default("pending"),
+  technicianNotes: text("technician_notes").default(""),
   partsUsed: jsonb("parts_used").$type<Array<{ name: string; quantity: number }>>().default([]),
   cost: decimal("cost", { precision: 10, scale: 2 }).notNull().default("0.00"),
-  scheduledDate: timestamp("scheduled_date"),
+  scheduledDate: timestamp("scheduled_date").notNull(),
   completedDate: timestamp("completed_date"),
   nextMaintenanceDate: timestamp("next_maintenance_date"),
   createdAt: timestamp("created_at").defaultNow(),
