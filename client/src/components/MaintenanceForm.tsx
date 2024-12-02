@@ -84,11 +84,9 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
         ...data,
         cost: data.cost,
         partsUsed: Array.isArray(data.partsUsed) ? data.partsUsed : [],
-        // Remove the toISOString() call since the date is already properly formatted
-        scheduledDate: data.scheduledDate,
+        scheduledDate: new Date(data.scheduledDate).toISOString(),
       };
       
-      console.log("Submitting maintenance record:", formattedData);
       const response = await fetch("/api/maintenance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

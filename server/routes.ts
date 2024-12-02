@@ -94,8 +94,12 @@ export function registerRoutes(app: Express) {
 
   app.post("/api/maintenance", async (req, res) => {
     try {
-      console.log("Received maintenance data:", req.body);
-      const result = await db.insert(maintenanceRecords).values(req.body).returning();
+      const data = {
+        ...req.body,
+        scheduledDate: new Date(req.body.scheduledDate)
+      };
+      console.log("Processing maintenance data:", data);
+      const result = await db.insert(maintenanceRecords).values(data).returning();
       res.json(result[0]);
     } catch (error: unknown) {
       console.error("Maintenance creation error:", error);
