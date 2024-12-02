@@ -175,7 +175,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
                         <button
                           type="button"
                           onClick={() => {
-                            field.onChange(field.value.filter((t) => t !== type));
+                            field.onChange(field.value.filter((t: string) => t !== type));
                           }}
                           className="text-secondary-foreground/50 hover:text-secondary-foreground"
                         >

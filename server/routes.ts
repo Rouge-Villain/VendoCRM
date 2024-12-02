@@ -97,9 +97,13 @@ export function registerRoutes(app: Express) {
       console.log("Received maintenance data:", req.body);
       const result = await db.insert(maintenanceRecords).values(req.body).returning();
       res.json(result[0]);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Maintenance creation error:", error);
-      res.status(400).json({ error: "Invalid maintenance record data", details: error.message });
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      res.status(400).json({ 
+        error: "Invalid maintenance record data", 
+        details: errorMessage 
+      });
     }
   });
 }
