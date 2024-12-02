@@ -18,6 +18,11 @@ import { useToast } from "@/hooks/use-toast";
 import { type Maintenance } from "@db/schema";
 import { format } from "date-fns";
 
+interface Part {
+  name: string;
+  quantity: number;
+}
+
 interface MaintenanceDetailsProps {
   record: Maintenance;
   open: boolean;
@@ -134,9 +139,9 @@ export function MaintenanceDetails({
 
           <div>
             <h4 className="font-semibold mb-1">Parts Used</h4>
-            {record.partsUsed && record.partsUsed.length > 0 ? (
+            {Array.isArray(record.partsUsed) && record.partsUsed.length > 0 ? (
               <ul className="list-disc list-inside">
-                {record.partsUsed.map((part, index) => (
+                {(record.partsUsed as Part[]).map((part: Part, index: number) => (
                   <li key={index}>
                     {part.name} - Quantity: {part.quantity}
                   </li>
