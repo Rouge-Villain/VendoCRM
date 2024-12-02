@@ -88,6 +88,8 @@ export default function Customers() {
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Address</TableHead>
+              <TableHead>City</TableHead>
+              <TableHead>State</TableHead>
               <TableHead>Notes</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -100,6 +102,8 @@ export default function Customers() {
                 <TableCell>{customer.email}</TableCell>
                 <TableCell>{customer.phone}</TableCell>
                 <TableCell>{customer.address}</TableCell>
+                <TableCell>{customer.city}</TableCell>
+                <TableCell>{customer.state}</TableCell>
                 <TableCell>{customer.notes}</TableCell>
                 <TableCell className="space-x-2">
                   <Button
