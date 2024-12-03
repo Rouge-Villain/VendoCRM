@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { DealPipeline } from "../components/DealPipeline";
 import { DealForm } from "../components/DealForm";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { type Opportunity } from "@db/schema";
+import { SalesAnalytics } from "@/components/analytics/SalesAnalytics";
 
 export default function Sales() {
   const [isOpen, setIsOpen] = useState(false);
