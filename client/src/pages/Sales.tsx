@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DealPipeline } from "../components/DealPipeline";
 import { DealForm } from "../components/DealForm";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -93,7 +93,12 @@ export default function Sales() {
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DealForm onSuccess={() => setIsOpen(false)} />
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New Deal</DialogTitle>
+          </DialogHeader>
+          <DealForm onSuccess={() => setIsOpen(false)} />
+        </DialogContent>
       </Dialog>
     </div>
   );
