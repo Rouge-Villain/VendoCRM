@@ -198,6 +198,24 @@ export function registerRoutes(app: Express) {
       const { stage } = req.body;
       const id = parseInt(req.params.id);
       
+      console.log(`Updating opportunity ${id} stage to: ${stage}`);
+      
+      // Validate the stage value
+      if (!stage) {
+        return res.status(400).json({ error: "Stage is required" });
+      }
+
+      // Check if opportunity exists before updating
+      const existing = await db
+        .select()
+        .from(opportunities)
+        .where(eq(opportunities.id, id));
+
+      if (existing.length === 0) {
+        console.error(`Opportunity ${id} not found`);
+        return res.status(404).json({ error: "Opportunity not found" });
+      }
+
       const result = await db
         .update(opportunities)
         .set({ 
@@ -207,10 +225,7 @@ export function registerRoutes(app: Express) {
         .where(eq(opportunities.id, id))
         .returning();
 
-      if (result.length === 0) {
-        return res.status(404).json({ error: "Opportunity not found" });
-      }
-
+      console.log(`Successfully updated opportunity ${id} stage to ${stage}`);
       res.json(result[0]);
     } catch (error) {
       console.error("Stage update error:", error);

@@ -76,21 +76,21 @@ export function WinLossAnalytics() {
   }, {} as Record<string, { totalValue: number; wonValue: number; count: number; winRate: number }>);
 
   // Calculate yearly projection based on last 3 months trend
-  const monthKeys = Object.keys(monthlyPerformance || {});
+  const monthKeys = Object.keys(monthlyPerformance ?? {});
   const lastThreeMonths = monthKeys.slice(-3);
-  const avgMonthlyGrowth = lastThreeMonths.reduce((acc, month, index) => {
+  const avgMonthlyGrowth = monthlyPerformance ? lastThreeMonths.reduce((acc, month, index) => {
     if (index === 0) return acc;
     const prevMonth = lastThreeMonths[index - 1];
-    const currentValue = monthlyPerformance[month]?.wonValue || 0;
-    const prevValue = monthlyPerformance[prevMonth]?.wonValue || 1; // Prevent division by zero
+    const currentValue = monthlyPerformance[month]?.wonValue ?? 0;
+    const prevValue = monthlyPerformance[prevMonth]?.wonValue ?? 1; // Prevent division by zero
     const growth = currentValue / prevValue - 1;
     return acc + growth;
-  }, 0) / (lastThreeMonths.length - 1);
+  }, 0) / (lastThreeMonths.length - 1) : 0;
 
   // Project next 6 months
   const lastMonth = monthKeys[monthKeys.length - 1];
-  const lastMonthData = monthlyPerformance[lastMonth];
-  const baseValue = lastMonthData?.wonValue || 0;
+  const lastMonthData = monthlyPerformance?.[lastMonth];
+  const baseValue = lastMonthData?.wonValue ?? 0;
 
   type ProjectedMonth = {
     projectedValue: number;

@@ -71,21 +71,32 @@ export function DealPipeline() {
   }, {} as Record<string, { count: number; value: number; avgProbability: number }>);
 
   const updateStageMutation = useMutation({
-  mutationFn: async ({ id, stage }: { id: number; stage: string }) => {
-    const response = await fetch(`/api/opportunities/${id}/stage`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stage }),
-    });
-    if (!response.ok) {
-      throw new Error("Failed to update opportunity stage");
-    }
-    return response.json();
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["opportunities"] });
-  },
-});
+    mutationFn: async ({ id, stage }: { id: number; stage: string }) => {
+      const response = await fetch(`/api/opportunities/${id}/stage`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stage }),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to update stage: ${response.statusText}`);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["opportunities"] });
+      toast({
+        title: "Stage updated",
+        description: "Deal stage has been successfully updated.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to update stage",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const onDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
