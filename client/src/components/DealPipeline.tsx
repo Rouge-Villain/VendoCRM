@@ -3,6 +3,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { type Opportunity } from "@db/schema";
 
@@ -19,7 +23,7 @@ export function DealPipeline() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: opportunities, isLoading } = useQuery({
+  const { data: opportunities, isLoading: isLoadingOpps, isError: isErrorOpps } = useQuery({
     queryKey: ["opportunities"],
     queryFn: async () => {
       const response = await fetch("/api/opportunities");
@@ -29,6 +33,25 @@ export function DealPipeline() {
       return response.json() as Promise<Opportunity[]>;
     },
   });
+
+  const { data: customers } = useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      const response = await fetch("/api/customers");
+      return response.json();
+    },
+  });
+
+  const { data: products } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const response = await fetch("/api/products");
+      return response.json();
+    },
+  });
+
+  const isLoading = isLoadingOpps || !customers || !products;
+  const isError = isErrorOpps;
 
   // Calculate stage statistics
   const stageStats = stages.reduce((acc, stage) => {
@@ -86,7 +109,34 @@ export function DealPipeline() {
   };
 
   if (isLoading) {
-    return <div>Loading deals...</div>;
+    return (
+      <div className="flex gap-4 overflow-x-auto p-4">
+        {stages.map((stage) => (
+          <div key={stage.id} className="flex-shrink-0 w-80">
+            <div className="bg-secondary p-4 rounded-lg">
+              <Skeleton className="h-6 w-32 mb-4" />
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-32 w-full" />
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (!opportunities) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          Failed to load opportunities. Please try refreshing the page.
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   const getOpportunitiesByStage = (stage: string) => {
@@ -142,6 +192,12 @@ export function DealPipeline() {
                                   <div className="text-sm px-2 py-1 rounded-full bg-primary/10 text-primary">
                                     {opp.probability}%
                                   </div>
+                                </div>
+                                <div className="text-sm font-medium">
+                                  {customers?.find(c => c.id === opp.customerId)?.company}
+                                </div>
+                                <div className="text-sm text-primary">
+                                  {products?.find(p => p.id === opp.productId)?.name}
                                 </div>
                                 <div className="text-sm text-muted-foreground line-clamp-2">
                                   {opp.notes}
