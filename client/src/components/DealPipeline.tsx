@@ -59,22 +59,24 @@ export function DealPipeline() {
 
   const updateStageMutation = useMutation({
     mutationFn: async ({ id, stage }: { id: number; stage: string }) => {
-      console.log('Updating stage:', { id, stage });
       const response = await fetch(`/api/opportunities/${id}/stage`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stage }),
       });
+      
       if (!response.ok) {
         throw new Error(`Failed to update stage: ${response.statusText}`);
       }
-      return response.json();
+      
+      const data = await response.json();
+      return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       toast({
         title: "Stage updated",
-        description: `Deal stage has been updated to ${data.stage}`,
+        description: `Deal moved to ${data.stage}`,
       });
     },
     onError: (error: Error) => {
@@ -99,13 +101,11 @@ export function DealPipeline() {
       return;
     }
 
-    console.log('Moving opportunity:', {
-      id: parseInt(draggableId),
-      stage: destination.droppableId
-    });
+    const oppId = parseInt(draggableId);
+    console.log('Moving opportunity:', { oppId, stage: destination.droppableId });
 
     updateStageMutation.mutate({
-      id: parseInt(draggableId),
+      id: oppId,
       stage: destination.droppableId,
     });
   };
@@ -163,19 +163,16 @@ export function DealPipeline() {
                   >
                     {getOpportunitiesByStage(stage.id).map((opp, index) => (
                       <Draggable
-                        key={opp.id}
+                        key={opp.id.toString()}
                         draggableId={opp.id.toString()}
                         index={index}
-                        isDragDisabled={updateStageMutation.isPending}
                       >
                         {(provided, snapshot) => (
                           <Card
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`bg-background ${
-                              snapshot.isDragging ? 'shadow-lg' : ''
-                            }`}
+                            className={`bg-background ${snapshot.isDragging ? 'shadow-lg' : ''}`}
                           >
                             <CardContent className="p-4">
                               <div className="space-y-2">
