@@ -198,9 +198,6 @@ export function DealPipeline() {
                                     <div className="font-medium">
                                       ${parseFloat(opp.value.toString()).toLocaleString()}
                                     </div>
-                                    <div className="text-sm px-2 py-1 rounded-full bg-primary/10 text-primary">
-                                      {opp.probability}%
-                                    </div>
                                   </div>
                                   <div className="text-sm font-medium">
                                     {customers?.find(c => c.id === opp.customerId)?.company}
