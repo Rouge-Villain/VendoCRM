@@ -19,7 +19,7 @@ const stages = [
   { id: "negotiation", name: "Negotiation" },
   { id: "closed-won", name: "Closed Won" },
   { id: "closed-lost", name: "Closed Lost" }
-];
+] as const;
 
 export function DealPipeline() {
   const { toast } = useToast();
@@ -152,12 +152,12 @@ export function DealPipeline() {
           <div key={stage.id} className="flex-shrink-0 w-80">
             <div className="bg-secondary p-4 rounded-lg">
               <div className="font-semibold mb-4">{stage.name}</div>
-              <Droppable droppableId={stage.id}>
+              <Droppable droppableId={stage.id} key={stage.id}>
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`space-y-4 min-h-[200px] p-4 ${
+                    className={`space-y-4 min-h-[200px] ${
                       snapshot.isDraggingOver ? 'bg-secondary/50' : ''
                     }`}
                   >
