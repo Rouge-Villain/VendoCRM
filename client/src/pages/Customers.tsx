@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { CustomerForm } from "../components/CustomerForm";
 import { CustomerHistory } from "../components/CustomerHistory";
@@ -152,7 +152,11 @@ export default function Customers() {
           setIsOpen(open);
         }}
       >
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="w-[90vw] max-w-[800px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Customer</DialogTitle>
+            <DialogDescription>Fill out the form below to add a new customer to the system.</DialogDescription>
+          </DialogHeader>
           <CustomerForm 
             onSuccess={() => {
               console.log('Customer form submitted successfully'); // Debug log
