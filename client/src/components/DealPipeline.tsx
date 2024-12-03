@@ -163,7 +163,7 @@ export function DealPipeline() {
                       .filter((opp) => opp.stage === stage.id)
                       .map((opp, index) => (
                         <Draggable
-                          key={String(opp.id)}
+                          key={opp.id}
                           draggableId={String(opp.id)}
                           index={index}
                           isDragDisabled={updateStageMutation.isPending}
@@ -173,6 +173,7 @@ export function DealPipeline() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
+                              style={provided.draggableProps.style}
                             >
                               <Card
                                 className={`bg-background ${
