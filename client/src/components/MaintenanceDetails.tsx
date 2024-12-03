@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
@@ -7,6 +8,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -132,9 +139,31 @@ export function MaintenanceDetails({
             <p>{record.description}</p>
           </div>
 
-          <div>
-            <h4 className="font-semibold mb-1">Technician Notes</h4>
-            <p>{record.technicianNotes || "No notes available"}</p>
+          <div className="bg-secondary/10 p-4 rounded-lg border border-secondary">
+            <h4 className="text-lg font-semibold mb-3">Technician Notes</h4>
+            <FormField
+              control={form.control}
+              name="technicianNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <textarea
+                      {...field}
+                      className="w-full min-h-[150px] rounded-lg border border-input bg-background px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      placeholder="Enter technician notes..."
+                      defaultValue={record.technicianNotes || ""}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <Button
+              className="mt-3"
+              onClick={() => notesMutation.mutate(form.getValues("technicianNotes"))}
+              disabled={notesMutation.isPending}
+            >
+              {notesMutation.isPending ? "Saving..." : "Save Notes"}
+            </Button>
           </div>
 
           <div>

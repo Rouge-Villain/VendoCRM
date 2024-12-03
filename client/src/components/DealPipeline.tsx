@@ -4,24 +4,28 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, FileText, BarChart } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { type Opportunity } from "@db/schema";
+import { QuoteGenerator } from "./QuoteGenerator";
 
 const stages = [
-  { id: "prospecting", name: "Prospecting" },
-  { id: "qualification", name: "Qualification" },
-  { id: "needs-analysis", name: "Needs Analysis" },
-  { id: "proposal", name: "Proposal" },
-  { id: "negotiation", name: "Negotiation" },
-  { id: "closed-won", name: "Closed Won" },
+  { id: "prospecting", name: "Prospecting", defaultProbability: 20 },
+  { id: "qualification", name: "Qualification", defaultProbability: 40 },
+  { id: "needs-analysis", name: "Needs Analysis", defaultProbability: 60 },
+  { id: "proposal", name: "Proposal", defaultProbability: 75 },
+  { id: "negotiation", name: "Negotiation", defaultProbability: 90 },
+  { id: "closed-won", name: "Closed Won", defaultProbability: 100 },
+  { id: "closed-lost", name: "Closed Lost", defaultProbability: 0 },
 ];
 
 export function DealPipeline() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
+  const [showQuoteGenerator, setShowQuoteGenerator] = useState(false);
 
   const { data: opportunities, isLoading: isLoadingOpps, isError: isErrorOpps } = useQuery({
     queryKey: ["opportunities"],
@@ -67,11 +71,11 @@ export function DealPipeline() {
   }, {} as Record<string, { count: number; value: number; avgProbability: number }>);
 
   const updateStageMutation = useMutation({
-    mutationFn: async ({ id, stage }: { id: number; stage: string }) => {
+    mutationFn: async ({ id, stage, probability }: { id: number; stage: string; probability: number }) => {
       const response = await fetch(`/api/opportunities/${id}/stage`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stage }),
+        body: JSON.stringify({ stage, probability }),
       });
       if (!response.ok) {
         throw new Error("Failed to update opportunity stage");
@@ -102,9 +106,13 @@ export function DealPipeline() {
       return;
     }
 
+    const stage = stages.find(s => s.id === destination.droppableId);
+    if (!stage) return;
+
     updateStageMutation.mutate({
       id: parseInt(draggableId),
       stage: destination.droppableId,
+      probability: stage.defaultProbability,
     });
   };
 
@@ -144,86 +152,124 @@ export function DealPipeline() {
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex gap-4 overflow-x-auto p-4">
-        {stages.map((stage) => (
-          <div key={stage.id} className="flex-shrink-0 w-80">
-            <div className="bg-secondary p-4 rounded-lg">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold">{stage.name}</h3>
-                <div className="text-sm text-muted-foreground">
-                  {stageStats[stage.id]?.count || 0} deals · ${stageStats[stage.id]?.value.toLocaleString()}
-                </div>
-              </div>
-              <div className="h-1 bg-primary/20 rounded mb-4">
-                <div 
-                  className="h-full bg-primary rounded" 
-                  style={{ 
-                    width: `${stageStats[stage.id]?.avgProbability || 0}%` 
-                  }} 
-                />
-              </div>
-              <Droppable droppableId={stage.id}>
-                {(provided) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className="space-y-4"
-                  >
-                    {getOpportunitiesByStage(stage.id).map((opp, index) => (
-                      <Draggable
-                        key={opp.id}
-                        draggableId={opp.id.toString()}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <Card
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="bg-background"
-                          >
-                            <CardContent className="p-4">
-                              <div className="space-y-2">
-                                <div className="flex justify-between items-center">
-                                  <div className="font-medium">
-                                    ${parseFloat(opp.value.toString()).toLocaleString()}
-                                  </div>
-                                  <div className="text-sm px-2 py-1 rounded-full bg-primary/10 text-primary">
-                                    {opp.probability}%
-                                  </div>
-                                </div>
-                                <div className="text-sm font-medium">
-                                  {customers?.find(c => c.id === opp.customerId)?.company}
-                                </div>
-                                <div className="text-sm text-primary">
-                                  {products?.find(p => p.id === opp.productId)?.name}
-                                </div>
-                                <div className="text-sm text-muted-foreground line-clamp-2">
-                                  {opp.notes}
-                                </div>
-                                <div className="flex justify-between items-center text-xs text-muted-foreground">
-                                  <span>
-                                    {opp.expectedCloseDate ? 
-                                      format(new Date(opp.expectedCloseDate), 'MMM d, yyyy') : 
-                                      'No close date'}
-                                  </span>
-                                  <span>{opp.assignedTo || 'Unassigned'}</span>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
+    <>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="flex gap-4 overflow-x-auto p-4">
+          {stages.map((stage) => (
+            <div key={stage.id} className="flex-shrink-0 w-80">
+              <div className="bg-secondary p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-semibold">{stage.name}</h3>
+                  <div className="text-sm text-muted-foreground">
+                    {stageStats[stage.id]?.count || 0} deals · ${stageStats[stage.id]?.value.toLocaleString()}
                   </div>
-                )}
-              </Droppable>
+                </div>
+                <div className="h-1 bg-primary/20 rounded mb-4">
+                  <div 
+                    className="h-full bg-primary rounded" 
+                    style={{ 
+                      width: `${stageStats[stage.id]?.avgProbability || 0}%` 
+                    }} 
+                  />
+                </div>
+                <Droppable droppableId={stage.id}>
+                  {(provided) => (
+                    <div
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      className="space-y-4"
+                    >
+                      {getOpportunitiesByStage(stage.id).map((opp, index) => (
+                        <Draggable
+                          key={opp.id}
+                          draggableId={opp.id.toString()}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <Card
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="bg-background"
+                            >
+                              <CardContent className="p-4">
+                                <div className="space-y-2">
+                                  <div className="flex justify-between items-center">
+                                    <div className="font-medium">
+                                      ${parseFloat(opp.value.toString()).toLocaleString()}
+                                    </div>
+                                    <div className="text-sm px-2 py-1 rounded-full bg-primary/10 text-primary">
+                                      {opp.probability}%
+                                    </div>
+                                  </div>
+                                  <div className="text-sm font-medium">
+                                    {customers?.find(c => c.id === opp.customerId)?.company}
+                                  </div>
+                                  <div className="text-sm text-primary">
+                                    {products?.find(p => p.id === opp.productId)?.name}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground line-clamp-2">
+                                    {opp.notes}
+                                  </div>
+                                  <div className="flex justify-between items-center gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="w-full"
+                                      onClick={() => {
+                                        setSelectedOpportunity(opp);
+                                        setShowQuoteGenerator(true);
+                                      }}
+                                    >
+                                      <FileText className="h-4 w-4 mr-1" />
+                                      Quote
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="w-full"
+                                      onClick={() => {
+                                        // TODO: Show analytics
+                                      }}
+                                    >
+                                      <BarChart className="h-4 w-4 mr-1" />
+                                      Stats
+                                    </Button>
+                                  </div>
+                                  <div className="flex justify-between items-center text-xs text-muted-foreground">
+                                    <span>
+                                      {opp.expectedCloseDate ? 
+                                        format(new Date(opp.expectedCloseDate), 'MMM d, yyyy') : 
+                                        'No close date'}
+                                    </span>
+                                    <span>{opp.assignedTo || 'Unassigned'}</span>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-    </DragDropContext>
+          ))}
+        </div>
+      </DragDropContext>
+
+      {selectedOpportunity && (
+        <QuoteGenerator
+          opportunity={selectedOpportunity}
+          open={showQuoteGenerator}
+          onOpenChange={(open) => {
+            setShowQuoteGenerator(open);
+            if (!open) setSelectedOpportunity(null);
+          }}
+        />
+      )}
+    </>
   );
 }

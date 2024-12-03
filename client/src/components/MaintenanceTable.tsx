@@ -81,6 +81,7 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
               <TableHead>Description</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Scheduled Date</TableHead>
+              <TableHead>Notes</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
