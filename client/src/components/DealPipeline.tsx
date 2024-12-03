@@ -71,28 +71,21 @@ export function DealPipeline() {
   }, {} as Record<string, { count: number; value: number; avgProbability: number }>);
 
   const updateStageMutation = useMutation({
-    mutationFn: async ({ id, stage, probability }: { id: number; stage: string; probability: number }) => {
-      const response = await fetch(`/api/opportunities/${id}/stage`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stage, probability }),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to update opportunity stage");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["opportunities"] });
-      toast({ title: "Deal updated successfully" });
-    },
-    onError: () => {
-      toast({
-        title: "Failed to update deal",
-        variant: "destructive",
-      });
-    },
-  });
+  mutationFn: async ({ id, stage }: { id: number; stage: string }) => {
+    const response = await fetch(`/api/opportunities/${id}/stage`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stage }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update opportunity stage");
+    }
+    return response.json();
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["opportunities"] });
+  },
+});
 
   const onDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
@@ -106,13 +99,9 @@ export function DealPipeline() {
       return;
     }
 
-    const stage = stages.find(s => s.id === destination.droppableId);
-    if (!stage) return;
-
     updateStageMutation.mutate({
       id: parseInt(draggableId),
       stage: destination.droppableId,
-      probability: stage.defaultProbability,
     });
   };
 

@@ -92,7 +92,12 @@ export function WinLossAnalytics() {
   const lastMonthData = monthlyPerformance[lastMonth];
   const baseValue = lastMonthData?.wonValue || 0;
 
-  const projectedMonths = Array.from({ length: 6 }).reduce((acc, _, index) => {
+  type ProjectedMonth = {
+    projectedValue: number;
+    isProjection: boolean;
+  };
+
+  const projectedMonths = Array.from({ length: 6 }).reduce<Record<string, ProjectedMonth>>((acc, _, index) => {
     const date = new Date();
     date.setMonth(date.getMonth() + index + 1);
     const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
@@ -102,7 +107,7 @@ export function WinLossAnalytics() {
       isProjection: true
     };
     return acc;
-  }, {} as { [key: string]: { projectedValue: number; isProjection: boolean } });
+  }, {});
 
   const winLossData = {
     labels: Object.keys(stageAnalysis || {}),
