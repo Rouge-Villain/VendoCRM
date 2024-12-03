@@ -69,8 +69,13 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
       form.reset();
       onSuccess();
     },
-    onError: () => {
-      toast({ title: "Failed to create customer", variant: "destructive" });
+    onError: (error) => {
+      console.error('Customer form submission error:', error); // Debug log
+      toast({ 
+        title: "Failed to create customer", 
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive" 
+      });
     },
   });
 

@@ -145,8 +145,22 @@ export default function Customers() {
         </Table>
       </div>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <CustomerForm onSuccess={() => setIsOpen(false)} />
+      <Dialog 
+        open={isOpen} 
+        onOpenChange={(open) => {
+          console.log('Dialog onOpenChange:', open); // Debug log
+          setIsOpen(open);
+        }}
+      >
+        <DialogContent className="sm:max-w-[600px]">
+          <CustomerForm 
+            onSuccess={() => {
+              console.log('Customer form submitted successfully'); // Debug log
+              setIsOpen(false);
+              queryClient.invalidateQueries({ queryKey: ["customers"] });
+            }} 
+          />
+        </DialogContent>
       </Dialog>
 
       {selectedCustomer && (
