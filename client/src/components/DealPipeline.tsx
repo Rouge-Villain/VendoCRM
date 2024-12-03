@@ -89,18 +89,11 @@ export function DealPipeline() {
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-    
+
     const oppId = parseInt(result.draggableId);
     
     if (isNaN(oppId)) {
       console.error('Invalid opportunity ID');
-      return;
-    }
-
-    if (
-      result.destination.droppableId === result.source.droppableId &&
-      result.destination.index === result.source.index
-    ) {
       return;
     }
 
@@ -141,10 +134,6 @@ export function DealPipeline() {
     );
   }
 
-  const getOpportunitiesByStage = (stageId: string) => {
-    return opportunities.filter((opp) => opp.stage === stageId);
-  };
-
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex gap-4 overflow-x-auto p-4">
@@ -152,86 +141,91 @@ export function DealPipeline() {
           <div key={stage.id} className="flex-shrink-0 w-80">
             <div className="bg-secondary p-4 rounded-lg">
               <div className="font-semibold mb-4">{stage.name}</div>
-              <Droppable droppableId={stage.id} key={stage.id}>
+              <Droppable droppableId={stage.id}>
                 {(provided, snapshot) => (
                   <div
-                    ref={provided.innerRef}
                     {...provided.droppableProps}
+                    ref={provided.innerRef}
                     className={`space-y-4 min-h-[200px] ${
                       snapshot.isDraggingOver ? 'bg-secondary/50' : ''
                     }`}
                   >
-                    {getOpportunitiesByStage(stage.id).map((opp, index) => (
-                      <Draggable
-                        key={opp.id.toString()}
-                        draggableId={opp.id.toString()}
-                        index={index}
-                        isDragDisabled={updateStageMutation.isPending}
-                      >
-                        {(provided, snapshot) => (
-                          <Card
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`bg-background ${
-                              snapshot.isDragging ? 'shadow-lg' : ''
-                            } ${updateStageMutation.isPending ? 'opacity-50' : ''}`}
-                          >
-                            <CardContent className="p-4">
-                              <div className="space-y-2">
-                                <div className="flex justify-between items-center">
-                                  <div className="font-medium">
-                                    ${parseFloat(opp.value.toString()).toLocaleString()}
+                    {opportunities
+                      .filter((opp) => opp.stage === stage.id)
+                      .map((opp, index) => (
+                        <Draggable
+                          key={opp.id}
+                          draggableId={`${opp.id}`}
+                          index={index}
+                          isDragDisabled={updateStageMutation.isPending}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <Card
+                                className={`bg-background ${
+                                  snapshot.isDragging ? 'shadow-lg' : ''
+                                } ${updateStageMutation.isPending ? 'opacity-50' : ''}`}
+                              >
+                                <CardContent className="p-4">
+                                  <div className="space-y-2">
+                                    <div className="flex justify-between items-center">
+                                      <div className="font-medium">
+                                        ${parseFloat(opp.value.toString()).toLocaleString()}
+                                      </div>
+                                    </div>
+                                    <div className="text-sm font-medium">
+                                      {customers?.find(c => c.id === opp.customerId)?.company}
+                                    </div>
+                                    <div className="text-sm text-primary">
+                                      {products?.find(p => p.id === opp.productId)?.name}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground line-clamp-2">
+                                      {opp.notes}
+                                    </div>
+                                    <div className="flex justify-between items-center gap-2">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full"
+                                        onClick={() => {
+                                          setSelectedOpportunity(opp);
+                                          setShowQuoteGenerator(true);
+                                        }}
+                                      >
+                                        <FileText className="h-4 w-4 mr-1" />
+                                        Quote
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full"
+                                        onClick={() => {
+                                          // TODO: Show analytics
+                                        }}
+                                      >
+                                        <BarChart className="h-4 w-4 mr-1" />
+                                        Stats
+                                      </Button>
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs text-muted-foreground">
+                                      <span>
+                                        {opp.expectedCloseDate ? 
+                                          format(new Date(opp.expectedCloseDate), 'MMM d, yyyy') : 
+                                          'No close date'}
+                                      </span>
+                                      <span>{opp.assignedTo || 'Unassigned'}</span>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="text-sm font-medium">
-                                  {customers?.find(c => c.id === opp.customerId)?.company}
-                                </div>
-                                <div className="text-sm text-primary">
-                                  {products?.find(p => p.id === opp.productId)?.name}
-                                </div>
-                                <div className="text-sm text-muted-foreground line-clamp-2">
-                                  {opp.notes}
-                                </div>
-                                <div className="flex justify-between items-center gap-2">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="w-full"
-                                    onClick={() => {
-                                      setSelectedOpportunity(opp);
-                                      setShowQuoteGenerator(true);
-                                    }}
-                                  >
-                                    <FileText className="h-4 w-4 mr-1" />
-                                    Quote
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="w-full"
-                                    onClick={() => {
-                                      // TODO: Show analytics
-                                    }}
-                                  >
-                                    <BarChart className="h-4 w-4 mr-1" />
-                                    Stats
-                                  </Button>
-                                </div>
-                                <div className="flex justify-between items-center text-xs text-muted-foreground">
-                                  <span>
-                                    {opp.expectedCloseDate ? 
-                                      format(new Date(opp.expectedCloseDate), 'MMM d, yyyy') : 
-                                      'No close date'}
-                                  </span>
-                                  <span>{opp.assignedTo || 'Unassigned'}</span>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        )}
-                      </Draggable>
-                    ))}
+                                </CardContent>
+                              </Card>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
                     {provided.placeholder}
                   </div>
                 )}
