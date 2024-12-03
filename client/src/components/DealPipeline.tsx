@@ -88,19 +88,34 @@ export function DealPipeline() {
   });
 
   const onDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
+    try {
+      if (!result.destination) return;
+      
+      const oppId = parseInt(result.draggableId);
+      console.log('Dragging opportunity:', { oppId, destination: result.destination.droppableId });
+      
+      if (isNaN(oppId)) {
+        console.error('Invalid opportunity ID');
+        toast({
+          title: 'Error',
+          description: 'Invalid opportunity ID',
+          variant: 'destructive',
+        });
+        return;
+      }
 
-    const oppId = parseInt(result.draggableId);
-    
-    if (isNaN(oppId)) {
-      console.error('Invalid opportunity ID');
-      return;
+      updateStageMutation.mutate({
+        id: oppId,
+        stage: result.destination.droppableId,
+      });
+    } catch (error) {
+      console.error('Error in drag and drop:', error);
+      toast({
+        title: 'Error',
+        description: 'An error occurred while moving the deal. Please try again.',
+        variant: 'destructive',
+      });
     }
-
-    updateStageMutation.mutate({
-      id: oppId,
-      stage: result.destination.droppableId,
-    });
   };
 
   if (isLoading) {
@@ -154,8 +169,8 @@ export function DealPipeline() {
                       .filter((opp) => opp.stage === stage.id)
                       .map((opp, index) => (
                         <Draggable
-                          key={opp.id}
-                          draggableId={`${opp.id}`}
+                          key={opp.id.toString()}
+                          draggableId={opp.id.toString()}
                           index={index}
                           isDragDisabled={updateStageMutation.isPending}
                         >
@@ -164,6 +179,10 @@ export function DealPipeline() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
+                              style={{
+                                ...provided.draggableProps.style,
+                                ...(snapshot.isDragging ? { transform: provided.draggableProps.style?.transform } : {})
+                              }}
                             >
                               <Card
                                 className={`bg-background ${

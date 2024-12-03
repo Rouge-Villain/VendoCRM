@@ -145,11 +145,30 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
       <DialogContent className="max-w-4xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Quote/Proposal Generator</DialogTitle>
+          <DialogDescription>Generate a detailed quote for this opportunity</DialogDescription>
         </DialogHeader>
         <div className="h-[80vh]">
-          <PDFViewer width="100%" height="100%">
-            <QuoteDocument />
-          </PDFViewer>
+          {(() => {
+            try {
+              return (
+                <PDFViewer width="100%" height="100%">
+                  <QuoteDocument />
+                </PDFViewer>
+              );
+            } catch (error) {
+              console.error('Error generating PDF:', error);
+              toast({
+                title: 'Error',
+                description: 'Failed to generate quote. Please try again.',
+                variant: 'destructive',
+              });
+              return (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-destructive">Failed to generate quote. Please try again.</p>
+                </div>
+              );
+            }
+          })()}
         </div>
       </DialogContent>
     </Dialog>
