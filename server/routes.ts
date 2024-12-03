@@ -39,69 +39,75 @@ export function registerRoutes(app: Express) {
       const standardProducts = [
         {
           name: "Snack Machines",
+          category: "Vending Machines",
           description: "Advanced snack vending machine with multi-tray configuration, digital payment system, and remote monitoring capabilities.",
-          price: 4999.99,
-          specifications: {
+          specs: JSON.stringify({
             dimensions: "72\"H x 39\"W x 36\"D",
             capacity: "Up to 45 selections and 360 items",
             payment: "Card reader, mobile payments, cash",
             features: ["LED lighting", "Energy efficient", "Remote monitoring"]
-          }
+          }),
+          price: "4999.99"
         },
         {
           name: "Beverage Machines",
+          category: "Vending Machines",
           description: "High-capacity beverage vending machine with cooling system and diverse container compatibility.",
-          price: 5499.99,
-          specifications: {
+          specs: JSON.stringify({
             dimensions: "72\"H x 42\"W x 34\"D",
             capacity: "Up to 400 bottles/cans",
             payment: "All payment types supported",
             features: ["Quick cooling", "Energy star rated", "Digital display"]
-          }
+          }),
+          price: "5499.99"
         },
         {
           name: "Food Machines",
+          category: "Vending Machines",
           description: "Temperature-controlled food vending machine for fresh meals and snacks.",
-          price: 6999.99,
-          specifications: {
+          specs: JSON.stringify({
             dimensions: "72\"H x 41\"W x 36\"D",
             capacity: "Up to 30 selections",
             payment: "Contactless and traditional payments",
             features: ["Temperature control", "Health timer", "Digital inventory"]
-          }
+          }),
+          price: "6999.99"
         },
         {
           name: "Coffee Machines",
+          category: "Vending Machines",
           description: "Premium coffee vending machine with fresh-ground beans and multiple drink options.",
-          price: 7499.99,
-          specifications: {
+          specs: JSON.stringify({
             dimensions: "70\"H x 30\"W x 30\"D",
             capacity: "Up to 1000 servings",
             payment: "All digital payments supported",
             features: ["Fresh grinding", "Multiple drinks", "Auto cleaning"]
-          }
+          }),
+          price: "7499.99"
         },
         {
           name: "Combo Machines",
+          category: "Vending Machines",
           description: "Combined snack and beverage vending machine with dual temperature zones.",
-          price: 8999.99,
-          specifications: {
+          specs: JSON.stringify({
             dimensions: "72\"H x 55\"W x 36\"D",
             capacity: "200 drinks + 200 snacks",
             payment: "Full payment system",
             features: ["Dual zone cooling", "Large display", "Remote monitoring"]
-          }
+          }),
+          price: "8999.99"
         },
         {
           name: "Cold/Frozen Machines",
+          category: "Vending Machines",
           description: "Frozen food and ice cream vending machine with advanced temperature control.",
-          price: 9499.99,
-          specifications: {
+          specs: JSON.stringify({
             dimensions: "72\"H x 41\"W x 36\"D",
             capacity: "Up to 25 selections",
             payment: "Modern payment systems",
             features: ["Deep freezing", "Smart defrost", "Temperature monitoring"]
-          }
+          }),
+          price: "9499.99"
         }
       ];
 
