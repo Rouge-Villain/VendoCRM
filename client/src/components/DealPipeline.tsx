@@ -59,6 +59,7 @@ export function DealPipeline() {
 
   const updateStageMutation = useMutation({
     mutationFn: async ({ id, stage }: { id: number; stage: string }) => {
+      console.log('Updating stage:', { id, stage });
       const response = await fetch(`/api/opportunities/${id}/stage`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -66,23 +67,22 @@ export function DealPipeline() {
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to update stage: ${response.statusText}`);
+        const error = await response.text();
+        throw new Error(error);
       }
       
-      const data = await response.json();
-      return data;
+      return response.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       toast({
-        title: "Stage updated",
+        title: "Success",
         description: `Deal moved to ${data.stage}`,
       });
     },
     onError: (error: Error) => {
-      console.error('Stage update error:', error);
       toast({
-        title: "Failed to update stage",
+        title: "Error",
         description: error.message,
         variant: "destructive",
       });
@@ -163,16 +163,19 @@ export function DealPipeline() {
                   >
                     {getOpportunitiesByStage(stage.id).map((opp, index) => (
                       <Draggable
-                        key={opp.id.toString()}
+                        key={opp.id}
                         draggableId={opp.id.toString()}
                         index={index}
+                        isDragDisabled={updateStageMutation.isPending}
                       >
                         {(provided, snapshot) => (
                           <Card
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`bg-background ${snapshot.isDragging ? 'shadow-lg' : ''}`}
+                            className={`bg-background ${
+                              snapshot.isDragging ? 'shadow-lg' : ''
+                            } ${updateStageMutation.isPending ? 'opacity-50' : ''}`}
                           >
                             <CardContent className="p-4">
                               <div className="space-y-2">
