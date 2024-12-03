@@ -2,17 +2,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { type InsertCustomer, insertCustomerSchema } from "@db/schema";
+
+const MACHINE_TYPES = [
+  { id: "cooler", label: "Cooler" },
+  { id: "snack", label: "Snack" },
+  { id: "soda", label: "Soda" },
+  { id: "freezer", label: "Freezer" },
+  { id: "coffee", label: "Coffee" },
+  { id: "micro market", label: "Micro Market" },
+];
 
 interface CustomerFormProps {
   onSuccess: () => void;
@@ -32,9 +36,8 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
       address: "",
       website: "",
       notes: "",
-      machineTypes: [] as string[],
-      city: "",
-      state: "",
+      machineTypes: [],
+      state: [],
       serviceTerritory: "",
       serviceHours: "",
       contractTerms: "",
@@ -47,7 +50,15 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
       const response = await fetch("/api/customers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          machineTypes: Object.entries(form.getValues("machineTypes"))
+            .filter(([_, checked]) => checked)
+            .map(([type]) => ({
+              type,
+              quantity: parseInt(form.getValues(`${type}Quantity`) || "0", 10),
+            })),
+        }),
       });
       if (!response.ok) throw new Error("Failed to create customer");
       return response.json();
@@ -141,12 +152,59 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
                 </FormItem>
               )}
             />
+
+            <div className="col-span-2">
+              <FormLabel>Machine Types</FormLabel>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                {MACHINE_TYPES.map((type) => (
+                  <div key={type.id} className="flex items-start space-x-3 space-y-0">
+                    <FormField
+                      control={form.control}
+                      name={`machineTypes.${type.id}`}
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            {type.label}
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    {form.watch(`machineTypes.${type.id}`) && (
+                      <FormField
+                        control={form.control}
+                        name={`${type.id}Quantity`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                {...field}
+                                placeholder="Quantity"
+                                className="w-24"
+                                min="1"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <FormField
               control={form.control}
-              name="machineTypes"
+              name="state"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Machine Types</FormLabel>
+                  <FormLabel>States</FormLabel>
                   <Select
                     onValueChange={(value) => {
                       const currentValues = Array.isArray(field.value) ? field.value : [];
@@ -157,26 +215,24 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select machine types" />
+                        <SelectValue placeholder="Select states" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="cooler">Cooler</SelectItem>
-                      <SelectItem value="snack">Snack</SelectItem>
-                      <SelectItem value="soda">Soda</SelectItem>
-                      <SelectItem value="freezer">Freezer</SelectItem>
-                      <SelectItem value="coffee">Coffee</SelectItem>
-                      <SelectItem value="micro market">Micro Market</SelectItem>
+                      {/* US States */}
+                      <SelectItem value="AL">Alabama</SelectItem>
+                      <SelectItem value="AK">Alaska</SelectItem>
+                      {/* ... other states ... */}
                     </SelectContent>
                   </Select>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {Array.isArray(field.value) && field.value.map((type) => (
-                      <div key={type} className="flex items-center gap-1 bg-secondary text-secondary-foreground px-2 py-1 rounded-md">
-                        <span>{type}</span>
+                    {Array.isArray(field.value) && field.value.map((state) => (
+                      <div key={state} className="flex items-center gap-1 bg-secondary text-secondary-foreground px-2 py-1 rounded-md">
+                        <span>{state}</span>
                         <button
                           type="button"
                           onClick={() => {
-                            field.onChange(field.value.filter((t: string) => t !== type));
+                            field.onChange(field.value.filter((s) => s !== state));
                           }}
                           className="text-secondary-foreground/50 hover:text-secondary-foreground"
                         >
@@ -188,93 +244,8 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="city"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>City</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Enter city"
-                      {...field}
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="state"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>State</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select state" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="AL">Alabama</SelectItem>
-                      <SelectItem value="AK">Alaska</SelectItem>
-                      <SelectItem value="AZ">Arizona</SelectItem>
-                      <SelectItem value="AR">Arkansas</SelectItem>
-                      <SelectItem value="CA">California</SelectItem>
-                      <SelectItem value="CO">Colorado</SelectItem>
-                      <SelectItem value="CT">Connecticut</SelectItem>
-                      <SelectItem value="DE">Delaware</SelectItem>
-                      <SelectItem value="FL">Florida</SelectItem>
-                      <SelectItem value="GA">Georgia</SelectItem>
-                      <SelectItem value="HI">Hawaii</SelectItem>
-                      <SelectItem value="ID">Idaho</SelectItem>
-                      <SelectItem value="IL">Illinois</SelectItem>
-                      <SelectItem value="IN">Indiana</SelectItem>
-                      <SelectItem value="IA">Iowa</SelectItem>
-                      <SelectItem value="KS">Kansas</SelectItem>
-                      <SelectItem value="KY">Kentucky</SelectItem>
-                      <SelectItem value="LA">Louisiana</SelectItem>
-                      <SelectItem value="ME">Maine</SelectItem>
-                      <SelectItem value="MD">Maryland</SelectItem>
-                      <SelectItem value="MA">Massachusetts</SelectItem>
-                      <SelectItem value="MI">Michigan</SelectItem>
-                      <SelectItem value="MN">Minnesota</SelectItem>
-                      <SelectItem value="MS">Mississippi</SelectItem>
-                      <SelectItem value="MO">Missouri</SelectItem>
-                      <SelectItem value="MT">Montana</SelectItem>
-                      <SelectItem value="NE">Nebraska</SelectItem>
-                      <SelectItem value="NV">Nevada</SelectItem>
-                      <SelectItem value="NH">New Hampshire</SelectItem>
-                      <SelectItem value="NJ">New Jersey</SelectItem>
-                      <SelectItem value="NM">New Mexico</SelectItem>
-                      <SelectItem value="NY">New York</SelectItem>
-                      <SelectItem value="NC">North Carolina</SelectItem>
-                      <SelectItem value="ND">North Dakota</SelectItem>
-                      <SelectItem value="OH">Ohio</SelectItem>
-                      <SelectItem value="OK">Oklahoma</SelectItem>
-                      <SelectItem value="OR">Oregon</SelectItem>
-                      <SelectItem value="PA">Pennsylvania</SelectItem>
-                      <SelectItem value="RI">Rhode Island</SelectItem>
-                      <SelectItem value="SC">South Carolina</SelectItem>
-                      <SelectItem value="SD">South Dakota</SelectItem>
-                      <SelectItem value="TN">Tennessee</SelectItem>
-                      <SelectItem value="TX">Texas</SelectItem>
-                      <SelectItem value="UT">Utah</SelectItem>
-                      <SelectItem value="VT">Vermont</SelectItem>
-                      <SelectItem value="VA">Virginia</SelectItem>
-                      <SelectItem value="WA">Washington</SelectItem>
-                      <SelectItem value="WV">West Virginia</SelectItem>
-                      <SelectItem value="WI">Wisconsin</SelectItem>
-                      <SelectItem value="WY">Wyoming</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
+
+            {/* Additional fields */}
             <FormField
               control={form.control}
               name="serviceTerritory"

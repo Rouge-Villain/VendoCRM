@@ -109,6 +109,36 @@ export function registerRoutes(app: Express) {
         details: errorMessage 
       });
     }
+  // Deal Pipeline Routes
+  app.patch("/api/opportunities/:id/stage", async (req, res) => {
+    try {
+      const { stage } = req.body;
+      const id = parseInt(req.params.id);
+      
+      const result = await db
+        .update(opportunities)
+        .set({ 
+          stage,
+          updatedAt: new Date()
+        })
+        .where(eq(opportunities.id, id))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({ error: "Opportunity not found" });
+      }
+
+      res.json(result[0]);
+    } catch (error) {
+      console.error("Stage update error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      res.status(400).json({
+        error: "Failed to update stage",
+        details: errorMessage
+      });
+    }
+  });
+
   });
   app.patch("/api/maintenance/:id/status", async (req, res) => {
     try {

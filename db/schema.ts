@@ -30,9 +30,8 @@ export const customers = pgTable("customers", {
   address: text("address").notNull(),
   website: text("website"),
   notes: text("notes"),
-  machineTypes: text("machine_types").array(),
-  city: text("city").notNull(),
-  state: text("state").notNull(),
+  machineTypes: jsonb("machine_types").$type<Array<{ type: string; quantity: number }>>().default([]),
+  state: text("state").array(),
   serviceTerritory: text("service_territory"),
   serviceHours: text("service_hours"),
   contractTerms: text("contract_terms"),
@@ -56,9 +55,16 @@ export const opportunities = pgTable("opportunities", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   customerId: integer("customer_id").notNull(),
   productId: integer("product_id").notNull(),
-  status: text("status").notNull(), // prospecting, qualification, proposal, closed
-  value: decimal("value").notNull(),
+  stage: text("stage").notNull().default("prospecting"), // Current pipeline stage
+  status: text("status").notNull().default("open"), // open, won, lost
+  value: decimal("value", { precision: 10, scale: 2 }).notNull(),
+  probability: integer("probability").default(0),
+  expectedCloseDate: timestamp("expected_close_date"),
+  lostReason: text("lost_reason"),
   notes: text("notes"),
+  assignedTo: text("assigned_to"),
+  lastContactDate: timestamp("last_contact_date"),
+  nextFollowUp: timestamp("next_follow_up"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
