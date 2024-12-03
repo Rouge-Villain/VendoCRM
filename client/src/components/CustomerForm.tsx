@@ -155,45 +155,47 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
 
             <div className="col-span-2">
               <FormLabel>Machine Types</FormLabel>
-              <div className="grid grid-cols-2 gap-4 mt-2">
+              <FormDescription className="mt-1 mb-3">Select the types of machines and specify quantities</FormDescription>
+              <div className="grid grid-cols-3 gap-3 p-4 bg-secondary/20 rounded-lg border border-secondary">
                 {MACHINE_TYPES.map((type) => (
-                  <div key={type.id} className="flex items-start space-x-3 space-y-0">
+                  <div key={type.id} className="flex items-center gap-2 bg-background p-2 rounded-md shadow-sm">
                     <FormField
                       control={form.control}
                       name={`machineTypes.${type.id}`}
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                        <FormItem className="flex-1 flex items-center gap-2 space-y-0">
                           <FormControl>
                             <Checkbox
                               checked={field.value}
                               onCheckedChange={field.onChange}
+                              className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                             />
                           </FormControl>
-                          <FormLabel className="font-normal">
+                          <FormLabel className="font-medium text-sm cursor-pointer flex-1 m-0">
                             {type.label}
                           </FormLabel>
+                          {field.value && (
+                            <FormField
+                              control={form.control}
+                              name={`${type.id}Quantity`}
+                              render={({ field: quantityField }) => (
+                                <FormItem className="space-y-0 flex-shrink-0">
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      {...quantityField}
+                                      placeholder="Qty"
+                                      className="w-16 h-7 text-sm"
+                                      min="1"
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          )}
                         </FormItem>
                       )}
                     />
-                    {form.watch(`machineTypes.${type.id}`) && (
-                      <FormField
-                        control={form.control}
-                        name={`${type.id}Quantity`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                placeholder="Quantity"
-                                className="w-24"
-                                min="1"
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    )}
                   </div>
                 ))}
               </div>
