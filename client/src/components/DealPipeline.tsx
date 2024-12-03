@@ -30,6 +30,19 @@ export function DealPipeline() {
     },
   });
 
+  // Calculate stage statistics
+  const stageStats = stages.reduce((acc, stage) => {
+    const stageOpps = opportunities?.filter(opp => opp.stage === stage.id) || [];
+    acc[stage.id] = {
+      count: stageOpps.length,
+      value: stageOpps.reduce((sum, opp) => sum + Number(opp.value), 0),
+      avgProbability: stageOpps.length ? 
+        stageOpps.reduce((sum, opp) => sum + (opp.probability || 0), 0) / stageOpps.length : 
+        0
+    };
+    return acc;
+  }, {} as Record<string, { count: number; value: number; avgProbability: number }>);
+
   const updateStageMutation = useMutation({
     mutationFn: async ({ id, stage }: { id: number; stage: string }) => {
       const response = await fetch(`/api/opportunities/${id}/stage`, {
@@ -86,7 +99,20 @@ export function DealPipeline() {
         {stages.map((stage) => (
           <div key={stage.id} className="flex-shrink-0 w-80">
             <div className="bg-secondary p-4 rounded-lg">
-              <h3 className="font-semibold mb-4">{stage.name}</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold">{stage.name}</h3>
+                <div className="text-sm text-muted-foreground">
+                  {stageStats[stage.id]?.count || 0} deals · ${stageStats[stage.id]?.value.toLocaleString()}
+                </div>
+              </div>
+              <div className="h-1 bg-primary/20 rounded mb-4">
+                <div 
+                  className="h-full bg-primary rounded" 
+                  style={{ 
+                    width: `${stageStats[stage.id]?.avgProbability || 0}%` 
+                  }} 
+                />
+              </div>
               <Droppable droppableId={stage.id}>
                 {(provided) => (
                   <div
@@ -109,17 +135,25 @@ export function DealPipeline() {
                           >
                             <CardContent className="p-4">
                               <div className="space-y-2">
-                                <div className="font-medium">
-                                  Value: ${parseFloat(opp.value.toString()).toFixed(2)}
+                                <div className="flex justify-between items-center">
+                                  <div className="font-medium">
+                                    ${parseFloat(opp.value.toString()).toLocaleString()}
+                                  </div>
+                                  <div className="text-sm px-2 py-1 rounded-full bg-primary/10 text-primary">
+                                    {opp.probability}%
+                                  </div>
                                 </div>
-                                <div className="text-sm text-muted-foreground">
+                                <div className="text-sm text-muted-foreground line-clamp-2">
                                   {opp.notes}
                                 </div>
-                                {opp.probability && (
-                                  <div className="text-sm">
-                                    Probability: {opp.probability}%
-                                  </div>
-                                )}
+                                <div className="flex justify-between items-center text-xs text-muted-foreground">
+                                  <span>
+                                    {opp.expectedCloseDate ? 
+                                      format(new Date(opp.expectedCloseDate), 'MMM d, yyyy') : 
+                                      'No close date'}
+                                  </span>
+                                  <span>{opp.assignedTo || 'Unassigned'}</span>
+                                </div>
                               </div>
                             </CardContent>
                           </Card>
