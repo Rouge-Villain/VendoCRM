@@ -59,22 +59,20 @@ export function DealPipeline() {
 
   const updateStageMutation = useMutation({
     mutationFn: async ({ id, stage }: { id: number; stage: string }) => {
-      console.log('Updating stage:', { id, stage });
       const response = await fetch(`/api/opportunities/${id}/stage`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stage }),
       });
-      
+
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
+        throw new Error('Failed to update stage');
       }
-      
+
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["opportunities"] });
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       toast({
         title: "Success",
         description: `Deal moved to ${data.stage}`,
@@ -82,31 +80,33 @@ export function DealPipeline() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
 
   const onDragEnd = (result: DropResult) => {
-    const { destination, source, draggableId } = result;
-
-    if (!destination) return;
+    if (!result.destination) return;
+    
+    const oppId = parseInt(result.draggableId);
+    
+    if (isNaN(oppId)) {
+      console.error('Invalid opportunity ID');
+      return;
+    }
 
     if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
+      result.destination.droppableId === result.source.droppableId &&
+      result.destination.index === result.source.index
     ) {
       return;
     }
 
-    const oppId = parseInt(draggableId);
-    console.log('Moving opportunity:', { oppId, stage: destination.droppableId });
-
     updateStageMutation.mutate({
       id: oppId,
-      stage: destination.droppableId,
+      stage: result.destination.droppableId,
     });
   };
 
@@ -163,7 +163,7 @@ export function DealPipeline() {
                   >
                     {getOpportunitiesByStage(stage.id).map((opp, index) => (
                       <Draggable
-                        key={opp.id}
+                        key={opp.id.toString()}
                         draggableId={opp.id.toString()}
                         index={index}
                         isDragDisabled={updateStageMutation.isPending}
