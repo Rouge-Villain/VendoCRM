@@ -32,11 +32,11 @@ export default function Sales() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Sales Pipeline</h1>
+      <div className="flex items-center justify-between px-4 max-w-screen-xl mx-auto">
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Sales Pipeline</h1>
         <Button 
           onClick={() => setIsOpen(true)}
-          className="px-6 py-2 hover:scale-105 transition-transform duration-200"
+          className="px-4 py-1.5 hover:scale-105 transition-transform duration-200"
         >
           New Deal
         </Button>
