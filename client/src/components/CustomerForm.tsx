@@ -36,31 +36,41 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
       address: "",
       website: "",
       notes: "",
-      machineTypes: [],
+      machineTypes: MACHINE_TYPES.reduce((acc, type) => ({
+        ...acc,
+        [type.id]: { selected: false, quantity: 0 }
+      }), {}),
       state: [],
       serviceTerritory: "",
-      serviceHours: "",
-      contractTerms: "",
       maintenanceHistory: "",
     },
   });
 
   const mutation = useMutation({
     mutationFn: async (data: InsertCustomer) => {
+      const machineData = Object.entries(data.machineTypes)
+        .filter(([_, value]) => value.selected)
+        .map(([type, value]) => ({
+          type,
+          quantity: value.quantity || 0
+        }));
+
+      const totalMachines = machineData.reduce((sum, machine) => sum + machine.quantity, 0);
+
       const response = await fetch("/api/customers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
-          machineTypes: Object.entries(form.getValues("machineTypes"))
-            .filter(([_, checked]) => checked)
-            .map(([type]) => ({
-              type,
-              quantity: parseInt(form.getValues(`${type}Quantity`) || "0", 10),
-            })),
+          machineTypes: machineData,
+          totalMachines,
         }),
       });
-      if (!response.ok) throw new Error("Failed to create customer");
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create customer");
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -150,6 +160,15 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
               name="website"
               render={({ field }) => (
                 <FormItem>
+              <div className="mb-4 p-3 bg-secondary/10 rounded-md">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Total Machines:</span>
+                  <span className="text-lg font-bold">
+                    {Object.values(form.watch("machineTypes"))
+                      .reduce((sum, machine) => sum + (machine.selected ? (machine.quantity || 0) : 0), 0)}
+                  </span>
+                </div>
+              </div>
                   <FormLabel>Website</FormLabel>
                   <FormControl>
                     <Input type="url" {...field} value={field.value || ""} />
@@ -171,32 +190,38 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
                         <FormItem className="flex-1 flex items-center gap-2 space-y-0">
                           <FormControl>
                             <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
+                              checked={field.value?.selected}
+                              onCheckedChange={(checked) => {
+                                field.onChange({
+                                  selected: checked,
+                                  quantity: checked ? field.value?.quantity || 1 : 0
+                                });
+                              }}
                               className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                             />
                           </FormControl>
                           <FormLabel className="font-medium text-sm cursor-pointer flex-1 m-0">
                             {type.label}
                           </FormLabel>
-                          {field.value && (
-                            <FormField
-                              control={form.control}
-                              name={`${type.id}Quantity`}
-                              render={({ field: quantityField }) => (
-                                <FormItem className="space-y-0 flex-shrink-0">
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      {...quantityField}
-                                      placeholder="Qty"
-                                      className="w-16 h-7 text-sm"
-                                      min="1"
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
+                          {field.value?.selected && (
+                            <FormItem className="space-y-0 flex-shrink-0">
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  value={field.value.quantity || ""}
+                                  onChange={(e) => {
+                                    const quantity = parseInt(e.target.value) || 0;
+                                    field.onChange({
+                                      selected: true,
+                                      quantity: Math.max(0, quantity)
+                                    });
+                                  }}
+                                  placeholder="Qty"
+                                  className="w-16 h-7 text-sm"
+                                  min="0"
+                                />
+                              </FormControl>
+                            </FormItem>
                           )}
                         </FormItem>
                       )}
