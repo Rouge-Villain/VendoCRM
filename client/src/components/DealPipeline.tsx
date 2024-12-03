@@ -72,6 +72,7 @@ export function DealPipeline() {
 
   const updateStageMutation = useMutation({
     mutationFn: async ({ id, stage }: { id: number; stage: string }) => {
+      console.log('Updating stage:', { id, stage });
       const response = await fetch(`/api/opportunities/${id}/stage`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -82,14 +83,15 @@ export function DealPipeline() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       toast({
         title: "Stage updated",
-        description: "Deal stage has been successfully updated.",
+        description: `Deal stage has been updated to ${data.stage}`,
       });
     },
     onError: (error: Error) => {
+      console.error('Stage update error:', error);
       toast({
         title: "Failed to update stage",
         description: error.message,
@@ -177,15 +179,16 @@ export function DealPipeline() {
                     <div
                       {...provided.droppableProps}
                       ref={provided.innerRef}
-                      className={`space-y-4 min-h-[100px] ${
+                      className={`space-y-4 min-h-[200px] p-4 ${
                         snapshot.isDraggingOver ? 'bg-secondary/50' : ''
                       }`}
                     >
                       {getOpportunitiesByStage(stage.id).map((opp, index) => (
                         <Draggable
-                          key={opp.id}
+                          key={opp.id.toString()}
                           draggableId={opp.id.toString()}
                           index={index}
+                          isDragDisabled={updateStageMutation.isPending}
                         >
                           {(provided) => (
                             <Card
