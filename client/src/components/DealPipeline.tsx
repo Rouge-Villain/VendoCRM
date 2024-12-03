@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,13 +12,13 @@ import { type Opportunity } from "@db/schema";
 import { QuoteGenerator } from "./QuoteGenerator";
 
 const stages = [
-  { id: "prospecting", name: "Prospecting", defaultProbability: 20 },
-  { id: "qualification", name: "Qualification", defaultProbability: 40 },
-  { id: "needs-analysis", name: "Needs Analysis", defaultProbability: 60 },
-  { id: "proposal", name: "Proposal", defaultProbability: 75 },
-  { id: "negotiation", name: "Negotiation", defaultProbability: 90 },
-  { id: "closed-won", name: "Closed Won", defaultProbability: 100 },
-  { id: "closed-lost", name: "Closed Lost", defaultProbability: 0 },
+  { id: "prospecting", name: "Prospecting" },
+  { id: "qualification", name: "Qualification" },
+  { id: "needs-analysis", name: "Needs Analysis" },
+  { id: "proposal", name: "Proposal" },
+  { id: "negotiation", name: "Negotiation" },
+  { id: "closed-won", name: "Closed Won" },
+  { id: "closed-lost", name: "Closed Lost" }
 ];
 
 export function DealPipeline() {
@@ -94,7 +94,7 @@ export function DealPipeline() {
     },
   });
 
-  const onDragEnd = (result: any) => {
+  const onDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
 
     if (!destination) return;
@@ -172,12 +172,14 @@ export function DealPipeline() {
                     }} 
                   />
                 </div>
-                <Droppable droppableId={stage.id}>
-                  {(provided) => (
+                <Droppable droppableId={stage.id} key={stage.id}>
+                  {(provided, snapshot) => (
                     <div
                       {...provided.droppableProps}
                       ref={provided.innerRef}
-                      className="space-y-4"
+                      className={`space-y-4 min-h-[100px] ${
+                        snapshot.isDraggingOver ? 'bg-secondary/50' : ''
+                      }`}
                     >
                       {getOpportunitiesByStage(stage.id).map((opp, index) => (
                         <Draggable
