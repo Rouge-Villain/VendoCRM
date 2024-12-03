@@ -8,11 +8,13 @@ import {
   PointElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ArcElement,
 } from 'chart.js';
-import { Bar, Line } from 'react-chartjs-2';
+import { Bar, Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type Opportunity } from "@db/schema";
+import { addMonths, format, startOfMonth } from "date-fns";
 
 ChartJS.register(
   CategoryScale,
@@ -20,6 +22,7 @@ ChartJS.register(
   BarElement,
   LineElement,
   PointElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend
@@ -34,92 +37,207 @@ export function SalesAnalytics() {
     },
   });
 
-  // Calculate revenue trends (monthly)
-  const revenueTrends = opportunities?.reduce((acc, opp) => {
-    if (opp.createdAt) {
-      const date = new Date(opp.createdAt);
-      const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
-      acc[monthYear] = (acc[monthYear] || 0) + Number(opp.value);
+  // Calculate win/loss ratio and reasons
+  const winLossData = opportunities?.reduce((acc, opp) => {
+    if (opp.status === 'won') {
+      acc.won++;
+      acc.wonValue += Number(opp.value);
+    } else if (opp.status === 'lost') {
+      acc.lost++;
+      acc.lostValue += Number(opp.value);
+      acc.reasons[opp.lostReason || 'Other'] = (acc.reasons[opp.lostReason || 'Other'] || 0) + 1;
     }
     return acc;
-  }, {} as Record<string, number>);
+  }, { won: 0, lost: 0, wonValue: 0, lostValue: 0, reasons: {} as Record<string, number> });
 
-  // Calculate conversion rates by status
-  const conversionRates = opportunities?.reduce((acc, opp) => {
-    acc[opp.status] = (acc[opp.status] || 0) + 1;
+  // Calculate monthly performance (last 12 months)
+  const last12Months = Array.from({ length: 12 }, (_, i) => {
+    const date = addMonths(new Date(), -i);
+    return startOfMonth(date);
+  }).reverse();
+
+  const monthlyPerformance = last12Months.reduce((acc, month) => {
+    const monthStr = format(month, 'MMM yyyy');
+    acc[monthStr] = {
+      deals: 0,
+      value: 0,
+      won: 0,
+      lost: 0,
+    };
     return acc;
-  }, {} as Record<string, number>);
+  }, {} as Record<string, { deals: number; value: number; won: number; lost: number; }>);
 
-  const revenueChartData = {
-    labels: Object.keys(revenueTrends || {}),
+  opportunities?.forEach(opp => {
+    if (opp.createdAt) {
+      const monthStr = format(new Date(opp.createdAt), 'MMM yyyy');
+      if (monthlyPerformance[monthStr]) {
+        monthlyPerformance[monthStr].deals++;
+        monthlyPerformance[monthStr].value += Number(opp.value);
+        if (opp.status === 'won') monthlyPerformance[monthStr].won++;
+        if (opp.status === 'lost') monthlyPerformance[monthStr].lost++;
+      }
+    }
+  });
+
+  // Calculate yearly projections based on last 3 months trend
+  const last3MonthsData = Object.values(monthlyPerformance).slice(-3);
+  const averageMonthlyValue = last3MonthsData.reduce((sum, month) => sum + month.value, 0) / 3;
+  const projectedYearlyValue = averageMonthlyValue * 12;
+
+  // Chart data
+  const winLossChartData = {
+    labels: ['Won', 'Lost'],
     datasets: [
       {
-        label: 'Revenue',
-        data: Object.values(revenueTrends || {}),
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1,
+        data: [winLossData?.won || 0, winLossData?.lost || 0],
+        backgroundColor: ['rgba(34, 197, 94, 0.5)', 'rgba(239, 68, 68, 0.5)'],
+        borderColor: ['rgb(34, 197, 94)', 'rgb(239, 68, 68)'],
       },
     ],
   };
 
-  const conversionChartData = {
-    labels: Object.keys(conversionRates || {}),
+  const monthlyPerformanceData = {
+    labels: Object.keys(monthlyPerformance),
     datasets: [
       {
-        label: 'Opportunities by Status',
-        data: Object.values(conversionRates || {}),
+        label: 'Revenue',
+        data: Object.values(monthlyPerformance).map(m => m.value),
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+        tension: 0.3,
+      },
+      {
+        label: 'Projected Revenue',
+        data: Object.keys(monthlyPerformance).map((_, i) => 
+          i >= Object.keys(monthlyPerformance).length - 3 ? averageMonthlyValue : null
+        ),
+        borderColor: 'rgb(168, 85, 247)',
+        backgroundColor: 'rgba(168, 85, 247, 0.5)',
+        borderDashOffset: 5,
+        borderDash: [5, 5],
+        tension: 0.3,
+      },
+    ],
+  };
+
+  const lostReasonsData = {
+    labels: Object.keys(winLossData?.reasons || {}),
+    datasets: [
+      {
+        data: Object.values(winLossData?.reasons || {}),
         backgroundColor: [
-          'rgba(255, 99, 132, 0.5)',
-          'rgba(54, 162, 235, 0.5)',
-          'rgba(255, 206, 86, 0.5)',
-          'rgba(75, 192, 192, 0.5)',
+          'rgba(239, 68, 68, 0.5)',
+          'rgba(245, 158, 11, 0.5)',
+          'rgba(59, 130, 246, 0.5)',
+          'rgba(168, 85, 247, 0.5)',
         ],
+        borderWidth: 1,
       },
     ],
   };
 
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Win/Loss Ratio</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] flex items-center justify-center">
+              <Pie
+                data={winLossChartData}
+                options={{
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      position: 'top' as const,
+                    },
+                    tooltip: {
+                      callbacks: {
+                        label: (context) => {
+                          const label = context.label;
+                          const value = context.raw as number;
+                          const total = (winLossData?.won || 0) + (winLossData?.lost || 0);
+                          const percentage = ((value / total) * 100).toFixed(1);
+                          return `${label}: ${value} (${percentage}%)`;
+                        },
+                      },
+                    },
+                  },
+                }}
+              />
+            </div>
+            <div className="mt-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                Total Won: ${(winLossData?.wonValue || 0).toLocaleString()}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Total Lost: ${(winLossData?.lostValue || 0).toLocaleString()}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Lost Deal Reasons</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] flex items-center justify-center">
+              <Pie
+                data={lostReasonsData}
+                options={{
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      position: 'top' as const,
+                    },
+                  },
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle>Revenue Trends</CardTitle>
+          <CardTitle>Monthly Performance & Projections</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px]">
+          <div className="h-[400px]">
             <Line
-              data={revenueChartData}
+              data={monthlyPerformanceData}
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                   legend: {
                     position: 'top' as const,
+                  },
+                  tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                  },
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      callback: (value) => `$${Number(value).toLocaleString()}`,
+                    },
                   },
                 },
               }}
             />
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Opportunity Status Distribution</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <Bar
-              data={conversionChartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: 'top' as const,
-                  },
-                },
-              }}
-            />
+          <div className="mt-4">
+            <p className="text-sm font-medium">Projected Annual Revenue:</p>
+            <p className="text-2xl font-bold">${projectedYearlyValue.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">
+              Based on last 3 months average: ${averageMonthlyValue.toLocaleString()}/month
+            </p>
           </div>
         </CardContent>
       </Card>

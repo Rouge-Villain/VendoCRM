@@ -20,7 +20,7 @@ export default function Sales() {
 
   if (isLoading) {
     return (
-      <div className="space-y-8">
+      <div className="max-w-screen-xl mx-auto px-4 space-y-8">
         <div className="flex items-center justify-between">
           <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
           <div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
@@ -31,8 +31,8 @@ export default function Sales() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between px-4 max-w-screen-xl mx-auto">
+    <div className="max-w-screen-2xl mx-auto px-4 space-y-8">
+      <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Sales Pipeline</h1>
         <Button 
           onClick={() => setIsOpen(true)}
@@ -42,39 +42,53 @@ export default function Sales() {
         </Button>
       </div>
 
-      <Card className="p-6 overflow-hidden">
+      <Card className="p-4 overflow-hidden bg-secondary/5">
         <DealPipeline />
       </Card>
 
-      <div className="rounded-lg border shadow-sm bg-white">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Customer</TableHead>
-              <TableHead>Product</TableHead>
-              <TableHead>Value</TableHead>
-              <TableHead>Stage</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Probability</TableHead>
-              <TableHead>Created</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {opportunities?.map((opportunity) => (
-              <TableRow key={opportunity.id}>
-                <TableCell>{opportunity.customerId}</TableCell>
-                <TableCell>{opportunity.productId}</TableCell>
-                <TableCell>${parseFloat(opportunity.value.toString()).toLocaleString()}</TableCell>
-                <TableCell className="capitalize">{opportunity.stage}</TableCell>
-                <TableCell className="capitalize">{opportunity.status}</TableCell>
-                <TableCell>{opportunity.probability}%</TableCell>
-                <TableCell>
-                  {opportunity.createdAt ? new Date(opportunity.createdAt).toLocaleDateString() : 'N/A'}
-                </TableCell>
+      <Card className="p-4">
+        <CardHeader>
+          <CardTitle>Sales Analytics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SalesAnalytics />
+        </CardContent>
+      </Card>
+
+      <div className="bg-white rounded-lg shadow-sm">
+        <div className="p-4 border-b">
+          <h2 className="text-lg font-semibold">Recent Opportunities</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Customer</TableHead>
+                <TableHead>Product</TableHead>
+                <TableHead>Value</TableHead>
+                <TableHead>Stage</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Probability</TableHead>
+                <TableHead>Created</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {opportunities?.map((opportunity) => (
+                <TableRow key={opportunity.id}>
+                  <TableCell>{opportunity.customerId}</TableCell>
+                  <TableCell>{opportunity.productId}</TableCell>
+                  <TableCell>${parseFloat(opportunity.value.toString()).toLocaleString()}</TableCell>
+                  <TableCell className="capitalize">{opportunity.stage}</TableCell>
+                  <TableCell className="capitalize">{opportunity.status}</TableCell>
+                  <TableCell>{opportunity.probability}%</TableCell>
+                  <TableCell>
+                    {opportunity.createdAt ? new Date(opportunity.createdAt).toLocaleDateString() : 'N/A'}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
