@@ -81,17 +81,22 @@ export function WinLossAnalytics() {
   const avgMonthlyGrowth = lastThreeMonths.reduce((acc, month, index) => {
     if (index === 0) return acc;
     const prevMonth = lastThreeMonths[index - 1];
-    const growth = monthlyPerformance[month].wonValue / monthlyPerformance[prevMonth].wonValue - 1;
+    const currentValue = monthlyPerformance[month]?.wonValue || 0;
+    const prevValue = monthlyPerformance[prevMonth]?.wonValue || 1; // Prevent division by zero
+    const growth = currentValue / prevValue - 1;
     return acc + growth;
   }, 0) / (lastThreeMonths.length - 1);
 
   // Project next 6 months
   const lastMonth = monthKeys[monthKeys.length - 1];
+  const lastMonthData = monthlyPerformance[lastMonth];
+  const baseValue = lastMonthData?.wonValue || 0;
+
   const projectedMonths = Array.from({ length: 6 }).reduce((acc, _, index) => {
     const date = new Date();
     date.setMonth(date.getMonth() + index + 1);
     const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
-    const projectedValue = monthlyPerformance[lastMonth].wonValue * Math.pow(1 + avgMonthlyGrowth, index + 1);
+    const projectedValue = baseValue * Math.pow(1 + (avgMonthlyGrowth || 0), index + 1);
     acc[monthYear] = {
       projectedValue,
       isProjection: true
