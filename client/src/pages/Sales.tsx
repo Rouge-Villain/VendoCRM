@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DealPipeline } from "../components/DealPipeline";
@@ -8,6 +8,7 @@ import { DealForm } from "../components/DealForm";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { type Opportunity } from "@db/schema";
 import { SalesAnalytics } from "@/components/analytics/SalesAnalytics";
+import { WinLossAnalytics } from "@/components/analytics/WinLossAnalytics";
 
 export default function Sales() {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,14 +48,28 @@ export default function Sales() {
         <DealPipeline />
       </Card>
 
-      <Card className="p-4">
-        <CardHeader>
-          <CardTitle>Sales Analytics</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SalesAnalytics />
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <Card className="p-4">
+          <CardHeader>
+            <CardTitle>Sales Analytics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SalesAnalytics />
+          </CardContent>
+        </Card>
+
+        <Card className="p-4">
+          <CardHeader>
+            <CardTitle>Win/Loss Analysis & Projections</CardTitle>
+            <CardDescription>
+              Track deal outcomes and view performance projections
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <WinLossAnalytics />
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="bg-white rounded-lg shadow-sm">
         <div className="p-4 border-b">
