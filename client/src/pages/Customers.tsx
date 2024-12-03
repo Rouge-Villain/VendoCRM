@@ -67,6 +67,11 @@ export default function Customers() {
     <div className="space-y-8">
       <div className="flex items-center justify-between px-4 max-w-screen-xl mx-auto">
         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Customers</h1>
+      </div>
+
+      <StatsOverview />
+      
+      <div className="flex justify-end px-4">
         <Button 
           onClick={() => setIsOpen(true)}
           className="px-4 py-1.5 hover:scale-105 transition-transform duration-200"
@@ -75,8 +80,6 @@ export default function Customers() {
         </Button>
       </div>
 
-      <StatsOverview />
-      
       <CustomerDistribution />
 
       <div className="rounded-lg border shadow-sm bg-white">
