@@ -61,7 +61,6 @@ export function DealPipeline() {
 
   const updateStageMutation = useMutation({
     mutationFn: async ({ id, stage }: { id: number; stage: Stage }) => {
-      console.log('Updating stage:', { id, stage });
       const response = await fetch(`/api/opportunities/${id}/stage`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -69,8 +68,8 @@ export function DealPipeline() {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to update stage');
+        const errorData = await response.json().catch(() => ({ error: 'Failed to update stage' }));
+        throw new Error(errorData.error || 'Failed to update stage');
       }
 
       return response.json();
@@ -79,11 +78,10 @@ export function DealPipeline() {
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       toast({
         title: "Success",
-        description: `Deal moved to ${data.stage}`,
+        description: `Deal moved to ${stages.find(s => s.id === data.stage)?.name}`,
       });
     },
     onError: (error: Error) => {
-      console.error('Stage update error:', error);
       toast({
         title: 'Error',
         description: error.message,
