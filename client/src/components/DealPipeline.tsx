@@ -23,6 +23,18 @@ const stages = [
 
 type Stage = typeof stages[number]['id'];
 
+interface DragResult extends DropResult {
+  draggableId: string;
+  source: {
+    droppableId: Stage;
+    index: number;
+  };
+  destination?: {
+    droppableId: Stage;
+    index: number;
+  };
+}
+
 export function DealPipeline() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -92,7 +104,7 @@ export function DealPipeline() {
     },
   });
 
-  const onDragEnd = (result: DropResult) => {
+  const onDragEnd = (result: DragResult) => {
     const { destination, source, draggableId } = result;
 
     if (!destination) return;
@@ -104,12 +116,18 @@ export function DealPipeline() {
       return;
     }
 
-    const oppId = parseInt(draggableId);
+    const oppId = parseInt(draggableId.replace('opp-', ''));
     
     if (isNaN(oppId)) {
       console.error('Invalid opportunity ID');
       return;
     }
+
+    console.log('Moving opportunity:', {
+      id: oppId,
+      from: source.droppableId,
+      to: destination.droppableId
+    });
 
     updateStageMutation.mutate({
       id: oppId,
@@ -168,8 +186,8 @@ export function DealPipeline() {
                       .filter((opp) => opp.stage === stage.id)
                       .map((opp, index) => (
                         <Draggable
-                          key={opp.id}
-                          draggableId={opp.id.toString()}
+                          key={`opp-${opp.id}`}
+                          draggableId={`opp-${opp.id}`}
                           index={index}
                         >
                           {(provided, snapshot) => (
