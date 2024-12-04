@@ -104,18 +104,12 @@ export function DealPipeline() {
       return;
     }
 
-    const oppId = parseInt(draggableId.replace('opp-', ''));
+    const oppId = parseInt(draggableId);
     
     if (isNaN(oppId)) {
       console.error('Invalid opportunity ID');
       return;
     }
-
-    console.log('Moving opportunity:', {
-      id: oppId,
-      from: source.droppableId,
-      to: destination.droppableId
-    });
 
     updateStageMutation.mutate({
       id: oppId,
@@ -174,8 +168,8 @@ export function DealPipeline() {
                       .filter((opp) => opp.stage === stage.id)
                       .map((opp, index) => (
                         <Draggable
-                          key={opp.id}
-                          draggableId={`opp-${opp.id}`}
+                          key={String(opp.id)}
+                          draggableId={String(opp.id)}
                           index={index}
                         >
                           {(provided, snapshot) => (
@@ -183,12 +177,9 @@ export function DealPipeline() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              style={{
-                                ...provided.draggableProps.style,
-                                opacity: snapshot.isDragging ? 0.8 : 1
-                              }}
+                              className={`${snapshot.isDragging ? 'opacity-50' : ''}`}
                             >
-                              <Card className={`bg-background ${snapshot.isDragging ? 'shadow-lg' : ''}`}>
+                              <Card>
                                 <CardContent className="p-4">
                                   <div className="space-y-2">
                                     <div className="flex justify-between items-center">

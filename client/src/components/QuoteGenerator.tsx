@@ -142,33 +142,28 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Quote/Proposal Generator</DialogTitle>
           <DialogDescription>Generate a detailed quote for this opportunity</DialogDescription>
         </DialogHeader>
-        <div className="h-[80vh]">
-          {(() => {
-            try {
-              return (
-                <PDFViewer width="100%" height="100%">
-                  <QuoteDocument />
-                </PDFViewer>
-              );
-            } catch (error) {
-              console.error('Error generating PDF:', error);
-              toast({
-                title: 'Error',
-                description: 'Failed to generate quote. Please try again.',
-                variant: 'destructive',
-              });
-              return (
-                <div className="flex items-center justify-center h-full">
-                  <p className="text-destructive">Failed to generate quote. Please try again.</p>
-                </div>
-              );
-            }
-          })()}
+        <div className="p-4">
+          <PDFDownloadLink
+            document={<QuoteDocument />}
+            fileName={`quote-${opportunity.id}.pdf`}
+            className="w-full"
+          >
+            {({ loading }) => (
+              <Button className="w-full" disabled={loading}>
+                {loading ? 'Generating PDF...' : 'Download Quote PDF'}
+              </Button>
+            )}
+          </PDFDownloadLink>
+          <div className="mt-4 p-4 border rounded-lg bg-muted">
+            <p className="text-center text-sm text-muted-foreground">
+              Click the button above to download the quote as a PDF
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
