@@ -69,7 +69,8 @@ export function DealPipeline() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update stage');
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to update stage');
       }
 
       return response.json();
@@ -82,6 +83,7 @@ export function DealPipeline() {
       });
     },
     onError: (error: Error) => {
+      console.error('Stage update error:', error);
       toast({
         title: 'Error',
         description: error.message,
@@ -91,9 +93,18 @@ export function DealPipeline() {
   });
 
   const onDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
+    const { destination, source, draggableId } = result;
 
-    const oppId = parseInt(result.draggableId);
+    if (!destination) return;
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const oppId = parseInt(draggableId.replace('opp-', ''));
     
     if (isNaN(oppId)) {
       console.error('Invalid opportunity ID');
@@ -102,13 +113,13 @@ export function DealPipeline() {
 
     console.log('Moving opportunity:', {
       id: oppId,
-      from: result.source.droppableId,
-      to: result.destination.droppableId
+      from: source.droppableId,
+      to: destination.droppableId
     });
 
     updateStageMutation.mutate({
       id: oppId,
-      stage: result.destination.droppableId as Stage,
+      stage: destination.droppableId as Stage,
     });
   };
 
@@ -164,22 +175,20 @@ export function DealPipeline() {
                       .map((opp, index) => (
                         <Draggable
                           key={opp.id}
-                          draggableId={String(opp.id)}
+                          draggableId={`opp-${opp.id}`}
                           index={index}
-                          isDragDisabled={updateStageMutation.isPending}
                         >
                           {(provided, snapshot) => (
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              style={provided.draggableProps.style}
+                              style={{
+                                ...provided.draggableProps.style,
+                                opacity: snapshot.isDragging ? 0.8 : 1
+                              }}
                             >
-                              <Card
-                                className={`bg-background ${
-                                  snapshot.isDragging ? 'shadow-lg' : ''
-                                } ${updateStageMutation.isPending ? 'opacity-50' : ''}`}
-                              >
+                              <Card className={`bg-background ${snapshot.isDragging ? 'shadow-lg' : ''}`}>
                                 <CardContent className="p-4">
                                   <div className="space-y-2">
                                     <div className="flex justify-between items-center">
