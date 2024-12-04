@@ -168,8 +168,8 @@ export function DealPipeline() {
                       .filter((opp) => opp.stage === stage.id)
                       .map((opp, index) => (
                         <Draggable
-                          key={String(opp.id)}
-                          draggableId={String(opp.id)}
+                          key={opp.id}
+                          draggableId={opp.id.toString()}
                           index={index}
                         >
                           {(provided, snapshot) => (

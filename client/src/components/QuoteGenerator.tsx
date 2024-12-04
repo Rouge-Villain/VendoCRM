@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Page, Text, View, Document, StyleSheet, PDFViewer } from "@react-pdf/renderer";
+import { Page, Text, View, Document, StyleSheet, PDFDownloadLink } from "@react-pdf/renderer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { type Opportunity, type Customer, type Product } from "@db/schema";
