@@ -28,6 +28,8 @@ export function DealPipeline() {
   const queryClient = useQueryClient();
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
   const [showQuoteGenerator, setShowQuoteGenerator] = useState(false);
+  const [stageChangeOpen, setStageChangeOpen] = useState(false);
+  const [selectedDeal, setSelectedDeal] = useState<Opportunity | null>(null);
 
   const { data: opportunities, isLoading: isLoadingOpps, isError: isErrorOpps } = useQuery({
     queryKey: ["opportunities"],
@@ -61,6 +63,7 @@ export function DealPipeline() {
 
   const updateStageMutation = useMutation({
     mutationFn: async ({ id, stage }: { id: number; stage: Stage }) => {
+      console.log('Updating stage:', { id, stage });
       const response = await fetch(`/api/opportunities/${id}/stage`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -68,7 +71,8 @@ export function DealPipeline() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update stage');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update stage');
       }
 
       return response.json();
@@ -81,6 +85,7 @@ export function DealPipeline() {
       });
     },
     onError: (error: Error) => {
+      console.error('Stage update error:', error);
       toast({
         title: 'Error',
         description: error.message,
@@ -150,28 +155,17 @@ export function DealPipeline() {
                   <Card key={opp.id}>
                     <CardContent className="p-4">
                       <div className="space-y-2">
-                        <Select
-                          value={opp.stage}
-                          onValueChange={(newStage: Stage) => {
-                            updateStageMutation.mutate({
-                              id: opp.id,
-                              stage: newStage,
-                            });
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => {
+                            setSelectedDeal(opp);
+                            setStageChangeOpen(true);
                           }}
                         >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select stage">
-                              {stages.find((s) => s.id === opp.stage)?.name || 'Select stage'}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {stages.map((s) => (
-                              <SelectItem key={s.id} value={s.id}>
-                                {s.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          Change Stage
+                        </Button>
                         <div className="flex justify-between items-center">
                           <div className="font-medium">
                             ${parseFloat(opp.value.toString()).toLocaleString()}
@@ -236,6 +230,33 @@ export function DealPipeline() {
             if (!open) setSelectedOpportunity(null);
           }}
         />
+      )}
+      {selectedDeal && (
+        <Dialog open={stageChangeOpen} onOpenChange={setStageChangeOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Change Deal Stage</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-1 gap-2">
+              {stages.map((s) => (
+                <Button
+                  key={s.id}
+                  variant={selectedDeal.stage === s.id ? "default" : "outline"}
+                  className="w-full justify-start"
+                  onClick={() => {
+                    updateStageMutation.mutate({
+                      id: selectedDeal.id,
+                      stage: s.id as Stage,
+                    });
+                    setStageChangeOpen(false);
+                  }}
+                >
+                  {s.name}
+                </Button>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
