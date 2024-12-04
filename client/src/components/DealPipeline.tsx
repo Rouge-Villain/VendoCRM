@@ -61,7 +61,6 @@ export function DealPipeline() {
 
   const updateStageMutation = useMutation({
     mutationFn: async ({ id, stage }: { id: number; stage: Stage }) => {
-      console.log('Updating stage:', { id, stage });
       const response = await fetch(`/api/opportunities/${id}/stage`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -69,9 +68,7 @@ export function DealPipeline() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Stage update error:', errorData);
-        throw new Error(errorData.error || 'Failed to update stage');
+        throw new Error('Failed to update stage');
       }
 
       return response.json();
@@ -84,7 +81,6 @@ export function DealPipeline() {
       });
     },
     onError: (error: Error) => {
-      console.error('Stage update error:', error);
       toast({
         title: 'Error',
         description: error.message,
@@ -154,23 +150,28 @@ export function DealPipeline() {
                   <Card key={opp.id}>
                     <CardContent className="p-4">
                       <div className="space-y-2">
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {stages.map((s) => (
-                            <Button
-                              key={s.id}
-                              variant={opp.stage === s.id ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => {
-                                updateStageMutation.mutate({
-                                  id: opp.id,
-                                  stage: s.id as Stage,
-                                });
-                              }}
-                            >
-                              {s.name}
-                            </Button>
-                          ))}
-                        </div>
+                        <Select
+                          value={opp.stage}
+                          onValueChange={(newStage: Stage) => {
+                            updateStageMutation.mutate({
+                              id: opp.id,
+                              stage: newStage,
+                            });
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select stage">
+                              {stages.find((s) => s.id === opp.stage)?.name || 'Select stage'}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {stages.map((s) => (
+                              <SelectItem key={s.id} value={s.id}>
+                                {s.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <div className="flex justify-between items-center">
                           <div className="font-medium">
                             ${parseFloat(opp.value.toString()).toLocaleString()}
