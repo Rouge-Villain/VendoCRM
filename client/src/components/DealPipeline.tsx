@@ -131,10 +131,10 @@ function DroppableStage({
     : '';
 
   return (
-    <div className="flex-shrink-0 w-80 relative">
-      <div className={`bg-secondary p-4 rounded-lg relative ${stageClass}`}>
+    <div className="flex-shrink-0 w-[320px] relative">
+      <div className={`bg-secondary p-4 rounded-lg relative h-full ${stageClass}`}>
         <div className="flex items-center justify-between mb-2">
-          <div className="font-semibold">{stage.name}</div>
+          <div className="font-semibold text-base">{stage.name}</div>
           <div className="text-sm text-muted-foreground">{metrics.count}</div>
         </div>
         <div className="space-y-2 mb-4">
@@ -362,17 +362,19 @@ export function DealPipeline() {
             </CardContent>
           </Card>
         </div>
-        <div className="flex gap-4 overflow-x-auto p-4 relative scroll-smooth" style={{ isolation: 'isolate', minWidth: 'min-content' }}>
-          {stages.map((stage) => (
-            <DroppableStage
-              key={stage.id}
-              stage={stage}
-              opportunities={opportunities}
-              customers={customers}
-              products={products}
-              metrics={stageMetrics[stage.id]}
-            />
-          ))}
+        <div className="flex gap-6 overflow-x-auto p-4 pb-8 relative scroll-smooth" style={{ isolation: 'isolate' }}>
+          <div className="flex gap-6 min-w-fit">
+            {stages.map((stage) => (
+              <DroppableStage
+                key={stage.id}
+                stage={stage}
+                opportunities={opportunities}
+                customers={customers}
+                products={products}
+                metrics={stageMetrics[stage.id]}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
