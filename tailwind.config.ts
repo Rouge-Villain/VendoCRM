@@ -62,6 +62,17 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      spacing: {
+        '4.5': '1.125rem',
+        '18': '4.5rem',
+      },
+      boxShadow: {
+        'soft': '0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04)',
+        'hover': '0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06)',
+      },
+      transitionDuration: {
+        '400': '400ms',
+      },
       keyframes: {
         "accordion-down": {
           from: {
