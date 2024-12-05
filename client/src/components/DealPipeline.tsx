@@ -55,8 +55,8 @@ function DraggableDealCard({ opportunity, customers, products }: {
     >
       <Card className="bg-white shadow-sm cursor-move relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
-        <CardContent className="p-4">
-          <div className="space-y-2">
+        <CardContent className="p-3">
+          <div className="space-y-1.5">
             <div className="flex justify-between items-center">
               <div className="font-medium">
                 ${parseFloat(opportunity.value.toString()).toLocaleString()}
@@ -64,24 +64,24 @@ function DraggableDealCard({ opportunity, customers, products }: {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-1"
+                className="flex items-center gap-1 h-7 px-2"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   setShowQuoteGenerator(true);
                 }}
               >
-                <FileText className="h-4 w-4" />
+                <FileText className="h-3.5 w-3.5" />
                 <span>Quote</span>
               </Button>
             </div>
-            <div className="text-sm font-medium">
+            <div className="text-sm font-medium truncate">
               {customer?.company}
             </div>
-            <div className="text-sm text-primary">
+            <div className="text-sm text-primary truncate">
               {product?.name}
             </div>
-            <div className="text-sm text-muted-foreground line-clamp-2">
+            <div className="text-xs text-muted-foreground line-clamp-1">
               {opportunity.notes}
             </div>
             <div className="flex justify-between items-center text-xs text-muted-foreground">
