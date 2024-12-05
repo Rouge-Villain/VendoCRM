@@ -53,7 +53,8 @@ function DraggableDealCard({ opportunity, customers, products }: {
       {...attributes}
       className="touch-none"
     >
-      <Card className="bg-white shadow-sm cursor-move">
+      <Card className="bg-white shadow-sm cursor-move relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
         <CardContent className="p-4">
           <div className="space-y-2">
             <div className="flex justify-between items-center">
@@ -273,7 +274,8 @@ export function DealPipeline() {
       <DragOverlay>
         {draggedDeal && (
           <div className="w-80">
-            <Card className="bg-white shadow-md">
+            <Card className="bg-white shadow-md relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
               <CardContent className="p-4">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
