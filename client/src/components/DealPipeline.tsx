@@ -25,8 +25,6 @@ import { QuoteGenerator } from "./QuoteGenerator";
 const stages = [
   { id: "prospecting", name: "Prospecting" },
   { id: "qualification", name: "Qualification" },
-  { id: "proposal", name: "Proposal" },
-  { id: "negotiation", name: "Negotiation" },
   { id: "closed-won", name: "Closed Won" },
   { id: "closed-lost", name: "Closed Lost" }
 ] as const;
