@@ -116,10 +116,13 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-8 p-4 sm:p-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Basic Information</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+      <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-8 p-6 bg-white/95 backdrop-blur-sm rounded-lg shadow-sm transition-all duration-200">
+        <div className="space-y-6">
+          <div className="border-b pb-4 mb-6">
+            <h3 className="text-xl font-bold text-primary tracking-tight">Basic Information</h3>
+            <p className="text-sm text-muted-foreground mt-1">Enter customer details and machine preferences</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <FormField
               control={form.control}
               name="company"
@@ -205,7 +208,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
             <div className="col-span-2">
               <FormLabel>Machine Types</FormLabel>
               <FormDescription className="mt-1 mb-3">Select the types of machines and specify quantities</FormDescription>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-3 sm:p-4 bg-secondary/20 rounded-lg border border-secondary">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 bg-secondary/10 rounded-lg border border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
                 {MACHINE_TYPES.map((type) => (
                   <div key={type.id} className="flex items-center gap-2 bg-background p-2 rounded-md shadow-sm">
                     <FormField
