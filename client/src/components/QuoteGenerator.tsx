@@ -158,7 +158,7 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
             fileName={`quote-${opportunity.id}.pdf`}
             className="w-full"
           >
-            {({ loading }) => (
+            {({ loading }: { loading: boolean }) => (
               <Button className="w-full" disabled={loading}>
                 {loading ? 'Generating PDF...' : 'Download Quote PDF'}
               </Button>

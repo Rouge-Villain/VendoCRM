@@ -31,7 +31,12 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
     quantity: number;
   }
 
-  const form = useForm<InsertCustomer & { machineTypes: Record<string, MachineType> }>({
+  type CustomerFormData = InsertCustomer & {
+    machineTypes: Record<string, MachineType>;
+    state: string[];
+  };
+
+  const form = useForm<CustomerFormData>({
     resolver: zodResolver(insertCustomerSchema),
     defaultValues: {
       name: "",
@@ -45,7 +50,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
         ...acc,
         [type.id]: { selected: false, quantity: 0 }
       }), {} as Record<string, MachineType>),
-      state: [] as string[],
+      state: [],
       serviceTerritory: "",
       maintenanceHistory: "",
     },
@@ -243,8 +248,8 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
                 <FormItem>
                   <FormLabel>States</FormLabel>
                   <Select
-                    onValueChange={(value) => {
-                      const currentValues = Array.isArray(field.value) ? field.value : [];
+                    onValueChange={(value: string) => {
+                      const currentValues = field.value || [];
                       if (!currentValues.includes(value)) {
                         field.onChange([...currentValues, value]);
                       }
@@ -269,7 +274,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
                         <button
                           type="button"
                           onClick={() => {
-                            field.onChange(field.value.filter((s) => s !== state));
+                            field.onChange((field.value || []).filter((s: string) => s !== state));
                           }}
                           className="text-secondary-foreground/50 hover:text-secondary-foreground"
                         >
