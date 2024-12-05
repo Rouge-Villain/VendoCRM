@@ -133,7 +133,7 @@ function DroppableStage({
 
   return (
     <div className="flex-shrink-0 w-[280px] relative">
-      <div className={`bg-card p-4 rounded-lg relative h-full ${stageClass} border shadow-sm hover:bg-accent/50 transition-colors min-h-[calc(100vh-20rem)]`}>
+      <div className={`bg-card p-4 rounded-lg relative h-full ${stageClass} border shadow-sm hover:bg-accent/50 transition-colors min-h-[500px]`}>
         <div className="flex items-center justify-between mb-2">
           <div className="font-semibold text-base">{stage.name}</div>
           <div className="text-sm text-muted-foreground">{metrics.count}</div>
@@ -366,9 +366,9 @@ export function DealPipeline() {
           </Card>
         </div>
 
-        <div className="relative">
-          <div className="overflow-x-auto pb-6 w-full">
-            <div className="flex gap-6 px-4">
+        <div className="relative w-full overflow-hidden">
+          <div className="overflow-x-auto pb-6">
+            <div className="flex gap-6 px-4 min-w-max">
               {stages.map((stage) => (
                 <DroppableStage
                   key={stage.id}
