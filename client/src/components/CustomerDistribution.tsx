@@ -44,51 +44,55 @@ export function CustomerDistribution() {
   }, {} as Record<string, number>);
 
   return (
-    <div className="grid grid-cols-2 gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Territory Distribution</CardTitle>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+        <CardHeader className="space-y-1 pb-2">
+          <CardTitle className="text-xl font-bold text-primary">Territory Distribution</CardTitle>
+          <p className="text-sm text-muted-foreground">Customer distribution across service areas</p>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {Object.entries(territoryDistribution || {}).map(([territory, count]) => (
-              <div key={territory} className="flex items-center gap-2">
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div key={territory} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-sm">{territory}</span>
+                  <span className="text-sm font-bold text-primary">{count}</span>
+                </div>
+                <div className="relative w-full bg-secondary/30 rounded-lg h-3 overflow-hidden">
                   <div
-                    className="bg-primary h-2.5 rounded-full"
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-primary/80 rounded-lg transition-all duration-300 ease-in-out"
                     style={{
                       width: `${(count / (customers?.length || 1)) * 100}%`,
                     }}
                   />
                 </div>
-                <span className="text-sm font-medium min-w-[100px]">
-                  {territory}: {count}
-                </span>
               </div>
             ))}
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Machine Types</CardTitle>
+      <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+        <CardHeader className="space-y-1 pb-2">
+          <CardTitle className="text-xl font-bold text-primary">Machine Types</CardTitle>
+          <p className="text-sm text-muted-foreground">Distribution of machine categories</p>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {Object.entries(machineTypesDistribution || {}).map(([type, count]) => (
-              <div key={type} className="flex items-center gap-2">
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div key={type} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-sm capitalize">{type}</span>
+                  <span className="text-sm font-bold text-primary">{count}</span>
+                </div>
+                <div className="relative w-full bg-secondary/30 rounded-lg h-3 overflow-hidden">
                   <div
-                    className="bg-primary h-2.5 rounded-full"
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary/90 to-primary/70 rounded-lg transition-all duration-300 ease-in-out"
                     style={{
                       width: `${(count / (customers?.length || 1)) * 100}%`,
                     }}
                   />
                 </div>
-                <span className="text-sm font-medium min-w-[100px]">
-                  {type}: {count}
-                </span>
               </div>
             ))}
           </div>

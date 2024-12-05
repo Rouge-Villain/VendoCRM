@@ -271,11 +271,11 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
                     }}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full h-10 px-3 py-2 text-sm border rounded-md bg-background">
                         <SelectValue placeholder="Select states" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="max-h-[300px] overflow-y-auto">
                       <SelectItem value="AL">Alabama</SelectItem>
                       <SelectItem value="AK">Alaska</SelectItem>
                       <SelectItem value="AZ">Arizona</SelectItem>
