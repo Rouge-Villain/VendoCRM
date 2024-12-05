@@ -192,6 +192,8 @@ export function registerRoutes(app: Express) {
         details: errorMessage 
       });
     }
+  });
+
   // Deal Pipeline Routes
   app.patch("/api/opportunities/:id/stage", async (req, res) => {
     try {
@@ -235,8 +237,6 @@ export function registerRoutes(app: Express) {
         details: errorMessage
       });
     }
-  });
-
   });
   app.patch("/api/maintenance/:id/status", async (req, res) => {
     try {
