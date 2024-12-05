@@ -1,5 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,8 +36,16 @@ export function DealPipeline() {
   const queryClient = useQueryClient();
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
   const [showQuoteGenerator, setShowQuoteGenerator] = useState(false);
-  const [stageChangeOpen, setStageChangeOpen] = useState(false);
-  const [selectedDeal, setSelectedDeal] = useState<Opportunity | null>(null);
+  const [draggedDeal, setDraggedDeal] = useState<Opportunity | null>(null);
+
+  // Configure DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   const { data: opportunities, isLoading: isLoadingOpps, isError: isErrorOpps } = useQuery({
     queryKey: ["opportunities"],
@@ -58,12 +74,8 @@ export function DealPipeline() {
     },
   });
 
-  const isLoading = isLoadingOpps || !customers || !products;
-  const isError = isErrorOpps;
-
   const updateStageMutation = useMutation({
     mutationFn: async ({ id, stage }: { id: number; stage: Stage }) => {
-      console.log('Updating stage:', { id, stage });
       const response = await fetch(`/api/opportunities/${id}/stage`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -85,7 +97,6 @@ export function DealPipeline() {
       });
     },
     onError: (error: Error) => {
-      console.error('Stage update error:', error);
       toast({
         title: 'Error',
         description: error.message,
@@ -94,7 +105,23 @@ export function DealPipeline() {
     },
   });
 
-  if (isLoading) {
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over) return;
+
+    const dealId = parseInt(active.id.toString());
+    const newStage = over.id.toString() as Stage;
+    
+    const deal = opportunities?.find(d => d.id === dealId);
+    if (deal && deal.stage !== newStage) {
+      updateStageMutation.mutate({ id: dealId, stage: newStage });
+    }
+    
+    setDraggedDeal(null);
+  };
+
+  if (isLoadingOpps || !customers || !products) {
     return (
       <div className="flex gap-4 overflow-x-auto p-4">
         {stages.map((stage) => (
@@ -113,24 +140,7 @@ export function DealPipeline() {
     );
   }
 
-  if (!opportunities?.length) {
-    return (
-      <div className="flex gap-4 overflow-x-auto p-4">
-        {stages.map((stage) => (
-          <div key={stage.id} className="flex-shrink-0 w-80">
-            <div className="bg-secondary p-4 rounded-lg">
-              <div className="font-semibold mb-4">{stage.name}</div>
-              <div className="min-h-[200px] flex items-center justify-center">
-                <p className="text-muted-foreground">No opportunities</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (isError || !opportunities) {
+  if (isErrorOpps || !opportunities) {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
@@ -142,85 +152,103 @@ export function DealPipeline() {
     );
   }
 
-  return (
-    <div className="flex gap-4 overflow-x-auto p-4">
-      {stages.map((stage) => (
-        <div key={stage.id} className="flex-shrink-0 w-80">
-          <div className="bg-secondary p-4 rounded-lg">
-            <div className="font-semibold mb-4">{stage.name}</div>
-            <div className="space-y-4 min-h-[200px]">
-              {opportunities
-                .filter((opp) => opp.stage === stage.id)
-                .map((opp) => (
-                  <Card key={opp.id}>
-                    <CardContent className="p-4">
-                      <div className="space-y-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={() => {
-                            setSelectedDeal(opp);
-                            setStageChangeOpen(true);
-                          }}
-                        >
-                          Change Stage
-                        </Button>
-                        <div className="flex justify-between items-center">
-                          <div className="font-medium">
-                            ${parseFloat(opp.value.toString()).toLocaleString()}
-                          </div>
-                        </div>
-                        <div className="text-sm font-medium">
-                          {customers?.find((c) => c.id === opp.customerId)?.company}
-                        </div>
-                        <div className="text-sm text-primary">
-                          {products?.find((p) => p.id === opp.productId)?.name}
-                        </div>
-                        <div className="text-sm text-muted-foreground line-clamp-2">
-                          {opp.notes}
-                        </div>
-                        <div className="flex justify-between items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full"
-                            onClick={() => {
-                              setSelectedOpportunity(opp);
-                              setShowQuoteGenerator(true);
-                            }}
-                          >
-                            <FileText className="h-4 w-4 mr-1" />
-                            Quote
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full"
-                            onClick={() => {
-                              // Show analytics
-                            }}
-                          >
-                            <BarChart className="h-4 w-4 mr-1" />
-                            Stats
-                          </Button>
-                        </div>
-                        <div className="flex justify-between items-center text-xs text-muted-foreground">
-                          <span>
-                            {opp.expectedCloseDate ? 
-                              format(new Date(opp.expectedCloseDate), 'MMM d, yyyy') : 
-                              'No close date'}
-                          </span>
-                          <span>{opp.assignedTo || 'Unassigned'}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+  const DealCard = ({ opportunity }: { opportunity: Opportunity }) => (
+    <Card className="bg-white shadow-sm">
+      <CardContent className="p-4">
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <div className="font-medium">
+              ${parseFloat(opportunity.value.toString()).toLocaleString()}
             </div>
           </div>
+          <div className="text-sm font-medium">
+            {customers?.find((c) => c.id === opportunity.customerId)?.company}
+          </div>
+          <div className="text-sm text-primary">
+            {products?.find((p) => p.id === opportunity.productId)?.name}
+          </div>
+          <div className="text-sm text-muted-foreground line-clamp-2">
+            {opportunity.notes}
+          </div>
+          <div className="flex justify-between items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => {
+                setSelectedOpportunity(opportunity);
+                setShowQuoteGenerator(true);
+              }}
+            >
+              <FileText className="h-4 w-4 mr-1" />
+              Quote
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+            >
+              <BarChart className="h-4 w-4 mr-1" />
+              Stats
+            </Button>
+          </div>
+          <div className="flex justify-between items-center text-xs text-muted-foreground">
+            <span>
+              {opportunity.expectedCloseDate ? 
+                format(new Date(opportunity.expectedCloseDate), 'MMM d, yyyy') : 
+                'No close date'}
+            </span>
+            <span>{opportunity.assignedTo || 'Unassigned'}</span>
+          </div>
         </div>
-      ))}
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <DndContext
+      sensors={sensors}
+      onDragStart={(event) => {
+        const dealId = parseInt(event.active.id.toString());
+        const deal = opportunities.find(d => d.id === dealId);
+        if (deal) setDraggedDeal(deal);
+      }}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="flex gap-4 overflow-x-auto p-4">
+        {stages.map((stage) => (
+          <div
+            key={stage.id}
+            className="flex-shrink-0 w-80"
+            id={stage.id}
+          >
+            <div className="bg-secondary p-4 rounded-lg">
+              <div className="font-semibold mb-4">{stage.name}</div>
+              <div className="space-y-4 min-h-[200px]">
+                {opportunities
+                  .filter((opp) => opp.stage === stage.id)
+                  .map((opp) => (
+                    <div
+                      key={opp.id}
+                      id={opp.id.toString()}
+                    >
+                      <DealCard opportunity={opp} />
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <DragOverlay>
+        {draggedDeal && (
+          <div className="w-80">
+            <DealCard opportunity={draggedDeal} />
+          </div>
+        )}
+      </DragOverlay>
+
       {selectedOpportunity && (
         <QuoteGenerator
           opportunity={selectedOpportunity}
@@ -231,33 +259,6 @@ export function DealPipeline() {
           }}
         />
       )}
-      {selectedDeal && (
-        <Dialog open={stageChangeOpen} onOpenChange={setStageChangeOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Change Deal Stage</DialogTitle>
-            </DialogHeader>
-            <div className="grid grid-cols-1 gap-2">
-              {stages.map((s) => (
-                <Button
-                  key={s.id}
-                  variant={selectedDeal.stage === s.id ? "default" : "outline"}
-                  className="w-full justify-start"
-                  onClick={() => {
-                    updateStageMutation.mutate({
-                      id: selectedDeal.id,
-                      stage: s.id as Stage,
-                    });
-                    setStageChangeOpen(false);
-                  }}
-                >
-                  {s.name}
-                </Button>
-              ))}
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-    </div>
+    </DndContext>
   );
 }
