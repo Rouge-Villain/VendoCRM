@@ -325,8 +325,8 @@ export function DealPipeline() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-6 w-full overflow-hidden">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="space-y-6 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 px-4">
           <Card>
             <CardContent className="pt-6">
               <div className="text-2xl font-bold">
@@ -366,9 +366,9 @@ export function DealPipeline() {
           </Card>
         </div>
 
-        <div className="relative">
-          <div className="overflow-x-auto pb-6 px-4">
-            <div className="flex gap-6 min-w-fit relative">
+        <div className="relative max-w-[calc(100vw-2rem)]">
+          <div className="overflow-x-auto pb-6">
+            <div className="flex gap-6 px-4">
               {stages.map((stage) => (
                 <DroppableStage
                   key={stage.id}
