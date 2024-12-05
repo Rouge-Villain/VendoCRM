@@ -126,39 +126,41 @@ function DroppableStage({
   const stageOpportunities = opportunities.filter(opp => opp.stage === stage.id);
   const isClosingStage = stage.id.startsWith('closed-');
   const stageClass = stage.id === 'closed-won' 
-    ? 'border-l-4 border-green-500'
+    ? 'border-l-4 border-l-green-500'
     : stage.id === 'closed-lost'
-    ? 'border-l-4 border-red-500'
+    ? 'border-l-4 border-l-red-500'
     : '';
 
   return (
-    <div className="flex-shrink-0 w-[280px] relative">
-      <div className={`bg-card p-4 rounded-lg relative ${stageClass} border shadow-sm hover:bg-accent/50 transition-colors h-[600px]`}>
-        <div className="flex items-center justify-between mb-2">
-          <div className="font-semibold text-base">{stage.name}</div>
-          <div className="text-sm text-muted-foreground">{metrics.count}</div>
-        </div>
-        <div className="space-y-2 mb-4">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Total Value:</span>
-            <span className="font-medium">${metrics.totalValue.toLocaleString()}</span>
+    <div className="flex-shrink-0 w-[280px]">
+      <div className={`bg-card rounded-lg ${stageClass} border shadow-sm hover:bg-accent/50 transition-colors h-[calc(100vh-240px)] flex flex-col`}>
+        <div className="p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="font-semibold text-base">{stage.name}</div>
+            <div className="text-sm text-muted-foreground">{metrics.count}</div>
           </div>
-          {!isClosingStage && (
-            <>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Weighted Value:</span>
-                <span className="font-medium">${metrics.weightedValue.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Avg Probability:</span>
-                <span className="font-medium">{Math.round(metrics.avgProbability)}%</span>
-              </div>
-            </>
-          )}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Total Value:</span>
+              <span className="font-medium">${metrics.totalValue.toLocaleString()}</span>
+            </div>
+            {!isClosingStage && (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Weighted Value:</span>
+                  <span className="font-medium">${metrics.weightedValue.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Avg Probability:</span>
+                  <span className="font-medium">{Math.round(metrics.avgProbability)}%</span>
+                </div>
+              </>
+            )}
+          </div>
         </div>
         <div 
           ref={setNodeRef}
-          className="space-y-4 overflow-y-auto max-h-[400px] pr-2"
+          className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 min-h-0"
         >
           {stageOpportunities.map((opp) => (
             <DraggableDealCard
@@ -270,11 +272,11 @@ export function DealPipeline() {
 
   if (isLoadingOpps || !customers || !products) {
     return (
-      <div className="max-w-full overflow-x-auto">
-        <div className="flex gap-4 p-4">
+      <div className="h-full w-full overflow-x-auto">
+        <div className="flex gap-6 p-4 min-w-max">
           {stages.map((stage) => (
-            <div key={stage.id} className="flex-shrink-0 w-80">
-              <div className="bg-secondary p-4 rounded-lg">
+            <div key={stage.id} className="w-[280px]">
+              <div className="bg-card p-4 rounded-lg border">
                 <Skeleton className="h-6 w-32 mb-4" />
                 <div className="space-y-4">
                   {[1, 2, 3].map((i) => (
@@ -301,7 +303,6 @@ export function DealPipeline() {
     );
   }
 
-  // Calculate stage metrics
   const stageMetrics = stages.reduce((acc, stage) => {
     const stageOpportunities = opportunities.filter(opp => opp.stage === stage.id);
     const totalValue = stageOpportunities.reduce((sum, opp) => sum + parseFloat(opp.value.toString()), 0);
@@ -325,7 +326,7 @@ export function DealPipeline() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-6 w-full">
+      <div className="space-y-6 h-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 px-4">
           <Card>
             <CardContent className="pt-6">
@@ -366,26 +367,24 @@ export function DealPipeline() {
           </Card>
         </div>
 
-        <div className="w-full">
-          <div className="overflow-x-auto pb-6">
-            <div className="flex gap-6 px-4 min-w-max">
-              {stages.map((stage) => (
-                <DroppableStage
-                  key={stage.id}
-                  stage={stage}
-                  opportunities={opportunities}
-                  customers={customers}
-                  products={products}
-                  metrics={stageMetrics[stage.id]}
-                />
-              ))}
-            </div>
+        <div className="h-[calc(100vh-240px)] overflow-x-auto">
+          <div className="flex gap-6 px-4 min-w-max h-full">
+            {stages.map((stage) => (
+              <DroppableStage
+                key={stage.id}
+                stage={stage}
+                opportunities={opportunities}
+                customers={customers}
+                products={products}
+                metrics={stageMetrics[stage.id]}
+              />
+            ))}
           </div>
         </div>
 
         <DragOverlay>
           {draggedDeal && (
-            <div className="w-80">
+            <div className="w-[280px]">
               <Card className="bg-white shadow-md relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
                 <CardContent className="p-4">
