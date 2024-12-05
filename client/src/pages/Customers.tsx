@@ -69,7 +69,7 @@ export default function Customers() {
       <div className="sticky top-0 z-10">
         <div className="bg-card shadow-sm rounded-lg">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div className="flex-1 text-center">
+            <div>
               <h1 className="text-3xl font-bold tracking-tight text-primary">Customer Management</h1>
               <p className="text-muted-foreground mt-1">Manage and monitor your customer relationships</p>
             </div>
