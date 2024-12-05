@@ -73,18 +73,18 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
 
   return (
     <>
-      <div className="rounded-lg border shadow-sm bg-white/50 backdrop-blur-sm hover:shadow-md transition-all duration-200">
-        <Table>
+      <div className="rounded-lg border shadow-sm bg-white/50 backdrop-blur-sm hover:shadow-md transition-all duration-200 overflow-x-auto">
+        <Table className="min-w-[800px]">
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="font-semibold">Machine ID</TableHead>
-              <TableHead className="font-semibold">Serial Number</TableHead>
-              <TableHead className="font-semibold">Type</TableHead>
-              <TableHead className="font-semibold">Description</TableHead>
-              <TableHead className="font-semibold">Status</TableHead>
-              <TableHead className="font-semibold">Scheduled Date</TableHead>
-              <TableHead className="font-semibold">Notes</TableHead>
-              <TableHead className="font-semibold">Actions</TableHead>
+              <TableHead className="font-semibold w-[120px]">Machine ID</TableHead>
+              <TableHead className="font-semibold w-[140px]">Serial Number</TableHead>
+              <TableHead className="font-semibold w-[120px]">Type</TableHead>
+              <TableHead className="font-semibold min-w-[200px]">Description</TableHead>
+              <TableHead className="font-semibold w-[160px]">Status</TableHead>
+              <TableHead className="font-semibold w-[140px]">Scheduled Date</TableHead>
+              <TableHead className="font-semibold w-[100px]">Notes</TableHead>
+              <TableHead className="font-semibold w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -94,27 +94,25 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
                 <TableCell className="font-mono text-sm">{record.serialNumber}</TableCell>
                 <TableCell className="capitalize font-medium text-muted-foreground">{record.maintenanceType}</TableCell>
                 <TableCell className="max-w-[200px] truncate">{record.description}</TableCell>
-                <TableCell>
-                  <div className="flex items-center space-x-2">
-                    <Select
-                      value={record.status}
-                      onValueChange={(value) =>
-                        statusMutation.mutate({ id: record.id, status: value })
-                      }
-                    >
-                      <SelectTrigger className="h-8 w-[130px]">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${getStatusColor(record.status)}`} />
-                          <SelectValue />
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="in-progress">In Progress</SelectItem>
-                        <SelectItem value="done">Done</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <TableCell className="min-w-[160px]">
+                  <Select
+                    value={record.status}
+                    onValueChange={(value) =>
+                      statusMutation.mutate({ id: record.id, status: value })
+                    }
+                  >
+                    <SelectTrigger className="h-8 w-[160px]">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${getStatusColor(record.status)}`} />
+                        <SelectValue className="flex-1 text-left" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="in-progress">In Progress</SelectItem>
+                      <SelectItem value="done">Done</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </TableCell>
                 <TableCell>
                   {record.scheduledDate
