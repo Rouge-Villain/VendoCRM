@@ -41,7 +41,7 @@ export function prepareAnalyticsData(customers: Customer[], opportunities: Oppor
     }
     
     acc[territory].customerCount++;
-    acc[territory].machineCount += (Array.isArray(customer.machineTypes) ? customer.machineTypes.length : 0);
+    acc[territory].machineCount += (Array.isArray(customer.machineTypes) ? (customer.machineTypes as any[]).length : 0);
     
     // Calculate revenue for this customer
     const customerRevenue = opportunities

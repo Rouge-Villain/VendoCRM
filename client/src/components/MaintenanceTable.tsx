@@ -126,18 +126,16 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      // Ensure partsUsed is properly typed
-                      const partsUsed = Array.isArray(record.partsUsed)
-                        ? record.partsUsed.map((part: any) => ({
-                            name: String(part.name),
-                            quantity: Number(part.quantity)
-                          }))
-                        : [];
-                      
-                      setSelectedRecord({
+                      const typedRecord: MaintenanceWithParts = {
                         ...record,
-                        partsUsed
-                      });
+                        partsUsed: Array.isArray(record.partsUsed)
+                          ? (record.partsUsed as any[]).map(part => ({
+                              name: String(part.name || ''),
+                              quantity: Number(part.quantity || 0)
+                            }))
+                          : []
+                      };
+                      setSelectedRecord(typedRecord);
                     }}
                   >
                     View Details
