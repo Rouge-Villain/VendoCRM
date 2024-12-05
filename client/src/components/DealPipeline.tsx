@@ -124,12 +124,12 @@ function DroppableStage({
   const stageOpportunities = opportunities.filter(opp => opp.stage === stage.id);
 
   return (
-    <div className="flex-shrink-0 w-80">
-      <div className="bg-secondary p-4 rounded-lg">
+    <div className="flex-shrink-0 w-80 relative">
+      <div className="bg-secondary p-4 rounded-lg relative">
         <div className="font-semibold mb-4">{stage.name}</div>
         <div 
           ref={setNodeRef}
-          className="space-y-4 min-h-[200px]"
+          className="space-y-4 min-h-[200px] relative"
         >
           {stageOpportunities.map((opp) => (
             <DraggableDealCard
@@ -277,7 +277,7 @@ export function DealPipeline() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 overflow-x-auto p-4">
+      <div className="flex gap-4 overflow-x-auto p-4 relative z-0">
         {stages.map((stage) => (
           <DroppableStage
             key={stage.id}
