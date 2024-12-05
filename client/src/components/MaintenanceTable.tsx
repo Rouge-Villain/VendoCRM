@@ -72,36 +72,36 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
   };
 
   return (
-    <>
-      <div className="rounded-lg border shadow-sm bg-white/50 backdrop-blur-sm hover:shadow-md transition-all duration-200 overflow-x-auto">
-        <Table className="min-w-[800px]">
+    <div className="rounded-lg border shadow-sm bg-white/50 backdrop-blur-sm hover:shadow-md transition-all duration-200">
+      <div className="overflow-x-auto">
+        <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="font-semibold w-[120px]">Machine ID</TableHead>
-              <TableHead className="font-semibold w-[140px]">Serial Number</TableHead>
-              <TableHead className="font-semibold w-[120px]">Type</TableHead>
-              <TableHead className="font-semibold min-w-[200px]">Description</TableHead>
-              <TableHead className="font-semibold w-[160px]">Status</TableHead>
-              <TableHead className="font-semibold w-[140px]">Scheduled Date</TableHead>
-              <TableHead className="font-semibold w-[100px]">Notes</TableHead>
-              <TableHead className="font-semibold w-[100px]">Actions</TableHead>
+              <TableHead className="w-[120px] whitespace-nowrap">Machine ID</TableHead>
+              <TableHead className="w-[140px] whitespace-nowrap">Serial Number</TableHead>
+              <TableHead className="w-[120px] whitespace-nowrap">Type</TableHead>
+              <TableHead className="w-[200px]">Description</TableHead>
+              <TableHead className="w-[160px] whitespace-nowrap">Status</TableHead>
+              <TableHead className="w-[140px] whitespace-nowrap">Scheduled Date</TableHead>
+              <TableHead className="w-[100px] text-center">Notes</TableHead>
+              <TableHead className="w-[100px] text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {records.map((record) => (
               <TableRow key={record.id} className="hover:bg-muted/50 transition-colors">
-                <TableCell className="font-medium">{record.machineId}</TableCell>
-                <TableCell className="font-mono text-sm">{record.serialNumber}</TableCell>
-                <TableCell className="capitalize font-medium text-muted-foreground">{record.maintenanceType}</TableCell>
-                <TableCell className="max-w-[200px] truncate">{record.description}</TableCell>
-                <TableCell className="min-w-[160px]">
+                <TableCell className="w-[120px] font-medium whitespace-nowrap">{record.machineId}</TableCell>
+                <TableCell className="w-[140px] font-mono text-sm whitespace-nowrap">{record.serialNumber}</TableCell>
+                <TableCell className="w-[120px] capitalize font-medium text-muted-foreground whitespace-nowrap">{record.maintenanceType}</TableCell>
+                <TableCell className="w-[200px] truncate">{record.description}</TableCell>
+                <TableCell className="w-[160px] whitespace-nowrap">
                   <Select
                     value={record.status}
                     onValueChange={(value) =>
                       statusMutation.mutate({ id: record.id, status: value })
                     }
                   >
-                    <SelectTrigger className="h-8 w-[160px]">
+                    <SelectTrigger className="h-8 w-[140px]">
                       <div className="flex items-center gap-2">
                         <span className={`w-2 h-2 rounded-full ${getStatusColor(record.status)}`} />
                         <SelectValue className="flex-1 text-left" />
@@ -114,12 +114,12 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
                     </SelectContent>
                   </Select>
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-[140px] whitespace-nowrap">
                   {record.scheduledDate
                     ? format(new Date(record.scheduledDate), "PPP")
                     : "N/A"}
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-[100px] text-center">
                   <Button
                     variant="outline"
                     size="sm"
@@ -144,22 +144,13 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
           </TableBody>
         </Table>
       </div>
-
       {selectedRecord && (
         <MaintenanceDetails
-          record={{
-            ...selectedRecord,
-            partsUsed: Array.isArray(selectedRecord.partsUsed) 
-              ? selectedRecord.partsUsed.map((part: { name: string | number; quantity: string | number }) => ({
-                  name: String(part.name),
-                  quantity: Number(part.quantity)
-                }))
-              : []
-          }}
+          record={selectedRecord}
           open={!!selectedRecord}
           onOpenChange={(open) => !open && setSelectedRecord(null)}
         />
       )}
-    </>
+    </div>
   );
 }
