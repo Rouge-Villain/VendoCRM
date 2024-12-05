@@ -13,14 +13,9 @@ import {
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type Opportunity } from "@db/schema";
+import { type Opportunity, type Product } from "@db/schema";
 
-interface Product {
-  id: number;
-  name: string;
-  description?: string;
-  price?: number;
-}
+
 
 const stages = [
   { id: "prospecting", name: "Prospecting" },
@@ -330,7 +325,21 @@ export function WinLossAnalytics() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {stages.map((stage) => {
-              const metrics = stageAnalysis?.[stage.id] || {
+              type StageMetrics = {
+                avgTimeInStage: number;
+                total: number;
+                won: number;
+                lost: number;
+                conversionRate: number;
+                winRate: number;
+                wonValue: number;
+                lostValue: number;
+                totalValue: number;
+                productWins: Record<number, number>;
+                productLosses: Record<number, number>;
+              };
+
+              const metrics: StageMetrics = stageAnalysis?.[stage.id] || {
                 avgTimeInStage: 0,
                 total: 0,
                 won: 0,

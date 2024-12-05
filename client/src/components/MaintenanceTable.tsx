@@ -125,7 +125,20 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setSelectedRecord(record)}
+                    onClick={() => {
+                      // Ensure partsUsed is properly typed
+                      const partsUsed = Array.isArray(record.partsUsed)
+                        ? record.partsUsed.map((part: any) => ({
+                            name: String(part.name),
+                            quantity: Number(part.quantity)
+                          }))
+                        : [];
+                      
+                      setSelectedRecord({
+                        ...record,
+                        partsUsed
+                      });
+                    }}
                   >
                     View Details
                   </Button>

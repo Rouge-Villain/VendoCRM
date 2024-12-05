@@ -237,12 +237,18 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
             document={<QuoteDocument />}
             fileName={`quote-${opportunity.id}.pdf`}
             className="w-full"
+            style={{ width: '100%', textDecoration: 'none' }}
           >
-            {({ loading }: { loading: boolean }) => (
-              <Button className="w-full" disabled={loading}>
-                {loading ? 'Generating PDF...' : 'Download Quote PDF'}
-              </Button>
-            )}
+            {({ loading }) => {
+              return React.createElement(Button, {
+                asChild: true,
+                className: "w-full",
+                disabled: loading,
+                children: React.createElement('span', null, 
+                  loading ? 'Generating PDF...' : 'Download Quote PDF'
+                )
+              });
+            }}
           </PDFDownloadLink>
           <div className="mt-4 p-4 border rounded-lg bg-muted">
             <p className="text-center text-sm text-muted-foreground">
