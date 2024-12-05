@@ -15,6 +15,14 @@ import { Bar, Line } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type Opportunity } from "@db/schema";
 
+const stages = [
+  { id: "prospecting", name: "Prospecting" },
+  { id: "qualification", name: "Qualification" },
+  { id: "closed-won", name: "Closed Won" },
+  { id: "closed-lost", name: "Closed Lost" }
+] as const;
+
+type Stage = typeof stages[number]['id'];
 ChartJS.register(
   CategoryScale,
   LinearScale,
