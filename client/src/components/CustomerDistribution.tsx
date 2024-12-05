@@ -44,14 +44,14 @@ export function CustomerDistribution() {
   }, {} as Record<string, number>);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-        <CardHeader className="space-y-1 pb-2">
-          <CardTitle className="text-xl font-bold text-primary">Territory Distribution</CardTitle>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card className="shadow-lg hover:shadow-xl transition-all duration-200 bg-gradient-to-br from-background to-secondary/10">
+        <CardHeader className="pb-2 border-b border-border/40">
+          <CardTitle className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">Territory Distribution</CardTitle>
           <p className="text-sm text-muted-foreground">Customer distribution across service areas</p>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
+        <CardContent className="pt-4">
+          <div className="space-y-4">
             {Object.entries(territoryDistribution || {}).map(([territory, count]) => (
               <div key={territory} className="space-y-2">
                 <div className="flex justify-between items-center">
