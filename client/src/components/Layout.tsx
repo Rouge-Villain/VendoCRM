@@ -24,8 +24,8 @@ export default function Layout({ children }: LayoutProps) {
       <div className="flex">
         {/* Sidebar */}
         <div className="fixed inset-y-0 flex w-64 flex-col bg-white shadow-xl border-r border-gray-200">
-          <div className="flex h-16 items-center px-6">
-            <img src="/AVS.png" alt="AVS Companies" className="h-12 w-auto object-contain" />
+          <div className="flex h-20 items-center px-4">
+            <img src="/AVS.png" alt="AVS Companies" className="h-16 w-auto object-contain" />
           </div>
           <nav className="flex-1 space-y-2 px-4 py-6">
             {navigation.map((item) => {
