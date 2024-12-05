@@ -85,8 +85,12 @@ export function SalesAnalytics() {
   const projectedYearlyValue = averageMonthlyValue * 12;
 
   // Chart data
+  const total = (winLossData?.won || 0) + (winLossData?.lost || 0);
+  const winPercentage = total > 0 ? ((winLossData?.won || 0) / total) * 100 : 0;
+  const lossPercentage = total > 0 ? ((winLossData?.lost || 0) / total) * 100 : 0;
+
   const winLossChartData = {
-    labels: ['Won', 'Lost'],
+    labels: [`Won (${winPercentage.toFixed(1)}%)`, `Lost (${lossPercentage.toFixed(1)}%)`],
     datasets: [
       {
         data: [winLossData?.won || 0, winLossData?.lost || 0],
@@ -156,11 +160,13 @@ export function SalesAnalytics() {
                     tooltip: {
                       callbacks: {
                         label: (context) => {
-                          const label = context.label;
+                          const label = context.label?.split(' (')[0];
                           const value = context.raw as number;
-                          const total = (winLossData?.won || 0) + (winLossData?.lost || 0);
-                          const percentage = ((value / total) * 100).toFixed(1);
-                          return `${label}: ${value} (${percentage}%)`;
+                          const moneyValue = label === 'Won' ? winLossData?.wonValue : winLossData?.lostValue;
+                          return [
+                            `${label}: ${value} deals`,
+                            `Value: $${(moneyValue || 0).toLocaleString()}`
+                          ];
                         },
                       },
                     },
