@@ -186,7 +186,11 @@ export function DealForm({ onSuccess }: DealFormProps) {
                   min="0"
                   max="100"
                   placeholder="Enter probability"
-                  {...field}
+                  value={field.value?.toString() || ""}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 0;
+                    field.onChange(Math.min(100, Math.max(0, value)));
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -204,7 +208,8 @@ export function DealForm({ onSuccess }: DealFormProps) {
                 <textarea
                   className="w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Enter deal notes"
-                  {...field}
+                  value={field.value || ""}
+                  onChange={(e) => field.onChange(e.target.value)}
                 />
               </FormControl>
               <FormMessage />

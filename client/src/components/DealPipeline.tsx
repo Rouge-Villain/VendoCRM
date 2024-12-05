@@ -7,6 +7,10 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  closestCorners,
+  DragStartEvent,
+  useDraggable,
+  useDroppable,
 } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,6 +35,95 @@ const stages = [
 
 type Stage = typeof stages[number]['id'];
 
+function DraggableDealCard({ opportunity, customers, products }: { 
+  opportunity: Opportunity; 
+  customers?: Customer[];
+  products?: Product[];
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: opportunity.id.toString(),
+  });
+
+  if (isDragging) return null;
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      className="touch-none"
+    >
+      <Card className="bg-white shadow-sm cursor-move">
+        <CardContent className="p-4">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <div className="font-medium">
+                ${parseFloat(opportunity.value.toString()).toLocaleString()}
+              </div>
+            </div>
+            <div className="text-sm font-medium">
+              {customers?.find((c) => c.id === opportunity.customerId)?.company}
+            </div>
+            <div className="text-sm text-primary">
+              {products?.find((p) => p.id === opportunity.productId)?.name}
+            </div>
+            <div className="text-sm text-muted-foreground line-clamp-2">
+              {opportunity.notes}
+            </div>
+            <div className="flex justify-between items-center text-xs text-muted-foreground">
+              <span>
+                {opportunity.expectedCloseDate ? 
+                  format(new Date(opportunity.expectedCloseDate), 'MMM d, yyyy') : 
+                  'No close date'}
+              </span>
+              <span>{opportunity.assignedTo || 'Unassigned'}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function DroppableStage({ 
+  stage, 
+  opportunities, 
+  customers, 
+  products 
+}: { 
+  stage: typeof stages[number];
+  opportunities: Opportunity[];
+  customers?: Customer[];
+  products?: Product[];
+}) {
+  const { setNodeRef } = useDroppable({
+    id: stage.id,
+  });
+
+  const stageOpportunities = opportunities.filter(opp => opp.stage === stage.id);
+
+  return (
+    <div className="flex-shrink-0 w-80">
+      <div className="bg-secondary p-4 rounded-lg">
+        <div className="font-semibold mb-4">{stage.name}</div>
+        <div 
+          ref={setNodeRef}
+          className="space-y-4 min-h-[200px]"
+        >
+          {stageOpportunities.map((opp) => (
+            <DraggableDealCard
+              key={opp.id}
+              opportunity={opp}
+              customers={customers}
+              products={products}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function DealPipeline() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -38,7 +131,6 @@ export function DealPipeline() {
   const [showQuoteGenerator, setShowQuoteGenerator] = useState(false);
   const [draggedDeal, setDraggedDeal] = useState<Opportunity | null>(null);
 
-  // Configure DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -105,6 +197,13 @@ export function DealPipeline() {
     },
   });
 
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const dealId = parseInt(active.id.toString());
+    const deal = opportunities?.find(d => d.id === dealId);
+    if (deal) setDraggedDeal(deal);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     
@@ -152,99 +251,45 @@ export function DealPipeline() {
     );
   }
 
-  const DealCard = ({ opportunity }: { opportunity: Opportunity }) => (
-    <Card className="bg-white shadow-sm">
-      <CardContent className="p-4">
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <div className="font-medium">
-              ${parseFloat(opportunity.value.toString()).toLocaleString()}
-            </div>
-          </div>
-          <div className="text-sm font-medium">
-            {customers?.find((c) => c.id === opportunity.customerId)?.company}
-          </div>
-          <div className="text-sm text-primary">
-            {products?.find((p) => p.id === opportunity.productId)?.name}
-          </div>
-          <div className="text-sm text-muted-foreground line-clamp-2">
-            {opportunity.notes}
-          </div>
-          <div className="flex justify-between items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={() => {
-                setSelectedOpportunity(opportunity);
-                setShowQuoteGenerator(true);
-              }}
-            >
-              <FileText className="h-4 w-4 mr-1" />
-              Quote
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-            >
-              <BarChart className="h-4 w-4 mr-1" />
-              Stats
-            </Button>
-          </div>
-          <div className="flex justify-between items-center text-xs text-muted-foreground">
-            <span>
-              {opportunity.expectedCloseDate ? 
-                format(new Date(opportunity.expectedCloseDate), 'MMM d, yyyy') : 
-                'No close date'}
-            </span>
-            <span>{opportunity.assignedTo || 'Unassigned'}</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   return (
     <DndContext
       sensors={sensors}
-      onDragStart={(event) => {
-        const dealId = parseInt(event.active.id.toString());
-        const deal = opportunities.find(d => d.id === dealId);
-        if (deal) setDraggedDeal(deal);
-      }}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
       <div className="flex gap-4 overflow-x-auto p-4">
         {stages.map((stage) => (
-          <div
+          <DroppableStage
             key={stage.id}
-            className="flex-shrink-0 w-80"
-            id={stage.id}
-          >
-            <div className="bg-secondary p-4 rounded-lg">
-              <div className="font-semibold mb-4">{stage.name}</div>
-              <div className="space-y-4 min-h-[200px]">
-                {opportunities
-                  .filter((opp) => opp.stage === stage.id)
-                  .map((opp) => (
-                    <div
-                      key={opp.id}
-                      id={opp.id.toString()}
-                    >
-                      <DealCard opportunity={opp} />
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
+            stage={stage}
+            opportunities={opportunities}
+            customers={customers}
+            products={products}
+          />
         ))}
       </div>
 
       <DragOverlay>
         {draggedDeal && (
           <div className="w-80">
-            <DealCard opportunity={draggedDeal} />
+            <Card className="bg-white shadow-sm">
+              <CardContent className="p-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <div className="font-medium">
+                      ${parseFloat(draggedDeal.value.toString()).toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="text-sm font-medium">
+                    {customers?.find((c) => c.id === draggedDeal.customerId)?.company}
+                  </div>
+                  <div className="text-sm text-primary">
+                    {products?.find((p) => p.id === draggedDeal.productId)?.name}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </DragOverlay>

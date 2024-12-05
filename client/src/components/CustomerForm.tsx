@@ -39,8 +39,8 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
       machineTypes: MACHINE_TYPES.reduce((acc, type) => ({
         ...acc,
         [type.id]: { selected: false, quantity: 0 }
-      }), {}),
-      state: [],
+      }), {} as Record<string, { selected: boolean; quantity: number }>),
+      state: [] as string[],
       serviceTerritory: "",
       maintenanceHistory: "",
     },
