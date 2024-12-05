@@ -63,18 +63,29 @@ export function StatsOverview() {
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((stat) => (
-        <Card key={stat.title} className="hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {stat.title}
-            </CardTitle>
-            <stat.icon className="h-4 w-4 text-primary" />
+        <Card 
+          key={stat.title} 
+          className="hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-background via-background/95 to-secondary/5 border border-border/50 group"
+        >
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <div className="space-y-1">
+              <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                {stat.title}
+              </CardTitle>
+              <div className="text-2xl font-bold tracking-tight text-foreground">
+                {stat.value}
+              </div>
+            </div>
+            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <stat.icon className="h-4 w-4 text-primary" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
-            <p className="text-xs text-muted-foreground">{stat.description}</p>
+            <p className="text-xs text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">
+              {stat.description}
+            </p>
           </CardContent>
         </Card>
       ))}
