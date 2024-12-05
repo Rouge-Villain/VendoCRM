@@ -123,17 +123,16 @@ function DroppableStage({
   });
 
   const stageOpportunities = opportunities.filter(opp => opp.stage === stage.id);
-  const isClosingStage = stage.id === 'closed-won' || stage.id === 'closed-lost';
+  const isClosingStage = stage.id.startsWith('closed-');
+  const stageClass = stage.id === 'closed-won' 
+    ? 'border-l-4 border-green-500'
+    : stage.id === 'closed-lost'
+    ? 'border-l-4 border-red-500'
+    : '';
 
   return (
     <div className="flex-shrink-0 w-80 relative">
-      <div className={`bg-secondary p-4 rounded-lg relative ${
-        stage.id === 'closed-won' 
-          ? 'border-l-4 border-green-500'
-          : stage.id === 'closed-lost'
-          ? 'border-l-4 border-red-500'
-          : ''
-      }`}>
+      <div className={`bg-secondary p-4 rounded-lg relative ${stageClass}`}>
         <div className="flex items-center justify-between mb-2">
           <div className="font-semibold">{stage.name}</div>
           <div className="text-sm text-muted-foreground">{metrics.count}</div>
