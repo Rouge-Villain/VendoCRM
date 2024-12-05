@@ -59,42 +59,42 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
-        return "text-yellow-600 bg-yellow-100";
+        return "text-yellow-700 bg-yellow-100 border border-yellow-200 shadow-sm shadow-yellow-100/50";
       case "in-progress":
-        return "text-blue-600 bg-blue-100";
+        return "text-blue-700 bg-blue-100 border border-blue-200 shadow-sm shadow-blue-100/50";
       case "done":
-        return "text-green-600 bg-green-100";
+        return "text-green-700 bg-green-100 border border-green-200 shadow-sm shadow-green-100/50";
       default:
-        return "text-gray-600 bg-gray-100";
+        return "text-gray-700 bg-gray-100 border border-gray-200 shadow-sm shadow-gray-100/50";
     }
   };
 
   return (
     <>
-      <div className="rounded-lg border shadow-sm bg-white">
+      <div className="rounded-lg border shadow-sm bg-white/50 backdrop-blur-sm hover:shadow-md transition-all duration-200">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Machine ID</TableHead>
-              <TableHead>Serial Number</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Scheduled Date</TableHead>
-              <TableHead>Notes</TableHead>
-              <TableHead>Actions</TableHead>
+            <TableRow className="bg-muted/50">
+              <TableHead className="font-semibold">Machine ID</TableHead>
+              <TableHead className="font-semibold">Serial Number</TableHead>
+              <TableHead className="font-semibold">Type</TableHead>
+              <TableHead className="font-semibold">Description</TableHead>
+              <TableHead className="font-semibold">Status</TableHead>
+              <TableHead className="font-semibold">Scheduled Date</TableHead>
+              <TableHead className="font-semibold">Notes</TableHead>
+              <TableHead className="font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {records.map((record) => (
-              <TableRow key={record.id}>
-                <TableCell>{record.machineId}</TableCell>
-                <TableCell>{record.serialNumber}</TableCell>
-                <TableCell className="capitalize">{record.maintenanceType}</TableCell>
-                <TableCell>{record.description}</TableCell>
+              <TableRow key={record.id} className="hover:bg-muted/50 transition-colors">
+                <TableCell className="font-medium">{record.machineId}</TableCell>
+                <TableCell className="font-mono text-sm">{record.serialNumber}</TableCell>
+                <TableCell className="capitalize font-medium text-muted-foreground">{record.maintenanceType}</TableCell>
+                <TableCell className="max-w-[200px] truncate">{record.description}</TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded-md ${getStatusColor(record.status)}`}>
+                  <div className="flex items-center gap-3">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${getStatusColor(record.status)}`}>
                       {record.status}
                     </span>
                     <Select

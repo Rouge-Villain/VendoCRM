@@ -53,44 +53,44 @@ function DraggableDealCard({ opportunity, customers, products }: {
       {...attributes}
       className="touch-none"
     >
-      <Card className="bg-white shadow-md hover:shadow-lg transition-all duration-200 cursor-move relative overflow-hidden border border-border/50">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-primary opacity-80" />
+      <Card className="bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-200 cursor-move relative overflow-hidden border border-border/50 hover:border-primary/20 group">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-primary/80 group-hover:bg-primary transition-colors duration-200" />
         <CardContent className="p-4">
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <div className="flex justify-between items-center">
-              <div className="font-medium">
+              <div className="font-semibold text-lg text-primary">
                 ${parseFloat(opportunity.value.toString()).toLocaleString()}
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-1 h-7 px-2"
+                className="flex items-center gap-1.5 h-8 px-3 opacity-80 hover:opacity-100 transition-opacity"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   setShowQuoteGenerator(true);
                 }}
               >
-                <FileText className="h-3.5 w-3.5" />
+                <FileText className="h-4 w-4" />
                 <span>Quote</span>
               </Button>
             </div>
             <div className="text-sm font-medium truncate">
               {customer?.company}
             </div>
-            <div className="text-sm text-primary truncate">
+            <div className="text-sm font-medium text-primary/90 truncate">
               {product?.name}
             </div>
-            <div className="text-xs text-muted-foreground line-clamp-1">
+            <div className="text-xs text-muted-foreground/90 line-clamp-2 min-h-[2.5em]">
               {opportunity.notes}
             </div>
-            <div className="flex justify-between items-center text-xs text-muted-foreground">
+            <div className="flex justify-between items-center text-xs text-muted-foreground pt-1 border-t border-border/40">
               <span>
                 {opportunity.expectedCloseDate ? 
                   format(new Date(opportunity.expectedCloseDate), 'MMM d, yyyy') : 
                   'No close date'}
               </span>
-              <span>{opportunity.assignedTo || 'Unassigned'}</span>
+              <span className="font-medium">{opportunity.assignedTo || 'Unassigned'}</span>
             </div>
           </div>
         </CardContent>
@@ -327,7 +327,7 @@ export function DealPipeline() {
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-6 h-full">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 px-6">
           <Card className="hover:shadow-lg transition-shadow duration-200">
             <CardContent className="pt-6 pb-4">
               <div className="flex flex-col space-y-1">

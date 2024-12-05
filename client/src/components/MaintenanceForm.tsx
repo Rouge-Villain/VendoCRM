@@ -120,8 +120,12 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-        className="space-y-4 p-6"
+        className="space-y-6 p-6 bg-white/95 backdrop-blur-sm rounded-lg shadow-sm transition-all duration-200"
       >
+        <div className="border-b pb-4 mb-6">
+          <h2 className="text-xl font-bold text-primary tracking-tight">Schedule Maintenance</h2>
+          <p className="text-sm text-muted-foreground mt-1">Fill in the details to schedule new maintenance</p>
+        </div>
         <FormField
           control={form.control}
           name="customerId"

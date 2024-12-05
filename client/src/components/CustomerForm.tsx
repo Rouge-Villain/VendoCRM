@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
 import { type InsertCustomer, insertCustomerSchema } from "@db/schema";
 
 const MACHINE_TYPES = [
@@ -31,13 +32,22 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
     quantity: number;
   }
 
-  type CustomerFormData = InsertCustomer & {
+  type CustomerFormData = Omit<InsertCustomer, 'machineTypes'> & {
     machineTypes: Record<string, MachineType>;
     state: string[];
   };
 
+  // Ensure machineTypes is included in the schema
+  const extendedCustomerSchema = insertCustomerSchema.extend({
+    machineTypes: z.record(z.object({
+      selected: z.boolean(),
+      quantity: z.number()
+    })),
+    state: z.array(z.string())
+  });
+
   const form = useForm<CustomerFormData>({
-    resolver: zodResolver(insertCustomerSchema),
+    resolver: zodResolver(extendedCustomerSchema),
     defaultValues: {
       name: "",
       company: "",
@@ -57,7 +67,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: InsertCustomer) => {
+    mutationFn: async (data: CustomerFormData) => {
       const machineData = Object.entries(data.machineTypes)
         .filter(([_, value]) => value.selected)
         .map(([type, value]) => ({
@@ -67,12 +77,17 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
 
       const totalMachines = machineData.reduce((sum, machine) => sum + machine.quantity, 0);
 
+      // Convert the form data to match InsertCustomer type
+      const customerData: InsertCustomer = {
+        ...data,
+        machineTypes: machineData
+      };
+
       const response = await fetch("/api/customers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...data,
-          machineTypes: machineData,
+          ...customerData,
           totalMachines,
         }),
       });

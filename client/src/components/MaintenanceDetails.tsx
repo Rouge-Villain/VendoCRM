@@ -25,13 +25,19 @@ import { useToast } from "@/hooks/use-toast";
 import { type Maintenance } from "@db/schema";
 import { format } from "date-fns";
 
+// Define the Part interface to match the database schema
 interface Part {
   name: string;
   quantity: number;
 }
 
+// Ensure partsUsed is properly typed in the maintenance record
+type MaintenanceWithParts = Omit<Maintenance, 'partsUsed'> & {
+  partsUsed: Part[];
+};
+
 interface MaintenanceDetailsProps {
-  record: Maintenance;
+  record: MaintenanceWithParts;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -44,6 +50,38 @@ export function MaintenanceDetails({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [status, setStatus] = useState(record.status);
+
+  const form = useForm({
+    defaultValues: {
+      technicianNotes: record.technicianNotes || ""
+    }
+  });
+
+  const notesMutation = useMutation({
+    mutationFn: async (notes: string) => {
+      const response = await fetch(`/api/maintenance/${record.id}/notes`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ technicianNotes: notes }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update notes");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["maintenance"] });
+      toast({ title: "Notes updated successfully" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to update notes",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const statusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
@@ -74,23 +112,23 @@ export function MaintenanceDetails({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
-        return "text-yellow-600 bg-yellow-100";
+        return "text-yellow-700 bg-yellow-100 border border-yellow-200 shadow-sm shadow-yellow-100/50";
       case "in-progress":
-        return "text-blue-600 bg-blue-100";
+        return "text-blue-700 bg-blue-100 border border-blue-200 shadow-sm shadow-blue-100/50";
       case "done":
-        return "text-green-600 bg-green-100";
+        return "text-green-700 bg-green-100 border border-green-200 shadow-sm shadow-green-100/50";
       default:
-        return "text-gray-600 bg-gray-100";
+        return "text-gray-700 bg-gray-100 border border-gray-200 shadow-sm shadow-gray-100/50";
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Maintenance Details</DialogTitle>
+      <DialogContent className="max-w-2xl overflow-hidden bg-white/95 backdrop-blur-sm shadow-lg transition-all duration-200">
+        <DialogHeader className="border-b pb-4">
+          <DialogTitle className="text-xl font-bold text-primary tracking-tight">Maintenance Details</DialogTitle>
         </DialogHeader>
-        <div className="space-y-6">
+        <div className="space-y-6 pt-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <h4 className="font-semibold mb-1">Machine ID</h4>
@@ -168,16 +206,16 @@ export function MaintenanceDetails({
 
           <div>
             <h4 className="font-semibold mb-1">Parts Used</h4>
-            {Array.isArray(record.partsUsed) && record.partsUsed.length > 0 ? (
+            {record.partsUsed && record.partsUsed.length > 0 ? (
               <ul className="list-disc list-inside">
-                {(record.partsUsed as Part[]).map((part: Part, index: number) => (
-                  <li key={index}>
-                    {part.name} - Quantity: {part.quantity}
+                {record.partsUsed.map((part, index) => (
+                  <li key={index} className="text-sm py-1">
+                    {part.name} - <span className="font-medium">Quantity: {part.quantity}</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p>No parts used</p>
+              <p className="text-muted-foreground italic">No parts used</p>
             )}
           </div>
 
