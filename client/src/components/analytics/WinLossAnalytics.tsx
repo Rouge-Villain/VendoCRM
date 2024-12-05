@@ -44,6 +44,14 @@ export function WinLossAnalytics() {
     },
   });
 
+  const { data: products } = useQuery<Product[]>({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const response = await fetch("/api/products");
+      return response.json();
+    },
+  });
+
   // Calculate win/loss ratio by stage with values
   const stageAnalysis = opportunities?.reduce((acc, opp) => {
     if (!acc[opp.stage]) {
