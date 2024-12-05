@@ -46,19 +46,40 @@ export function WinLossAnalytics() {
         wonValue: 0,
         lostValue: 0,
         totalValue: 0,
-        winRate: 0
+        winRate: 0,
+        avgTimeInStage: 0,
+        conversionRate: 0,
+        productWins: {} as Record<number, number>,
+        productLosses: {} as Record<number, number>
       };
     }
     const value = Number(opp.value) || 0;
     acc[opp.stage].totalValue += value;
     
+    // Track wins and losses by product
+    if (!acc[opp.stage].productWins[opp.productId]) {
+      acc[opp.stage].productWins[opp.productId] = 0;
+    }
+    if (!acc[opp.stage].productLosses[opp.productId]) {
+      acc[opp.stage].productLosses[opp.productId] = 0;
+    }
+    
     if (opp.status === 'closed-won') {
       acc[opp.stage].won++;
       acc[opp.stage].wonValue += value;
+      acc[opp.stage].productWins[opp.productId]++;
     } else if (opp.status === 'closed-lost') {
       acc[opp.stage].lost++;
       acc[opp.stage].lostValue += value;
+      acc[opp.stage].productLosses[opp.productId]++;
     }
+    
+    // Calculate time in stage
+    if (opp.updatedAt && opp.createdAt) {
+      const timeInStage = new Date(opp.updatedAt).getTime() - new Date(opp.createdAt).getTime();
+      acc[opp.stage].avgTimeInStage = (acc[opp.stage].avgTimeInStage * acc[opp.stage].total + timeInStage) / (acc[opp.stage].total + 1);
+    }
+    
     acc[opp.stage].total++;
     acc[opp.stage].winRate = acc[opp.stage].total > 0 ? 
       (acc[opp.stage].won / acc[opp.stage].total) * 100 : 0;
@@ -72,6 +93,10 @@ export function WinLossAnalytics() {
     lostValue: number;
     totalValue: number;
     winRate: number;
+    avgTimeInStage: number;
+    conversionRate: number;
+    productWins: Record<number, number>;
+    productLosses: Record<number, number>;
   }>);
 
   // Calculate monthly performance and projections with year-over-year comparison
@@ -271,6 +296,97 @@ export function WinLossAnalytics() {
                 },
               }}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Stage Performance Metrics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {stages.map((stage) => {
+              const metrics = stageAnalysis?.[stage.id] || {
+                avgTimeInStage: 0,
+                total: 0,
+                won: 0,
+                conversionRate: 0
+              };
+              
+              const timeInDays = Math.round(metrics.avgTimeInStage / (1000 * 60 * 60 * 24));
+              const previousStageTotal = stage.id === stages[0].id ? metrics.total :
+                stageAnalysis?.[stages[stages.findIndex(s => s.id === stage.id) - 1].id]?.total || 0;
+              const conversionRate = previousStageTotal > 0 ? (metrics.total / previousStageTotal) * 100 : 0;
+              
+              return (
+                <div key={stage.id} className="p-4 rounded-lg border bg-card">
+                  <h3 className="font-semibold mb-2">{stage.name}</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Avg. Time in Stage</span>
+                      <span className="font-medium">{timeInDays} days</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Conversion Rate</span>
+                      <span className="font-medium">{conversionRate.toFixed(1)}%</span>
+                    </div>
+                    {stage.id.startsWith('closed-') && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Win Rate</span>
+                        <span className={`font-medium ${metrics.winRate >= 50 ? 'text-green-600' : 'text-red-600'}`}>
+                          {metrics.winRate.toFixed(1)}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Product Performance Analysis</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {products?.map((product) => {
+              const productStats = Object.values(stageAnalysis || {}).reduce(
+                (acc, stage) => {
+                  acc.wins += stage.productWins[product.id] || 0;
+                  acc.losses += stage.productLosses[product.id] || 0;
+                  return acc;
+                },
+                { wins: 0, losses: 0 }
+              );
+              
+              const total = productStats.wins + productStats.losses;
+              const winRate = total > 0 ? (productStats.wins / total) * 100 : 0;
+              
+              return (
+                <div key={product.id} className="p-4 rounded-lg border">
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-medium">{product.name}</h4>
+                    <span className={`text-sm font-semibold ${winRate >= 50 ? 'text-green-600' : 'text-red-600'}`}>
+                      {winRate.toFixed(1)}% Win Rate
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-muted-foreground">Won Deals</div>
+                      <div className="text-lg font-semibold text-green-600">{productStats.wins}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Lost Deals</div>
+                      <div className="text-lg font-semibold text-red-600">{productStats.losses}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
