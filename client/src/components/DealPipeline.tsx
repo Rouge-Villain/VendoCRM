@@ -53,10 +53,10 @@ function DraggableDealCard({ opportunity, customers, products }: {
       {...attributes}
       className="touch-none"
     >
-      <Card className="bg-white shadow-sm cursor-move relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
-        <CardContent className="p-3">
-          <div className="space-y-1.5">
+      <Card className="bg-white shadow-md hover:shadow-lg transition-all duration-200 cursor-move relative overflow-hidden border border-border/50">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-primary opacity-80" />
+        <CardContent className="p-4">
+          <div className="space-y-2">
             <div className="flex justify-between items-center">
               <div className="font-medium">
                 ${parseFloat(opportunity.value.toString()).toLocaleString()}
@@ -132,9 +132,9 @@ function DroppableStage({
     : '';
 
   return (
-    <div className="flex-shrink-0 w-[280px]">
-      <div className={`bg-card rounded-lg ${stageClass} border shadow-sm hover:bg-accent/50 transition-colors h-[calc(100vh-240px)] flex flex-col`}>
-        <div className="p-4 space-y-4">
+    <div className="flex-shrink-0 w-[300px]">
+      <div className={`bg-card/50 backdrop-blur-sm rounded-xl ${stageClass} border shadow-md hover:shadow-lg hover:bg-accent/40 transition-all duration-200 h-[calc(100vh-240px)] flex flex-col`}>
+        <div className="p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div className="font-semibold text-base">{stage.name}</div>
             <div className="text-sm text-muted-foreground">{metrics.count}</div>
@@ -328,41 +328,61 @@ export function DealPipeline() {
     >
       <div className="space-y-6 h-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 px-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold">
-                ${opportunities.reduce((sum, opp) => sum + parseFloat(opp.value.toString()), 0).toLocaleString()}
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardContent className="pt-6 pb-4">
+              <div className="flex flex-col space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">Total Pipeline Value</div>
+                <div className="text-2xl font-bold text-primary">
+                  ${opportunities.reduce((sum, opp) => sum + parseFloat(opp.value.toString()), 0).toLocaleString()}
+                </div>
+                <div className="text-xs text-muted-foreground mt-2">
+                  All active opportunities
+                </div>
               </div>
-              <div className="text-sm text-muted-foreground">Total Pipeline Value</div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold">
-                ${opportunities
-                  .reduce((sum, opp) => sum + (parseFloat(opp.value.toString()) * ((opp.probability || 0) / 100)), 0)
-                  .toLocaleString()}
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardContent className="pt-6 pb-4">
+              <div className="flex flex-col space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">Weighted Pipeline Value</div>
+                <div className="text-2xl font-bold text-primary">
+                  ${opportunities
+                    .reduce((sum, opp) => sum + (parseFloat(opp.value.toString()) * ((opp.probability || 0) / 100)), 0)
+                    .toLocaleString()}
+                </div>
+                <div className="text-xs text-muted-foreground mt-2">
+                  Adjusted by probability
+                </div>
               </div>
-              <div className="text-sm text-muted-foreground">Weighted Pipeline Value</div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold">
-                {opportunities.filter(opp => opp.stage === 'closed-won').length}
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardContent className="pt-6 pb-4">
+              <div className="flex flex-col space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">Won Deals</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {opportunities.filter(opp => opp.stage === 'closed-won').length}
+                </div>
+                <div className="text-xs text-muted-foreground mt-2">
+                  Successfully closed deals
+                </div>
               </div>
-              <div className="text-sm text-muted-foreground">Won Deals</div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold">
-                {Math.round(
-                  (opportunities.filter(opp => opp.stage === 'closed-won').length /
-                    Math.max(opportunities.filter(opp => ['closed-won', 'closed-lost'].includes(opp.stage)).length, 1)) * 100
-                )}%
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardContent className="pt-6 pb-4">
+              <div className="flex flex-col space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">Win Rate</div>
+                <div className="text-2xl font-bold text-primary">
+                  {Math.round(
+                    (opportunities.filter(opp => opp.stage === 'closed-won').length /
+                      Math.max(opportunities.filter(opp => ['closed-won', 'closed-lost'].includes(opp.stage)).length, 1)) * 100
+                  )}%
+                </div>
+                <div className="text-xs text-muted-foreground mt-2">
+                  Of closed opportunities
+                </div>
               </div>
-              <div className="text-sm text-muted-foreground">Win Rate</div>
             </CardContent>
           </Card>
         </div>
