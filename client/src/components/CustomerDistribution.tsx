@@ -36,8 +36,8 @@ export function CustomerDistribution() {
 
   const machineTypesDistribution = customers?.reduce((acc, customer) => {
     if (Array.isArray(customer.machineTypes)) {
-      (customer.machineTypes as string[]).forEach(type => {
-        acc[type] = (acc[type] || 0) + 1;
+      (customer.machineTypes as Array<{ type: string; quantity: number }>).forEach(machine => {
+        acc[machine.type] = (acc[machine.type] || 0) + machine.quantity;
       });
     }
     return acc;
