@@ -61,13 +61,13 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
-        return "text-yellow-700 bg-yellow-100 border border-yellow-200 shadow-sm shadow-yellow-100/50";
+        return "bg-yellow-500";
       case "in-progress":
-        return "text-blue-700 bg-blue-100 border border-blue-200 shadow-sm shadow-blue-100/50";
+        return "bg-blue-500";
       case "done":
-        return "text-green-700 bg-green-100 border border-green-200 shadow-sm shadow-green-100/50";
+        return "bg-green-500";
       default:
-        return "text-gray-700 bg-gray-100 border border-gray-200 shadow-sm shadow-gray-100/50";
+        return "bg-gray-500";
     }
   };
 
@@ -95,18 +95,18 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
                 <TableCell className="capitalize font-medium text-muted-foreground">{record.maintenanceType}</TableCell>
                 <TableCell className="max-w-[200px] truncate">{record.description}</TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${getStatusColor(record.status)}`}>
-                      {record.status}
-                    </span>
+                  <div className="flex items-center space-x-2">
                     <Select
                       value={record.status}
                       onValueChange={(value) =>
                         statusMutation.mutate({ id: record.id, status: value })
                       }
                     >
-                      <SelectTrigger className="w-[140px]">
-                        <SelectValue />
+                      <SelectTrigger className="h-8 w-[130px]">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${getStatusColor(record.status)}`} />
+                          <SelectValue />
+                        </div>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="pending">Pending</SelectItem>
