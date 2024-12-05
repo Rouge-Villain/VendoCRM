@@ -36,19 +36,43 @@ export function WinLossAnalytics() {
     },
   });
 
-  // Calculate win/loss ratio by stage
+  // Calculate win/loss ratio by stage with values
   const stageAnalysis = opportunities?.reduce((acc, opp) => {
     if (!acc[opp.stage]) {
-      acc[opp.stage] = { won: 0, lost: 0, total: 0 };
+      acc[opp.stage] = { 
+        won: 0, 
+        lost: 0, 
+        total: 0,
+        wonValue: 0,
+        lostValue: 0,
+        totalValue: 0,
+        winRate: 0
+      };
     }
+    const value = Number(opp.value) || 0;
+    acc[opp.stage].totalValue += value;
+    
     if (opp.status === 'closed-won') {
       acc[opp.stage].won++;
+      acc[opp.stage].wonValue += value;
     } else if (opp.status === 'closed-lost') {
       acc[opp.stage].lost++;
+      acc[opp.stage].lostValue += value;
     }
     acc[opp.stage].total++;
+    acc[opp.stage].winRate = acc[opp.stage].total > 0 ? 
+      (acc[opp.stage].won / acc[opp.stage].total) * 100 : 0;
+    
     return acc;
-  }, {} as Record<string, { won: number; lost: number; total: number }>);
+  }, {} as Record<string, { 
+    won: number; 
+    lost: number; 
+    total: number;
+    wonValue: number;
+    lostValue: number;
+    totalValue: number;
+    winRate: number;
+  }>);
 
   // Calculate monthly performance and projections
   const monthlyPerformance = opportunities?.reduce((acc, opp) => {
@@ -155,6 +179,36 @@ export function WinLossAnalytics() {
 
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {Object.entries(stageAnalysis || {}).map(([stage, data]) => (
+          <Card key={stage}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-medium">{stage}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Win Rate</span>
+                  <span className="font-medium">{data.winRate.toFixed(1)}%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Won Deals</span>
+                  <span className="text-green-600 font-medium">{data.won}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Lost Deals</span>
+                  <span className="text-red-600 font-medium">{data.lost}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Total Value</span>
+                  <span className="font-medium">${data.totalValue.toLocaleString()}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Win/Loss Analysis by Stage</CardTitle>
