@@ -43,6 +43,9 @@ function DraggableDealCard({ opportunity, customers, products }: {
 
   if (isDragging) return null;
 
+  const customer = customers?.find((c) => c.id === opportunity.customerId);
+  const product = products?.find((p) => p.id === opportunity.productId);
+
   return (
     <div
       ref={setNodeRef}
@@ -73,10 +76,10 @@ function DraggableDealCard({ opportunity, customers, products }: {
               </Button>
             </div>
             <div className="text-sm font-medium">
-              {customers?.find((c) => c.id === opportunity.customerId)?.company}
+              {customer?.company}
             </div>
             <div className="text-sm text-primary">
-              {products?.find((p) => p.id === opportunity.productId)?.name}
+              {product?.name}
             </div>
             <div className="text-sm text-muted-foreground line-clamp-2">
               {opportunity.notes}
@@ -267,19 +270,21 @@ export function DealPipeline() {
 
   if (isLoadingOpps || !customers || !products) {
     return (
-      <div className="flex gap-4 overflow-x-auto p-4">
-        {stages.map((stage) => (
-          <div key={stage.id} className="flex-shrink-0 w-80">
-            <div className="bg-secondary p-4 rounded-lg">
-              <Skeleton className="h-6 w-32 mb-4" />
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-32 w-full" />
-                ))}
+      <div className="max-w-full overflow-x-auto">
+        <div className="flex gap-4 p-4">
+          {stages.map((stage) => (
+            <div key={stage.id} className="flex-shrink-0 w-80">
+              <div className="bg-secondary p-4 rounded-lg">
+                <Skeleton className="h-6 w-32 mb-4" />
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-32 w-full" />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     );
   }
@@ -301,7 +306,7 @@ export function DealPipeline() {
     const stageOpportunities = opportunities.filter(opp => opp.stage === stage.id);
     const totalValue = stageOpportunities.reduce((sum, opp) => sum + parseFloat(opp.value.toString()), 0);
     const avgProbability = stageOpportunities.length > 0
-      ? stageOpportunities.reduce((sum, opp) => sum + opp.probability, 0) / stageOpportunities.length
+      ? stageOpportunities.reduce((sum, opp) => sum + (opp.probability || 0), 0) / stageOpportunities.length
       : 0;
     
     acc[stage.id] = {
@@ -320,8 +325,8 @@ export function DealPipeline() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="max-w-[calc(100vw-2rem)] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-4">
+      <div className="space-y-6 max-w-[calc(100vw-16rem)] mx-auto overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-4">
           <Card>
             <CardContent className="pt-6">
               <div className="text-2xl font-bold">
@@ -334,7 +339,7 @@ export function DealPipeline() {
             <CardContent className="pt-6">
               <div className="text-2xl font-bold">
                 ${opportunities
-                  .reduce((sum, opp) => sum + (parseFloat(opp.value.toString()) * (opp.probability / 100)), 0)
+                  .reduce((sum, opp) => sum + (parseFloat(opp.value.toString()) * ((opp.probability || 0) / 100)), 0)
                   .toLocaleString()}
               </div>
               <div className="text-sm text-muted-foreground">Weighted Pipeline Value</div>
@@ -353,53 +358,56 @@ export function DealPipeline() {
               <div className="text-2xl font-bold">
                 {Math.round(
                   (opportunities.filter(opp => opp.stage === 'closed-won').length /
-                    opportunities.filter(opp => ['closed-won', 'closed-lost'].includes(opp.stage)).length) * 100 || 0
+                    Math.max(opportunities.filter(opp => ['closed-won', 'closed-lost'].includes(opp.stage)).length, 1)) * 100
                 )}%
               </div>
               <div className="text-sm text-muted-foreground">Win Rate</div>
             </CardContent>
           </Card>
         </div>
-        <div className="flex gap-6 overflow-x-auto p-4 pb-8 relative scroll-smooth" style={{ isolation: 'isolate' }}>
-          <div className="flex gap-6 min-w-fit">
-            {stages.map((stage) => (
-              <DroppableStage
-                key={stage.id}
-                stage={stage}
-                opportunities={opportunities}
-                customers={customers}
-                products={products}
-                metrics={stageMetrics[stage.id]}
-              />
-            ))}
+
+        <div className="px-4 overflow-hidden">
+          <div className="overflow-x-auto pb-6">
+            <div className="flex gap-6 min-w-fit">
+              {stages.map((stage) => (
+                <DroppableStage
+                  key={stage.id}
+                  stage={stage}
+                  opportunities={opportunities}
+                  customers={customers}
+                  products={products}
+                  metrics={stageMetrics[stage.id]}
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      <DragOverlay>
-        {draggedDeal && (
-          <div className="w-80">
-            <Card className="bg-white shadow-md relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
-              <CardContent className="p-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <div className="font-medium">
-                      ${parseFloat(draggedDeal.value.toString()).toLocaleString()}
+        <DragOverlay>
+          {draggedDeal && (
+            <div className="w-80">
+              <Card className="bg-white shadow-md relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <div className="font-medium">
+                        ${parseFloat(draggedDeal.value.toString()).toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="text-sm font-medium">
+                      {customers?.find((c) => c.id === draggedDeal.customerId)?.company}
+                    </div>
+                    <div className="text-sm text-primary">
+                      {products?.find((p) => p.id === draggedDeal.productId)?.name}
                     </div>
                   </div>
-                  <div className="text-sm font-medium">
-                    {customers?.find((c) => c.id === draggedDeal.customerId)?.company}
-                  </div>
-                  <div className="text-sm text-primary">
-                    {products?.find((p) => p.id === draggedDeal.productId)?.name}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </DragOverlay>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </DragOverlay>
+      </div>
     </DndContext>
   );
 }
