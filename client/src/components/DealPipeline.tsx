@@ -15,9 +15,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, FileText, BarChart } from "lucide-react";
+import { AlertCircle, FileText } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { type Opportunity, type Customer, type Product } from "@db/schema";
@@ -43,6 +42,7 @@ function DraggableDealCard({ opportunity, customers, products }: {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: opportunity.id.toString(),
   });
+  const [showQuoteGenerator, setShowQuoteGenerator] = useState(false);
 
   if (isDragging) return null;
 
@@ -61,6 +61,19 @@ function DraggableDealCard({ opportunity, customers, products }: {
               <div className="font-medium">
                 ${parseFloat(opportunity.value.toString()).toLocaleString()}
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowQuoteGenerator(true);
+                }}
+              >
+                <FileText className="h-4 w-4" />
+                <span>Quote</span>
+              </Button>
             </div>
             <div className="text-sm font-medium">
               {customers?.find((c) => c.id === opportunity.customerId)?.company}
@@ -82,6 +95,13 @@ function DraggableDealCard({ opportunity, customers, products }: {
           </div>
         </CardContent>
       </Card>
+      {showQuoteGenerator && (
+        <QuoteGenerator
+          opportunity={opportunity}
+          open={showQuoteGenerator}
+          onOpenChange={setShowQuoteGenerator}
+        />
+      )}
     </div>
   );
 }
@@ -128,8 +148,6 @@ function DroppableStage({
 export function DealPipeline() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
-  const [showQuoteGenerator, setShowQuoteGenerator] = useState(false);
   const [draggedDeal, setDraggedDeal] = useState<Opportunity | null>(null);
 
   const sensors = useSensors(
@@ -295,17 +313,6 @@ export function DealPipeline() {
           </div>
         )}
       </DragOverlay>
-
-      {selectedOpportunity && (
-        <QuoteGenerator
-          opportunity={selectedOpportunity}
-          open={showQuoteGenerator}
-          onOpenChange={(open) => {
-            setShowQuoteGenerator(open);
-            if (!open) setSelectedOpportunity(null);
-          }}
-        />
-      )}
     </DndContext>
   );
 }
