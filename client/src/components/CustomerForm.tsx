@@ -26,7 +26,12 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<InsertCustomer>({
+  interface MachineType {
+    selected: boolean;
+    quantity: number;
+  }
+
+  const form = useForm<InsertCustomer & { machineTypes: Record<string, MachineType> }>({
     resolver: zodResolver(insertCustomerSchema),
     defaultValues: {
       name: "",
@@ -39,7 +44,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
       machineTypes: MACHINE_TYPES.reduce((acc, type) => ({
         ...acc,
         [type.id]: { selected: false, quantity: 0 }
-      }), {} as Record<string, { selected: boolean; quantity: number }>),
+      }), {} as Record<string, MachineType>),
       state: [] as string[],
       serviceTerritory: "",
       maintenanceHistory: "",

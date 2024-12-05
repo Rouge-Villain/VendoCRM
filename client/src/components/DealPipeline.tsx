@@ -277,7 +277,7 @@ export function DealPipeline() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 overflow-x-auto p-4 relative z-0">
+      <div className="flex gap-4 overflow-x-auto p-4 relative" style={{ isolation: 'isolate' }}>
         {stages.map((stage) => (
           <DroppableStage
             key={stage.id}
