@@ -39,10 +39,10 @@ export function SalesAnalytics() {
 
   // Calculate win/loss ratio and reasons
   const winLossData = opportunities?.reduce((acc, opp) => {
-    if (opp.status === 'won') {
+    if (opp.stage === 'closed-won') {
       acc.won++;
       acc.wonValue += Number(opp.value);
-    } else if (opp.status === 'lost') {
+    } else if (opp.stage === 'closed-lost') {
       acc.lost++;
       acc.lostValue += Number(opp.value);
       acc.reasons[opp.lostReason || 'Other'] = (acc.reasons[opp.lostReason || 'Other'] || 0) + 1;
@@ -73,8 +73,8 @@ export function SalesAnalytics() {
       if (monthlyPerformance[monthStr]) {
         monthlyPerformance[monthStr].deals++;
         monthlyPerformance[monthStr].value += Number(opp.value);
-        if (opp.status === 'won') monthlyPerformance[monthStr].won++;
-        if (opp.status === 'lost') monthlyPerformance[monthStr].lost++;
+        if (opp.stage === 'closed-won') monthlyPerformance[monthStr].won++;
+        if (opp.stage === 'closed-lost') monthlyPerformance[monthStr].lost++;
       }
     }
   });
