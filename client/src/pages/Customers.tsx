@@ -66,20 +66,22 @@ export default function Customers() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between pb-6 border-b">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-primary">Customer Management</h1>
-            <p className="text-muted-foreground mt-1">Manage and monitor your customer relationships</p>
+      <div className="sticky top-0 z-10">
+        <div className="bg-card shadow-sm rounded-lg">
+          <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div className="flex-1 text-center">
+              <h1 className="text-3xl font-bold tracking-tight text-primary">Customer Management</h1>
+              <p className="text-muted-foreground mt-1">Manage and monitor your customer relationships</p>
+            </div>
+            <Button 
+              onClick={() => setIsOpen(true)}
+              size="lg"
+              className="gap-2 shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <UserPlus className="w-4 h-4" />
+              Add Customer
+            </Button>
           </div>
-          <Button 
-            onClick={() => setIsOpen(true)}
-            size="lg"
-            className="gap-2 shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            <UserPlus className="w-4 h-4" />
-            Add Customer
-          </Button>
         </div>
       </div>
 
@@ -154,10 +156,7 @@ export default function Customers() {
         </div>
       </div>
 
-      <Dialog 
-        open={isOpen} 
-        onOpenChange={setIsOpen}
-      >
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="w-[90vw] max-w-[800px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Customer</DialogTitle>
