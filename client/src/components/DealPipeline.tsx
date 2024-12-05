@@ -53,7 +53,7 @@ function DraggableDealCard({ opportunity, customers, products }: {
       {...attributes}
       className="touch-none"
     >
-      <Card className="bg-white shadow-sm cursor-move">
+      <Card className="bg-white shadow-sm cursor-move transition-all duration-200 hover:shadow-md active:shadow-lg transform hover:-translate-y-0.5">
         <CardContent className="p-4">
           <div className="space-y-2">
             <div className="flex justify-between items-center">
@@ -134,7 +134,8 @@ export function DealPipeline() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 4, // Reduced distance for quicker activation
+        tolerance: 5, // Added tolerance for smoother activation
       },
     })
   );
@@ -272,8 +273,8 @@ export function DealPipeline() {
 
       <DragOverlay>
         {draggedDeal && (
-          <div className="w-80">
-            <Card className="bg-white shadow-sm">
+          <div className="w-80 transform scale-105 opacity-90 transition-transform">
+            <Card className="bg-white shadow-lg ring-2 ring-primary/50">
               <CardContent className="p-4">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
