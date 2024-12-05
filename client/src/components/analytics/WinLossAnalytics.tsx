@@ -74,18 +74,28 @@ export function WinLossAnalytics() {
     winRate: number;
   }>);
 
-  // Calculate monthly performance and projections
+  // Calculate monthly performance and projections with year-over-year comparison
   const monthlyPerformance = opportunities?.reduce((acc, opp) => {
     if (opp.createdAt) {
       const date = new Date(opp.createdAt);
       const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+      const year = date.getFullYear();
+      const month = date.getMonth();
       
       if (!acc[monthYear]) {
+        // Set monthly target as 10% more than last year's same month
+        const lastYear = new Date(date);
+        lastYear.setFullYear(year - 1);
+        const lastYearMonth = lastYear.toLocaleString('default', { month: 'short', year: 'numeric' });
+        const lastYearValue = acc[lastYearMonth]?.wonValue || 0;
+        
         acc[monthYear] = {
           totalValue: 0,
           wonValue: 0,
           count: 0,
-          winRate: 0
+          winRate: 0,
+          target: lastYearValue * 1.1, // 10% growth target
+          yearOverYear: 0
         };
       }
       
@@ -95,9 +105,23 @@ export function WinLossAnalytics() {
       }
       acc[monthYear].count++;
       acc[monthYear].winRate = (acc[monthYear].wonValue / acc[monthYear].totalValue) * 100;
+      
+      // Calculate year-over-year growth
+      const lastYear = new Date(date);
+      lastYear.setFullYear(year - 1);
+      const lastYearMonth = lastYear.toLocaleString('default', { month: 'short', year: 'numeric' });
+      const lastYearValue = acc[lastYearMonth]?.wonValue || 0;
+      acc[monthYear].yearOverYear = lastYearValue ? ((acc[monthYear].wonValue - lastYearValue) / lastYearValue) * 100 : 0;
     }
     return acc;
-  }, {} as Record<string, { totalValue: number; wonValue: number; count: number; winRate: number }>);
+  }, {} as Record<string, { 
+    totalValue: number; 
+    wonValue: number; 
+    count: number; 
+    winRate: number;
+    target: number;
+    yearOverYear: number;
+  }>);
 
   // Calculate yearly projection based on last 3 months trend
   const monthKeys = Object.keys(monthlyPerformance ?? {});
@@ -163,6 +187,14 @@ export function WinLossAnalytics() {
         segment: {
           borderDash: undefined,
         },
+      },
+      {
+        label: 'Target',
+        data: Object.values(monthlyPerformance || {}).map(m => m.target),
+        borderColor: 'rgb(234, 179, 8)',
+        backgroundColor: 'rgba(234, 179, 8, 0.5)',
+        borderWidth: 2,
+        borderDash: [5, 5],
       },
       {
         label: 'Projected Revenue',
@@ -274,6 +306,39 @@ export function WinLossAnalytics() {
                 },
               }}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Year-over-Year Performance</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {Object.entries(monthlyPerformance || {}).slice(-3).map(([month, data]) => (
+              <div key={month} className="p-4 rounded-lg border bg-card">
+                <h3 className="font-semibold mb-2">{month}</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Revenue</span>
+                    <span className="font-medium">${data.wonValue.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">vs Target</span>
+                    <span className={`font-medium ${data.wonValue >= data.target ? 'text-green-600' : 'text-red-600'}`}>
+                      {((data.wonValue / data.target - 1) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">YoY Growth</span>
+                    <span className={`font-medium ${data.yearOverYear >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {data.yearOverYear.toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
