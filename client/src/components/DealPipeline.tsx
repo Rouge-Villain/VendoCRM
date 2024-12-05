@@ -132,8 +132,8 @@ function DroppableStage({
     : '';
 
   return (
-    <div className="flex-shrink-0 w-[320px] relative">
-      <div className={`bg-secondary p-4 rounded-lg relative h-full ${stageClass}`}>
+    <div className="flex-shrink-0 w-[300px] relative">
+      <div className={`bg-secondary/50 p-4 rounded-lg relative h-full ${stageClass} hover:bg-secondary/70 transition-colors`}>
         <div className="flex items-center justify-between mb-2">
           <div className="font-semibold text-base">{stage.name}</div>
           <div className="text-sm text-muted-foreground">{metrics.count}</div>
@@ -325,8 +325,8 @@ export function DealPipeline() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-6 max-w-[calc(100vw-16rem)] mx-auto overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-4">
+      <div className="space-y-6 w-full overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardContent className="pt-6">
               <div className="text-2xl font-bold">
@@ -366,9 +366,9 @@ export function DealPipeline() {
           </Card>
         </div>
 
-        <div className="px-4 overflow-hidden">
-          <div className="overflow-x-auto pb-6">
-            <div className="flex gap-6 min-w-fit">
+        <div className="relative">
+          <div className="overflow-x-auto pb-6 px-4">
+            <div className="flex gap-6 min-w-fit relative">
               {stages.map((stage) => (
                 <DroppableStage
                   key={stage.id}
