@@ -29,7 +29,7 @@ export function StatsOverview() {
 
   const totalCustomers = customers?.length || 0;
   const totalMachines = customers?.reduce((acc, customer) => 
-    acc + (customer.machineTypes?.length || 0), 0) || 0;
+    acc + (Array.isArray(customer.machineTypes) ? customer.machineTypes.length : 0), 0) || 0;
   const territories = new Set(customers?.map(c => c.serviceTerritory)).size;
   const recentCustomers = customers
     ?.filter(c => c.createdAt ? new Date(c.createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000 : false)

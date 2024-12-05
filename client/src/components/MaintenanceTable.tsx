@@ -20,6 +20,8 @@ import { useToast } from "@/hooks/use-toast";
 import { type Maintenance } from "@db/schema";
 import { format } from "date-fns";
 import { MaintenanceDetails } from "./MaintenanceDetails";
+import { type Part } from "./MaintenanceDetails";
+import { type MaintenanceWithParts } from "./MaintenanceDetails";
 
 interface MaintenanceTableProps {
   records: Maintenance[];
@@ -28,7 +30,7 @@ interface MaintenanceTableProps {
 export function MaintenanceTable({ records }: MaintenanceTableProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedRecord, setSelectedRecord] = useState<Maintenance | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<MaintenanceWithParts | null>(null);
 
   const statusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
@@ -136,7 +138,15 @@ export function MaintenanceTable({ records }: MaintenanceTableProps) {
 
       {selectedRecord && (
         <MaintenanceDetails
-          record={selectedRecord}
+          record={{
+            ...selectedRecord,
+            partsUsed: Array.isArray(selectedRecord.partsUsed) 
+              ? selectedRecord.partsUsed.map((part: { name: string | number; quantity: string | number }) => ({
+                  name: String(part.name),
+                  quantity: Number(part.quantity)
+                }))
+              : []
+          }}
           open={!!selectedRecord}
           onOpenChange={(open) => !open && setSelectedRecord(null)}
         />

@@ -25,14 +25,14 @@ import { useToast } from "@/hooks/use-toast";
 import { type Maintenance } from "@db/schema";
 import { format } from "date-fns";
 
-// Define the Part interface to match the database schema
-interface Part {
+// Define and export the Part interface to match the database schema
+export interface Part {
   name: string;
   quantity: number;
 }
 
-// Ensure partsUsed is properly typed in the maintenance record
-type MaintenanceWithParts = Omit<Maintenance, 'partsUsed'> & {
+// Export the maintenance record type with properly typed parts
+export type MaintenanceWithParts = Omit<Maintenance, 'partsUsed'> & {
   partsUsed: Part[];
 };
 

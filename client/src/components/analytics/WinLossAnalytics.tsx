@@ -15,6 +15,13 @@ import { Bar, Line } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type Opportunity } from "@db/schema";
 
+interface Product {
+  id: number;
+  name: string;
+  description?: string;
+  price?: number;
+}
+
 const stages = [
   { id: "prospecting", name: "Prospecting" },
   { id: "qualification", name: "Qualification" },
@@ -327,7 +334,14 @@ export function WinLossAnalytics() {
                 avgTimeInStage: 0,
                 total: 0,
                 won: 0,
-                conversionRate: 0
+                lost: 0,
+                conversionRate: 0,
+                winRate: 0,
+                wonValue: 0,
+                lostValue: 0,
+                totalValue: 0,
+                productWins: {},
+                productLosses: {}
               };
               
               const timeInDays = Math.round(metrics.avgTimeInStage / (1000 * 60 * 60 * 24));

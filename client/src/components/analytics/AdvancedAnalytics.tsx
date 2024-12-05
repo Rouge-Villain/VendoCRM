@@ -56,7 +56,7 @@ export function AdvancedAnalytics() {
     if (customer.serviceTerritory) {
       acc[customer.serviceTerritory] = {
         customers: (acc[customer.serviceTerritory]?.customers || 0) + 1,
-        machines: (acc[customer.serviceTerritory]?.machines || 0) + (customer.machineTypes?.length || 0),
+        machines: (acc[customer.serviceTerritory]?.machines || 0) + (Array.isArray(customer.machineTypes) ? customer.machineTypes.length : 0),
         revenue: opportunities?.reduce((sum, opp) => 
           opp.customerId === customer.id ? sum + Number(opp.value) : sum
         , 0) || 0

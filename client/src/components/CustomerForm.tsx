@@ -264,7 +264,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
                   <FormLabel>States</FormLabel>
                   <Select
                     onValueChange={(value: string) => {
-                      const currentValues = field.value || [];
+                      const currentValues: string[] = Array.isArray(field.value) ? field.value : [];
                       if (!currentValues.includes(value)) {
                         field.onChange([...currentValues, value]);
                       }

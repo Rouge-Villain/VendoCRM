@@ -49,7 +49,7 @@ export function CustomerAnalytics() {
   // Calculate machine type distribution
   const machineDistribution = customers?.reduce((acc, customer) => {
     if (Array.isArray(customer.machineTypes)) {
-      customer.machineTypes.forEach((type: string) => {
+      (customer.machineTypes as string[]).forEach(type => {
         acc[type] = (acc[type] || 0) + 1;
       });
     }
