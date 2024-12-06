@@ -24,7 +24,7 @@ import { AlertCircle, FileText } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { type Opportunity, type Customer, type Product } from "@db/schema";
+import type { Opportunity, Customer, Product } from "../../db/schema";
 import { QuoteGenerator } from "./QuoteGenerator";
 
 const stages = [
