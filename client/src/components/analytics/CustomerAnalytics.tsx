@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  Filler,
 } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +28,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  Filler
 );
 
 export function CustomerAnalytics() {
@@ -145,7 +147,7 @@ export function CustomerAnalytics() {
                       padding: 20,
                       font: {
                         size: 12,
-                        weight: '500',
+                        weight: 500,
                       },
                     },
                   },
@@ -215,7 +217,7 @@ export function CustomerAnalytics() {
                       padding: 20,
                       font: {
                         size: 12,
-                        weight: '500',
+                        weight: 500,
                       },
                     },
                   },

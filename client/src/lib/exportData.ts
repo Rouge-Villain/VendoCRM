@@ -115,6 +115,10 @@ export function prepareAnalyticsData(
 
       return Object.values(territoryData);
     }
+
+    default: {
+      throw new Error(`Unsupported analytics type: ${type}`);
+    }
   }
 }
 
