@@ -101,7 +101,7 @@ export default function Customers() {
                   <TableHead>Address</TableHead>
                   <TableHead>State</TableHead>
                   <TableHead>Notes</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right pr-4 min-w-[240px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -114,18 +114,19 @@ export default function Customers() {
                     <TableCell>{customer.address}</TableCell>
                     <TableCell>{customer.state}</TableCell>
                     <TableCell className="max-w-[200px] truncate">{customer.notes}</TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setSelectedCustomer({ id: customer.id, name: customer.name })}
-                        className="hover:bg-primary/10"
-                      >
-                        View History
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive" className="hover:bg-destructive/90">Delete</Button>
-                        </AlertDialogTrigger>
+                    <TableCell className="text-right p-4">
+                      <div className="flex items-center justify-end gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => setSelectedCustomer({ id: customer.id, name: customer.name })}
+                          className="hover:bg-primary/10 min-w-[120px]"
+                        >
+                          View History
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive" className="hover:bg-destructive/90 min-w-[100px]">Delete</Button>
+                          </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -145,6 +146,7 @@ export default function Customers() {
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
