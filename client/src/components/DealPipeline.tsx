@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   DndContext,
@@ -10,11 +10,11 @@ import {
   DragStartEvent,
   useDraggable,
   useDroppable,
-  defaultDropAnimationSideEffects,
   MeasuringStrategy,
   CollisionDetection,
   pointerWithin,
 } from "@dnd-kit/core";
+import { FixedSizeList as List } from "react-window";
 import { cn } from "@/lib/utils";
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { Button } from "@/components/ui/button";
@@ -36,11 +36,15 @@ const stages = [
 
 type Stage = typeof stages[number]['id'];
 
-function DraggableDealCard({ opportunity, customers, products }: { 
+const DraggableDealCard = React.memo(({ 
+  opportunity, 
+  customers, 
+  products 
+}: { 
   opportunity: Opportunity; 
   customers?: Customer[];
   products?: Product[];
-}) {
+}) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: opportunity.id.toString(),
   });
@@ -109,9 +113,11 @@ function DraggableDealCard({ opportunity, customers, products }: {
       )}
     </div>
   );
-}
+});
 
-function DroppableStage({ 
+DraggableDealCard.displayName = "DraggableDealCard";
+
+const DroppableStage = React.memo(({ 
   stage, 
   opportunities, 
   customers, 
@@ -123,7 +129,7 @@ function DroppableStage({
   customers?: Customer[];
   products?: Product[];
   metrics: { count: number; totalValue: number; weightedValue: number; avgProbability: number; };
-}) {
+}) => {
   const { setNodeRef, isOver: isDraggingOver } = useDroppable({
     id: stage.id,
   });
@@ -166,24 +172,39 @@ function DroppableStage({
         <div 
           ref={setNodeRef}
           className={cn(
-            "flex-1 overflow-y-auto px-4 pb-4 space-y-4 min-h-0 transition-all duration-200",
+            "flex-1 min-h-0 transition-all duration-200",
             "transform-gpu rounded-xl",
             isDraggingOver && "scale-[1.02] transition-transform duration-75 bg-primary/5"
           )}
         >
-          {stageOpportunities.map((opp) => (
-            <DraggableDealCard
-              key={opp.id}
-              opportunity={opp}
-              customers={customers}
-              products={products}
-            />
-          ))}
+          <List
+            height={600}
+            itemCount={stageOpportunities.length}
+            itemSize={180}
+            width={280}
+            itemData={{
+              opportunities: stageOpportunities,
+              customers,
+              products
+            }}
+          >
+            {({ index, style, data }) => (
+              <div style={style}>
+                <DraggableDealCard
+                  opportunity={data.opportunities[index]}
+                  customers={data.customers}
+                  products={data.products}
+                />
+              </div>
+            )}
+          </List>
         </div>
       </div>
     </div>
   );
-}
+});
+
+DroppableStage.displayName = "DroppableStage";
 
 export function DealPipeline() {
   const { toast } = useToast();
@@ -193,7 +214,7 @@ export function DealPipeline() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Increased for better touch handling
+        distance: 8,
         delay: 0,
         tolerance: 5,
       },
@@ -201,7 +222,6 @@ export function DealPipeline() {
   );
 
   const collisionDetectionStrategy: CollisionDetection = (args) => {
-    // Optimize collision detection for vertical movement
     const pointerCollisions = pointerWithin(args);
     return pointerCollisions.length > 0 ? [pointerCollisions[0]] : [];
   };
@@ -264,14 +284,14 @@ export function DealPipeline() {
     },
   });
 
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
     const dealId = parseInt(active.id.toString());
     const deal = opportunities?.find(d => d.id === dealId);
     if (deal) setDraggedDeal(deal);
-  };
+  }, [opportunities]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
     
     if (!over) return;
@@ -285,7 +305,7 @@ export function DealPipeline() {
     }
     
     setDraggedDeal(null);
-  };
+  }, [opportunities, updateStageMutation]);
 
   if (isLoadingOpps || !customers || !products) {
     return (
@@ -345,7 +365,7 @@ export function DealPipeline() {
       modifiers={[restrictToVerticalAxis]}
       measuring={{
         droppable: {
-          strategy: MeasuringStrategy.Always,
+          strategy: MeasuringStrategy.BeforeDragging,
         },
       }}
     >

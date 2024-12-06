@@ -18,7 +18,10 @@
     "paths": {
       "@/*": ["./client/src/*"],
       "@db/*": ["./db/*"],
-      "@ui/*": ["./client/src/components/ui/*"]
+      "@ui/*": ["./client/src/components/ui/*"],
+      "@/components/*": ["./client/src/components/*"],
+      "@/lib/*": ["./client/src/lib/*"],
+      "@/hooks/*": ["./client/src/hooks/*"]
     }
   }
 }
