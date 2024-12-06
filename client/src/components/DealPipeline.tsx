@@ -7,11 +7,13 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  rectIntersection,
   DragStartEvent,
   useDraggable,
   useDroppable,
   defaultDropAnimationSideEffects,
+  MeasuringStrategy,
+  CollisionDetection,
+  pointerWithin,
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { Button } from "@/components/ui/button";
@@ -121,7 +123,7 @@ function DroppableStage({
   products?: Product[];
   metrics: { count: number; totalValue: number; weightedValue: number; avgProbability: number; };
 }) {
-  const { setNodeRef } = useDroppable({
+  const { setNodeRef, isOver: isDraggingOver } = useDroppable({
     id: stage.id,
   });
 
@@ -162,7 +164,14 @@ function DroppableStage({
         </div>
         <div 
           ref={setNodeRef}
-          className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 min-h-0"
+          className={`flex-1 overflow-y-auto px-4 pb-4 space-y-4 min-h-0 transition-all duration-200 ${
+            isDraggingOver ? 'bg-primary/5 scale-[1.02]' : ''
+          }`}
+          style={{
+            borderRadius: '0.75rem',
+            transform: isDraggingOver ? 'translateZ(0)' : undefined,
+            willChange: 'transform, background-color',
+          }}
         >
           {stageOpportunities.map((opp) => (
             <DraggableDealCard
@@ -186,9 +195,9 @@ export function DealPipeline() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 1,
+        distance: 3,
         delay: 0,
-        tolerance: 1,
+        tolerance: 0,
       },
     })
   );
@@ -326,15 +335,16 @@ export function DealPipeline() {
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={rectIntersection}
+      collisionDetection={pointerWithin}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       modifiers={[restrictToVerticalAxis]}
       measuring={{
         droppable: {
-          strategy: 'rects',
+          strategy: MeasuringStrategy.Always,
         },
       }}
+      animationDuration={150}
     >
       <div className="space-y-6 h-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 px-6">
