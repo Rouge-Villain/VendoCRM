@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { type Customer } from "@db/schema";
 import { Users, Box, Map, UserPlus } from "lucide-react";
 
@@ -14,13 +14,19 @@ export function StatsOverview() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
           <Card key={i} className="animate-pulse">
-            <CardHeader className="space-y-2">
-              <div className="h-4 w-1/3 bg-gray-200 rounded" />
-              <div className="h-8 w-1/2 bg-gray-200 rounded" />
-            </CardHeader>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between space-y-0">
+                <div className="h-12 w-12 rounded-lg bg-muted animate-pulse" />
+                <div className="h-8 w-24 bg-muted rounded animate-pulse" />
+              </div>
+              <div className="mt-4 space-y-2">
+                <div className="h-4 w-1/2 bg-muted rounded animate-pulse" />
+                <div className="h-3 w-2/3 bg-muted rounded animate-pulse" />
+              </div>
+            </CardContent>
           </Card>
         ))}
       </div>
@@ -79,9 +85,9 @@ export function StatsOverview() {
               </div>
             </div>
             <div className="space-y-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
+              <h3 className="text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
                 {stat.title}
-              </CardTitle>
+              </h3>
               <p className="text-xs text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">
                 {stat.description}
               </p>
