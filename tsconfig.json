@@ -24,6 +24,7 @@
       "@/*": ["./client/src/*"],
       "@db/*": ["./db/*"],
       "@/components/*": ["./client/src/components/*"],
+      "@/components/ui": ["./client/src/components/ui"],
       "@/components/ui/*": ["./client/src/components/ui/*"],
       "@/lib/*": ["./client/src/lib/*"],
       "@/hooks/*": ["./client/src/hooks/*"],
