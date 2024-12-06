@@ -15,6 +15,7 @@ import {
   CollisionDetection,
   pointerWithin,
 } from "@dnd-kit/core";
+import { cn } from "@/lib/utils";
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -55,7 +56,7 @@ function DraggableDealCard({ opportunity, customers, products }: {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className="touch-none"
+      className="touch-none transform-gpu will-change-transform"
     >
       <Card className="bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-75 cursor-move relative overflow-hidden border border-border/50 hover:border-primary/20 group translate-gpu will-change-transform">
         <div className="absolute top-0 left-0 right-0 h-1 bg-primary/80 group-hover:bg-primary transition-colors duration-75" />
@@ -164,14 +165,11 @@ function DroppableStage({
         </div>
         <div 
           ref={setNodeRef}
-          className={`flex-1 overflow-y-auto px-4 pb-4 space-y-4 min-h-0 transition-all duration-200 ${
-            isDraggingOver ? 'bg-primary/5 scale-[1.02]' : ''
-          }`}
-          style={{
-            borderRadius: '0.75rem',
-            transform: isDraggingOver ? 'translateZ(0)' : undefined,
-            willChange: 'transform, background-color',
-          }}
+          className={cn(
+            "flex-1 overflow-y-auto px-4 pb-4 space-y-4 min-h-0 transition-all duration-200",
+            "transform-gpu rounded-xl",
+            isDraggingOver && "scale-[1.02] transition-transform duration-75 bg-primary/5"
+          )}
         >
           {stageOpportunities.map((opp) => (
             <DraggableDealCard
@@ -195,12 +193,18 @@ export function DealPipeline() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 3,
+        distance: 8, // Increased for better touch handling
         delay: 0,
-        tolerance: 0,
+        tolerance: 5,
       },
     })
   );
+
+  const collisionDetectionStrategy: CollisionDetection = (args) => {
+    // Optimize collision detection for vertical movement
+    const pointerCollisions = pointerWithin(args);
+    return pointerCollisions.length > 0 ? [pointerCollisions[0]] : [];
+  };
 
   const { data: opportunities, isLoading: isLoadingOpps, isError: isErrorOpps } = useQuery({
     queryKey: ["opportunities"],
@@ -335,7 +339,7 @@ export function DealPipeline() {
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={pointerWithin}
+      collisionDetection={collisionDetectionStrategy}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       modifiers={[restrictToVerticalAxis]}
@@ -344,7 +348,6 @@ export function DealPipeline() {
           strategy: MeasuringStrategy.Always,
         },
       }}
-      animationDuration={150}
     >
       <div className="space-y-6 h-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 px-6">
@@ -424,7 +427,7 @@ export function DealPipeline() {
           </div>
         </div>
 
-        <DragOverlay dropAnimation={null}>
+        <DragOverlay>
           {draggedDeal && (
             <div className="w-[280px]">
               <Card className="bg-white/95 shadow-lg relative overflow-hidden translate-gpu scale-100">
