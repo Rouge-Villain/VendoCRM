@@ -13,7 +13,10 @@ import {
 } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type Customer } from "@db/schema";
+import { Button } from "@/components/ui/button";
+import { FileDown as FileDownIcon } from "lucide-react";
+import { type Customer, type Opportunity } from "@db/schema";
+import { exportAnalyticsData } from "@/lib/exportData";
 
 ChartJS.register(
   CategoryScale,
@@ -33,6 +36,14 @@ export function CustomerAnalytics() {
     queryFn: async () => {
       const response = await fetch("/api/customers");
       return response.json() as Promise<Customer[]>;
+    },
+  });
+
+  const { data: opportunities } = useQuery({
+    queryKey: ["opportunities"],
+    queryFn: async () => {
+      const response = await fetch("/api/opportunities");
+      return response.json() as Promise<Opportunity[]>;
     },
   });
 
@@ -102,7 +113,18 @@ export function CustomerAnalytics() {
     <div className="space-y-6">
       <Card className="hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-background via-background/95 to-secondary/5">
         <CardHeader>
-          <CardTitle className="text-xl font-bold text-primary tracking-tight">Customer Acquisition Trends</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-xl font-bold text-primary tracking-tight">Customer Acquisition Trends</CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => exportAnalyticsData(customers || [], opportunities || [], 'acquisition')}
+            >
+              <FileDownIcon className="h-4 w-4" />
+              Export Data
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -160,7 +182,18 @@ export function CustomerAnalytics() {
 
       <Card className="hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-background via-background/95 to-secondary/5">
         <CardHeader>
-          <CardTitle className="text-xl font-bold text-primary tracking-tight">Machine Type Distribution</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-xl font-bold text-primary tracking-tight">Machine Type Distribution</CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => exportAnalyticsData(customers || [], opportunities || [], 'distribution')}
+            >
+              <FileDownIcon className="h-4 w-4" />
+              Export Data
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] animate-in fade-in slide-in-from-bottom-4 duration-700">
