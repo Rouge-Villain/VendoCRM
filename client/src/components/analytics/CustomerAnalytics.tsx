@@ -178,7 +178,7 @@ export function CustomerAnalytics() {
                     beginAtZero: true,
                     grid: {
                       color: 'rgba(148, 163, 184, 0.1)',
-                      borderWidth: 0,
+                      display: true,
                     },
                     ticks: {
                       font: {
@@ -194,7 +194,7 @@ export function CustomerAnalytics() {
                   },
                   x: {
                     grid: {
-                      display: false,
+                      drawOnChartArea: false,
                     },
                     ticks: {
                       font: {

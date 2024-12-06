@@ -188,6 +188,9 @@ export function AdvancedAnalytics() {
                 scales: {
                   y: {
                     beginAtZero: true,
+                    grid: {
+                      color: 'rgba(148, 163, 184, 0.1)',
+                    },
                   },
                 },
               }}

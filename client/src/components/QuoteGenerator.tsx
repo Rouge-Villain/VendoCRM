@@ -1,13 +1,29 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Page, Text, View, Document, StyleSheet, PDFDownloadLinkProps, BlobProvider } from "@react-pdf/renderer";
+import { Page, Text, View, Document, StyleSheet, PDFDownloadLinkProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import { format, addDays } from "date-fns";
 import dynamic from 'next/dynamic';
 
-const PDFDownloadLink = dynamic<PDFDownloadLinkProps>(() => import('@react-pdf/renderer').then(mod => mod.PDFDownloadLink), {
-  ssr: false
-});
+interface PDFLinkProps {
+  document: ReactElement;
+  fileName: string;
+  style?: React.CSSProperties;
+  className?: string;
+}
+
+const PDFDownloadLink = dynamic(
+  () => import('@react-pdf/renderer').then((mod) => {
+    const PDFLink = mod.PDFDownloadLink;
+    return PDFLink;
+  }),
+  {
+    ssr: false,
+    loading: () => <div>Loading PDF generator...</div>
+  }
+) as React.ComponentType<PDFLinkProps & {
+  children: (props: { url: string | null; loading: boolean; error: Error | null }) => ReactElement;
+}>;
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { type Opportunity, type Customer, type Product } from "@db/schema";
@@ -240,11 +256,15 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
             className="w-full"
             style={{ width: '100%', textDecoration: 'none' }}
           >
-            {({ loading }: { loading: boolean }): ReactElement => (
-              <Button asChild className="w-full" disabled={loading}>
-                <div className="w-full text-center">
-                  {loading ? 'Generating PDF...' : 'Download Quote PDF'}
-                </div>
+            {({ loading, url, error }: { loading: boolean; url: string | null; error: Error | null }): ReactElement => (
+              <Button asChild className="w-full" disabled={loading || !!error}>
+                <a 
+                  href={url ?? '#'} 
+                  className="w-full text-center"
+                  download={`quote-${opportunity.id}.pdf`}
+                >
+                  {loading ? 'Generating PDF...' : error ? 'Error generating PDF' : 'Download Quote PDF'}
+                </a>
               </Button>
             )}
           </PDFDownloadLink>
