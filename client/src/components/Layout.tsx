@@ -57,9 +57,11 @@ export default function Layout({ children }: LayoutProps) {
         </div>
 
         {/* Main content */}
-        <div className="pl-64 flex-1 min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 overflow-x-auto transition-all duration-300">
-          <main className="py-8 px-8 min-w-[1024px] animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {children}
+        <div className="pl-64 flex-1 min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 transition-all duration-300">
+          <main className="py-8 px-8 w-full overflow-x-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="container mx-auto">
+              {children}
+            </div>
           </main>
         </div>
       </div>
