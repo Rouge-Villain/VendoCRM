@@ -99,7 +99,6 @@ export default function Customers() {
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Address</TableHead>
-                  <TableHead>City</TableHead>
                   <TableHead>State</TableHead>
                   <TableHead>Notes</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -113,7 +112,6 @@ export default function Customers() {
                     <TableCell>{customer.email}</TableCell>
                     <TableCell>{customer.phone}</TableCell>
                     <TableCell>{customer.address}</TableCell>
-                    <TableCell>{customer.city}</TableCell>
                     <TableCell>{customer.state}</TableCell>
                     <TableCell className="max-w-[200px] truncate">{customer.notes}</TableCell>
                     <TableCell className="text-right space-x-2">

@@ -239,15 +239,13 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
             className="w-full"
             style={{ width: '100%', textDecoration: 'none' }}
           >
-            {({ loading }: { loading: boolean }) => {
-              return (
-                <Button asChild className="w-full" disabled={loading}>
-                  <div className="w-full text-center">
-                    {loading ? 'Generating PDF...' : 'Download Quote PDF'}
-                  </div>
-                </Button>
-              );
-            }}
+            {({ loading }: { loading: boolean; }): React.ReactElement => (
+              <Button asChild className="w-full" disabled={loading}>
+                <div className="w-full text-center">
+                  {loading ? 'Generating PDF...' : 'Download Quote PDF'}
+                </div>
+              </Button>
+            )}
           </PDFDownloadLink>
           <div className="mt-4 p-4 border rounded-lg bg-muted">
             <p className="text-center text-sm text-muted-foreground">
