@@ -1,12 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
-import type { PDFDownloadLinkProps, PDFDownloadLink as PDFDownloadLinkType } from "@react-pdf/renderer";
-import type { ReactElement } from "react";
+import { Page, Text, View, Document, StyleSheet, PDFDownloadLink } from "@react-pdf/renderer";
 import { format, addDays } from "date-fns";
-import dynamic from "next/dynamic";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { type Opportunity, type Customer, type Product } from "@db/schema";
+import type { Customer, Product } from "@db/schema";
 
 // PDF styles
 const styles = StyleSheet.create({
@@ -109,51 +106,126 @@ const styles = StyleSheet.create({
   },
 });
 
-// Type definitions for PDF components
-interface BlobProviderParams {
-  blob: Blob | null;
-  url: string | null;
-  loading: boolean;
-  error: Error | null;
+// Types
+interface QuoteOpportunity {
+  id: number;
+  customerId: number;
+  productId: number;
+  value: string;
+  status: string;
+  stage: string;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  notes: string | null;
+  probability: number | null;
+  expectedCloseDate: Date | null;
+  lostReason: string | null;
+  nextFollowUp: Date | null;
 }
-
-type RenderProps = BlobProviderParams;
-
-// Define the props type for the PDF download link component
-interface PDFLinkProps extends PDFDownloadLinkProps {
-  children: (props: BlobProviderParams) => JSX.Element;
-}
-
-// Dynamic import of PDFDownloadLink with proper typing
-const DynamicPDFDownloadLink = dynamic<PDFLinkProps>(() => 
-  import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink), {
-    ssr: false,
-    loading: () => <div>Loading PDF generator...</div>
-  }
-);
-
-DynamicPDFDownloadLink.displayName = 'DynamicPDFDownloadLink';
-
-type QuoteOpportunity = {
-  id: string | number;
-  customerId: string | number;
-  productId: string | number;
-  value: string | number;
-  status?: string;
-  stage?: string;
-  createdAt?: string | Date;
-  probability?: number | null;
-  expectedCloseDate?: Date | null;
-  lostReason?: string | null;
-  notes?: string | null;
-  updatedAt?: Date | null;
-};
 
 interface QuoteGeneratorProps {
   opportunity: QuoteOpportunity;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+interface QuoteDocumentProps {
+  opportunity: QuoteOpportunity;
+  customer?: Customer;
+  product?: Product;
+}
+
+// Quote Document Component
+const QuoteDocument = ({ opportunity, customer, product }: QuoteDocumentProps) => (
+  <Document>
+    <Page size="A4" style={styles.page}>
+      <View style={styles.companyInfo}>
+        <Text>Your Vending Solutions Company</Text>
+        <Text>123 Business Street</Text>
+        <Text>City, State 12345</Text>
+        <Text>Tel: (555) 123-4567</Text>
+      </View>
+
+      <View style={styles.header}>
+        <Text>Sales Proposal</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Quote Information</Text>
+        <Text style={styles.text}>Quote Number: Q-{opportunity.id}</Text>
+        <Text style={styles.text}>Date: {format(new Date(), 'MMMM d, yyyy')}</Text>
+        <Text style={styles.text}>Valid Until: {format(addDays(new Date(), 30), 'MMMM d, yyyy')}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Customer Details</Text>
+        <Text style={styles.text}>Company: {customer?.company}</Text>
+        <Text style={styles.text}>Contact: {customer?.name}</Text>
+        <Text style={styles.text}>Email: {customer?.email}</Text>
+        <Text style={styles.text}>Phone: {customer?.phone}</Text>
+        <Text style={styles.text}>Address: {customer?.address}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Equipment Details</Text>
+        <View style={styles.table}>
+          <View style={styles.tableHeader}>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellHeader}>Product</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellHeader}>Description</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellHeader}>Quantity</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellHeader}>Price</Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCell}>{product?.name}</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCell}>{product?.description}</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCell}>1</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCell}>${product?.price?.toLocaleString()}</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.total}>
+          <Text style={styles.totalLabel}>Total Investment: </Text>
+          <Text style={styles.totalAmount}>${Number(opportunity.value).toLocaleString()}</Text>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Service Agreement</Text>
+        <Text style={styles.text}>• Equipment Installation and Setup</Text>
+        <Text style={styles.text}>• Preventive Maintenance Schedule</Text>
+        <Text style={styles.text}>• 24/7 Technical Support</Text>
+        <Text style={styles.text}>• Product Restocking Services</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Terms and Conditions</Text>
+        <Text style={styles.text}>1. This proposal is valid for 30 days from the date of issue</Text>
+        <Text style={styles.text}>2. Standard delivery and installation: 2-4 weeks from order confirmation</Text>
+        <Text style={styles.text}>3. Payment terms: Net 30 days from invoice date</Text>
+        <Text style={styles.text}>4. Warranty: 12 months parts and labor</Text>
+      </View>
+
+      <View style={styles.footer}>
+        <Text>Thank you for considering our vending solutions. We look forward to serving your refreshment needs.</Text>
+      </View>
+    </Page>
+  </Document>
+);
 
 export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGeneratorProps) {
   const { data: customer } = useQuery<Customer>({
@@ -163,8 +235,7 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
       if (!response.ok) {
         throw new Error(`Error fetching customer: ${response.statusText}`);
       }
-      const data = await response.json();
-      return data;
+      return response.json();
     },
   });
 
@@ -175,101 +246,9 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
       if (!response.ok) {
         throw new Error(`Error fetching product: ${response.statusText}`);
       }
-      const data = await response.json();
-      return data;
+      return response.json();
     },
   });
-
-  const QuoteDocument = (): ReactElement => (
-    <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.companyInfo}>
-          <Text>Your Vending Solutions Company</Text>
-          <Text>123 Business Street</Text>
-          <Text>City, State 12345</Text>
-          <Text>Tel: (555) 123-4567</Text>
-        </View>
-
-        <View style={styles.header}>
-          <Text>Sales Proposal</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quote Information</Text>
-          <Text style={styles.text}>Quote Number: Q-{opportunity.id}</Text>
-          <Text style={styles.text}>Date: {format(new Date(), 'MMMM d, yyyy')}</Text>
-          <Text style={styles.text}>Valid Until: {format(addDays(new Date(), 30), 'MMMM d, yyyy')}</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Customer Details</Text>
-          <Text style={styles.text}>Company: {customer?.company}</Text>
-          <Text style={styles.text}>Contact: {customer?.name}</Text>
-          <Text style={styles.text}>Email: {customer?.email}</Text>
-          <Text style={styles.text}>Phone: {customer?.phone}</Text>
-          <Text style={styles.text}>Address: {customer?.address}</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Equipment Details</Text>
-          <View style={styles.table}>
-            <View style={styles.tableHeader}>
-              <View style={styles.tableCol}>
-                <Text style={styles.tableCellHeader}>Product</Text>
-              </View>
-              <View style={styles.tableCol}>
-                <Text style={styles.tableCellHeader}>Description</Text>
-              </View>
-              <View style={styles.tableCol}>
-                <Text style={styles.tableCellHeader}>Quantity</Text>
-              </View>
-              <View style={styles.tableCol}>
-                <Text style={styles.tableCellHeader}>Price</Text>
-              </View>
-            </View>
-            <View style={styles.tableRow}>
-              <View style={styles.tableCol}>
-                <Text style={styles.tableCell}>{product?.name}</Text>
-              </View>
-              <View style={styles.tableCol}>
-                <Text style={styles.tableCell}>{product?.description}</Text>
-              </View>
-              <View style={styles.tableCol}>
-                <Text style={styles.tableCell}>1</Text>
-              </View>
-              <View style={styles.tableCol}>
-                <Text style={styles.tableCell}>${product?.price?.toLocaleString()}</Text>
-              </View>
-            </View>
-          </View>
-          <View style={styles.total}>
-            <Text style={styles.totalLabel}>Total Investment: </Text>
-            <Text style={styles.totalAmount}>${Number(opportunity.value).toLocaleString()}</Text>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Service Agreement</Text>
-          <Text style={styles.text}>• Equipment Installation and Setup</Text>
-          <Text style={styles.text}>• Preventive Maintenance Schedule</Text>
-          <Text style={styles.text}>• 24/7 Technical Support</Text>
-          <Text style={styles.text}>• Product Restocking Services</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Terms and Conditions</Text>
-          <Text style={styles.text}>1. This proposal is valid for 30 days from the date of issue</Text>
-          <Text style={styles.text}>2. Standard delivery and installation: 2-4 weeks from order confirmation</Text>
-          <Text style={styles.text}>3. Payment terms: Net 30 days from invoice date</Text>
-          <Text style={styles.text}>4. Warranty: 12 months parts and labor</Text>
-        </View>
-
-        <View style={styles.footer}>
-          <Text>Thank you for considering our vending solutions. We look forward to serving your refreshment needs.</Text>
-        </View>
-      </Page>
-    </Document>
-  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -279,29 +258,19 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
           <DialogDescription>Generate a detailed quote for this opportunity</DialogDescription>
         </DialogHeader>
         <div className="p-4">
-          <DynamicPDFDownloadLink
-            document={<QuoteDocument />}
-            fileName={`quote-${opportunity.id}.pdf`}
-          >
-            {({ blob, url, loading, error }) => (
-              <div className="w-full">
-                <Button
-                  className="w-full"
-                  disabled={loading || !!error}
-                  asChild
-                >
-                  <a 
-                    href={url || '#'} 
-                    className="w-full inline-flex items-center justify-center"
-                    download={`quote-${opportunity.id}.pdf`}
-                    rel="noopener noreferrer"
-                  >
-                    {loading ? 'Generating PDF...' : error ? 'Error generating PDF' : 'Download Quote PDF'}
-                  </a>
-                </Button>
-              </div>
-            )}
-          </DynamicPDFDownloadLink>
+          {typeof window !== 'undefined' && (
+            <Button asChild className="w-full">
+              <PDFDownloadLink
+                document={<QuoteDocument opportunity={opportunity} customer={customer} product={product} />}
+                fileName={`quote-${opportunity.id}.pdf`}
+                className="w-full inline-flex items-center justify-center"
+              >
+                {({ loading, error }) => (
+                  loading ? 'Generating PDF...' : error ? 'Error generating PDF' : 'Download Quote PDF'
+                )}
+              </PDFDownloadLink>
+            </Button>
+          )}
           <div className="mt-4 p-4 border rounded-lg bg-muted">
             <p className="text-center text-sm text-muted-foreground">
               Click the button above to download the quote as a PDF
