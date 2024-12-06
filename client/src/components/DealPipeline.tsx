@@ -53,7 +53,7 @@ function DraggableDealCard({ opportunity, customers, products }: {
       {...attributes}
       className="touch-none"
     >
-      <Card className="bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-200 cursor-move relative overflow-hidden border border-border/50 hover:border-primary/20 group">
+      <Card className="bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-150 cursor-move relative overflow-hidden border border-border/50 hover:border-primary/20 group translate-gpu">
         <div className="absolute top-0 left-0 right-0 h-1 bg-primary/80 group-hover:bg-primary transition-colors duration-200" />
         <CardContent className="p-4">
           <div className="space-y-2.5">
@@ -184,7 +184,9 @@ export function DealPipeline() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 1,
+        distance: 0.5,
+        delay: 0,
+        tolerance: 0,
       },
     })
   );
@@ -407,8 +409,8 @@ export function DealPipeline() {
         <DragOverlay>
           {draggedDeal && (
             <div className="w-[280px]">
-              <Card className="bg-white shadow-md relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
+              <Card className="bg-white/95 shadow-lg relative overflow-hidden translate-gpu scale-[1.02] transition-transform duration-75">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-primary animate-pulse" />
                 <CardContent className="p-4">
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
