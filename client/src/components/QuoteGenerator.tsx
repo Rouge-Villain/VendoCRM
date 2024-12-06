@@ -1,37 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
+import type { PDFDownloadLinkProps, PDFDownloadLink as PDFDownloadLinkType } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import { format, addDays } from "date-fns";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { type Opportunity, type Customer, type Product } from "@db/schema";
 
-// Define types for the PDF component
-interface PDFRenderProps {
-  blob: Blob | null;
-  url: string | null;
-  loading: boolean;
-  error: Error | null;
-}
-
-interface PDFDocumentProps {
-  document: ReactElement;
-  fileName: string;
-  className?: string;
-  style?: React.CSSProperties;
-  children: (props: PDFRenderProps) => ReactElement;
-}
-
-// Dynamic import of PDFDownloadLink
-const PDFDownloadLink = dynamic<PDFDocumentProps>(
-  () => import('@react-pdf/renderer').then(mod => mod.PDFDownloadLink as any),
-  {
-    ssr: false,
-    loading: () => <div>Loading PDF generator...</div>
-  }
-);
-
+// PDF styles
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
@@ -132,6 +109,22 @@ const styles = StyleSheet.create({
   },
 });
 
+// Type definitions for PDF components
+type RenderProps = {
+  blob: Blob | null;
+  url: string | null;
+  loading: boolean;
+  error: Error | null;
+};
+
+// Dynamic import of PDFDownloadLink with proper typing
+const PDFDownloadLink = dynamic<PDFDownloadLinkProps>(() => 
+  import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink as unknown as typeof PDFDownloadLinkType), {
+    ssr: false,
+    loading: () => <div>Loading PDF generator...</div>
+  }
+);
+
 interface QuoteGeneratorProps {
   opportunity: Opportunity;
   open: boolean;
@@ -155,7 +148,7 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
     },
   });
 
-  const QuoteDocument = () => (
+  const QuoteDocument = (): ReactElement => (
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.companyInfo}>
@@ -168,7 +161,7 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
         <View style={styles.header}>
           <Text>Sales Proposal</Text>
         </View>
-        
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quote Information</Text>
           <Text style={styles.text}>Quote Number: Q-{opportunity.id}</Text>
@@ -260,7 +253,7 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
             className="w-full"
             style={{ width: '100%', textDecoration: 'none' }}
           >
-            {({ blob, url, loading, error }) => (
+            {({ blob, url, loading, error }: RenderProps): ReactElement => (
               <Button asChild className="w-full" disabled={loading || !!error}>
                 <a 
                   href={url ?? '#'} 
