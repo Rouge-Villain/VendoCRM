@@ -20,18 +20,18 @@ export default function Layout({ children }: LayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-background">
       <div className="flex min-h-screen">
         {/* Sidebar */}
-        <div className="fixed inset-y-0 flex w-64 flex-col bg-gradient-to-b from-background to-background/95 shadow-xl border-r border-border/50 backdrop-blur-sm transition-all duration-300">
-          <div className="flex h-32 items-center justify-center px-6 pt-8 pb-4">
+        <div className="fixed inset-y-0 z-30 flex w-64 flex-col bg-gradient-to-b from-background to-background/95 shadow-xl border-r border-border/50 backdrop-blur-sm">
+          <div className="flex h-24 items-center justify-center px-6">
             <img 
               src="/AVS.png" 
               alt="AVS Companies" 
-              className="h-16 w-auto object-contain transition-transform duration-300 hover:scale-105" 
+              className="h-12 w-auto object-contain transition-transform duration-300 hover:scale-105" 
             />
           </div>
-          <nav className="flex-1 space-y-2 px-4 py-6">
+          <nav className="flex-1 space-y-1 px-3 py-4">
             {navigation.map((item) => {
               const isActive = location === item.href;
               return (
@@ -57,12 +57,14 @@ export default function Layout({ children }: LayoutProps) {
         </div>
 
         {/* Main content */}
-        <div className="pl-64 flex-1 min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 transition-all duration-300">
-          <main className="py-8 px-8 w-full overflow-x-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="container mx-auto">
-              {children}
-            </div>
-          </main>
+        <div className="pl-64 flex-1">
+          <div className="min-h-screen w-full bg-gradient-to-br from-background via-background/95 to-background/90">
+            <main className="p-8">
+              <div className="max-w-[1400px] mx-auto">
+                {children}
+              </div>
+            </main>
+          </div>
         </div>
       </div>
     </div>
