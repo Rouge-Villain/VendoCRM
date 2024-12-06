@@ -187,9 +187,14 @@ export function AdvancedAnalytics() {
                 },
                 scales: {
                   y: {
+                    type: 'linear' as const,
                     beginAtZero: true,
                     grid: {
                       color: 'rgba(148, 163, 184, 0.1)',
+                      drawOnChartArea: true,
+                    },
+                    border: {
+                      display: false
                     },
                   },
                 },

@@ -1,32 +1,36 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Page, Text, View, Document, StyleSheet, PDFDownloadLinkProps } from "@react-pdf/renderer";
+import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import { format, addDays } from "date-fns";
 import dynamic from 'next/dynamic';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { type Opportunity, type Customer, type Product } from "@db/schema";
 
-interface PDFLinkProps {
-  document: ReactElement;
-  fileName: string;
-  style?: React.CSSProperties;
-  className?: string;
+// Define types for the PDF component
+interface PDFRenderProps {
+  blob: Blob | null;
+  url: string | null;
+  loading: boolean;
+  error: Error | null;
 }
 
-const PDFDownloadLink = dynamic(
-  () => import('@react-pdf/renderer').then((mod) => {
-    const PDFLink = mod.PDFDownloadLink;
-    return PDFLink;
-  }),
+interface PDFDocumentProps {
+  document: ReactElement;
+  fileName: string;
+  className?: string;
+  style?: React.CSSProperties;
+  children: (props: PDFRenderProps) => ReactElement;
+}
+
+// Dynamic import of PDFDownloadLink
+const PDFDownloadLink = dynamic<PDFDocumentProps>(
+  () => import('@react-pdf/renderer').then(mod => mod.PDFDownloadLink as any),
   {
     ssr: false,
     loading: () => <div>Loading PDF generator...</div>
   }
-) as React.ComponentType<PDFLinkProps & {
-  children: (props: { url: string | null; loading: boolean; error: Error | null }) => ReactElement;
-}>;
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { type Opportunity, type Customer, type Product } from "@db/schema";
+);
 
 const styles = StyleSheet.create({
   page: {
@@ -209,13 +213,13 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
                 <Text style={styles.tableCell}>1</Text>
               </View>
               <View style={styles.tableCol}>
-                <Text style={styles.tableCell}>${parseFloat(product?.price?.toString() || '0').toLocaleString()}</Text>
+                <Text style={styles.tableCell}>${product?.price?.toLocaleString()}</Text>
               </View>
             </View>
           </View>
           <View style={styles.total}>
             <Text style={styles.totalLabel}>Total Investment: </Text>
-            <Text style={styles.totalAmount}> ${parseFloat(opportunity.value.toString()).toLocaleString()}</Text>
+            <Text style={styles.totalAmount}>${opportunity.value.toLocaleString()}</Text>
           </View>
         </View>
 
@@ -256,7 +260,7 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
             className="w-full"
             style={{ width: '100%', textDecoration: 'none' }}
           >
-            {({ loading, url, error }: { loading: boolean; url: string | null; error: Error | null }): ReactElement => (
+            {({ blob, url, loading, error }) => (
               <Button asChild className="w-full" disabled={loading || !!error}>
                 <a 
                   href={url ?? '#'} 

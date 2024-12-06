@@ -177,8 +177,8 @@ export function CustomerAnalytics() {
                   y: {
                     beginAtZero: true,
                     grid: {
-                      color: 'rgba(148, 163, 184, 0.1)',
-                      display: true,
+                      drawOnChartArea: true,
+                      color: 'rgba(148, 163, 184, 0.1)'
                     },
                     ticks: {
                       font: {
