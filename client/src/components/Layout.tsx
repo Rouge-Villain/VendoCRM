@@ -53,8 +53,8 @@ export default function Layout({ children }: LayoutProps) {
         </div>
 
         {/* Main content */}
-        <div className="pl-64 flex-1 min-h-screen bg-gray-50/50">
-          <main className="py-8 px-8 max-w-7xl mx-auto">
+        <div className="pl-64 flex-1 min-h-screen bg-gray-50/50 overflow-x-auto">
+          <main className="py-8 px-8 min-w-[1024px]">
             {children}
           </main>
         </div>
