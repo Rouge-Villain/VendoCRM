@@ -7,11 +7,13 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  closestCorners,
+  rectIntersection,
   DragStartEvent,
   useDraggable,
   useDroppable,
+  defaultDropAnimationSideEffects,
 } from "@dnd-kit/core";
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -53,8 +55,8 @@ function DraggableDealCard({ opportunity, customers, products }: {
       {...attributes}
       className="touch-none"
     >
-      <Card className="bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-150 cursor-move relative overflow-hidden border border-border/50 hover:border-primary/20 group translate-gpu">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-primary/80 group-hover:bg-primary transition-colors duration-200" />
+      <Card className="bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-75 cursor-move relative overflow-hidden border border-border/50 hover:border-primary/20 group translate-gpu will-change-transform">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-primary/80 group-hover:bg-primary transition-colors duration-75" />
         <CardContent className="p-4">
           <div className="space-y-2.5">
             <div className="flex justify-between items-center">
@@ -184,9 +186,9 @@ export function DealPipeline() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 0.5,
+        distance: 1,
         delay: 0,
-        tolerance: 0,
+        tolerance: 1,
       },
     })
   );
@@ -324,9 +326,15 @@ export function DealPipeline() {
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={rectIntersection}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      modifiers={[restrictToVerticalAxis]}
+      measuring={{
+        droppable: {
+          strategy: 'rects',
+        },
+      }}
     >
       <div className="space-y-6 h-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 px-6">
@@ -406,11 +414,11 @@ export function DealPipeline() {
           </div>
         </div>
 
-        <DragOverlay>
+        <DragOverlay dropAnimation={null}>
           {draggedDeal && (
             <div className="w-[280px]">
-              <Card className="bg-white/95 shadow-lg relative overflow-hidden translate-gpu scale-[1.02] transition-transform duration-75">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-primary animate-pulse" />
+              <Card className="bg-white/95 shadow-lg relative overflow-hidden translate-gpu scale-100">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
                 <CardContent className="p-4">
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
