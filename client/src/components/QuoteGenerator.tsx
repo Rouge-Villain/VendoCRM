@@ -110,41 +110,73 @@ const styles = StyleSheet.create({
 });
 
 // Type definitions for PDF components
-type RenderProps = {
+interface BlobProviderParams {
   blob: Blob | null;
   url: string | null;
   loading: boolean;
   error: Error | null;
-};
+}
+
+type RenderProps = BlobProviderParams;
+
+// Define the props type for the PDF download link component
+interface PDFLinkProps extends PDFDownloadLinkProps {
+  children: (props: BlobProviderParams) => JSX.Element;
+}
 
 // Dynamic import of PDFDownloadLink with proper typing
-const PDFDownloadLink = dynamic<PDFDownloadLinkProps>(() => 
-  import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink as unknown as typeof PDFDownloadLinkType), {
+const DynamicPDFDownloadLink = dynamic<PDFLinkProps>(() => 
+  import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink), {
     ssr: false,
     loading: () => <div>Loading PDF generator...</div>
   }
 );
 
+DynamicPDFDownloadLink.displayName = 'DynamicPDFDownloadLink';
+
+type QuoteOpportunity = {
+  id: string | number;
+  customerId: string | number;
+  productId: string | number;
+  value: string | number;
+  status?: string;
+  stage?: string;
+  createdAt?: string | Date;
+  probability?: number | null;
+  expectedCloseDate?: Date | null;
+  lostReason?: string | null;
+  notes?: string | null;
+  updatedAt?: Date | null;
+};
+
 interface QuoteGeneratorProps {
-  opportunity: Opportunity;
+  opportunity: QuoteOpportunity;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGeneratorProps) {
-  const { data: customer } = useQuery({
+  const { data: customer } = useQuery<Customer>({
     queryKey: ["customers", opportunity.customerId],
     queryFn: async () => {
       const response = await fetch(`/api/customers/${opportunity.customerId}`);
-      return response.json() as Promise<Customer>;
+      if (!response.ok) {
+        throw new Error(`Error fetching customer: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data;
     },
   });
 
-  const { data: product } = useQuery({
+  const { data: product } = useQuery<Product>({
     queryKey: ["products", opportunity.productId],
     queryFn: async () => {
       const response = await fetch(`/api/products/${opportunity.productId}`);
-      return response.json() as Promise<Product>;
+      if (!response.ok) {
+        throw new Error(`Error fetching product: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data;
     },
   });
 
@@ -212,7 +244,7 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
           </View>
           <View style={styles.total}>
             <Text style={styles.totalLabel}>Total Investment: </Text>
-            <Text style={styles.totalAmount}>${opportunity.value.toLocaleString()}</Text>
+            <Text style={styles.totalAmount}>${Number(opportunity.value).toLocaleString()}</Text>
           </View>
         </View>
 
@@ -247,24 +279,29 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
           <DialogDescription>Generate a detailed quote for this opportunity</DialogDescription>
         </DialogHeader>
         <div className="p-4">
-          <PDFDownloadLink
+          <DynamicPDFDownloadLink
             document={<QuoteDocument />}
             fileName={`quote-${opportunity.id}.pdf`}
-            className="w-full"
-            style={{ width: '100%', textDecoration: 'none' }}
           >
-            {({ blob, url, loading, error }: RenderProps): ReactElement => (
-              <Button asChild className="w-full" disabled={loading || !!error}>
-                <a 
-                  href={url ?? '#'} 
-                  className="w-full text-center"
-                  download={`quote-${opportunity.id}.pdf`}
+            {({ blob, url, loading, error }) => (
+              <div className="w-full">
+                <Button
+                  className="w-full"
+                  disabled={loading || !!error}
+                  asChild
                 >
-                  {loading ? 'Generating PDF...' : error ? 'Error generating PDF' : 'Download Quote PDF'}
-                </a>
-              </Button>
+                  <a 
+                    href={url || '#'} 
+                    className="w-full inline-flex items-center justify-center"
+                    download={`quote-${opportunity.id}.pdf`}
+                    rel="noopener noreferrer"
+                  >
+                    {loading ? 'Generating PDF...' : error ? 'Error generating PDF' : 'Download Quote PDF'}
+                  </a>
+                </Button>
+              </div>
             )}
-          </PDFDownloadLink>
+          </DynamicPDFDownloadLink>
           <div className="mt-4 p-4 border rounded-lg bg-muted">
             <p className="text-center text-sm text-muted-foreground">
               Click the button above to download the quote as a PDF
