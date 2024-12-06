@@ -49,7 +49,6 @@ export function CustomerAnalytics() {
     },
   });
 
-  // Calculate customer acquisition trends (monthly)
   const acquisitionTrends = customers?.reduce((acc, customer) => {
     if (customer.createdAt) {
       const date = new Date(customer.createdAt);
@@ -59,7 +58,6 @@ export function CustomerAnalytics() {
     return acc;
   }, {} as Record<string, number>);
 
-  // Calculate machine type distribution
   const machineDistribution = customers?.reduce((acc, customer) => {
     if (Array.isArray(customer.machineTypes)) {
       (customer.machineTypes as string[]).forEach(type => {
@@ -156,7 +154,7 @@ export function CustomerAnalytics() {
                     padding: 12,
                     titleFont: {
                       size: 14,
-                      weight: 'bold',
+                      weight: 500,
                     },
                     bodyFont: {
                       size: 12,
@@ -226,7 +224,7 @@ export function CustomerAnalytics() {
                     padding: 12,
                     titleFont: {
                       size: 14,
-                      weight: 'bold',
+                      weight: 500,
                     },
                     bodyFont: {
                       size: 12,
