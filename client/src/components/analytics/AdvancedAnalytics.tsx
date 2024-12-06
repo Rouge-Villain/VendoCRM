@@ -150,7 +150,7 @@ export function AdvancedAnalytics() {
 
   const handleExportData = () => {
     if (!customers || !opportunities) return;
-    const analyticsData = prepareAnalyticsData(customers, opportunities);
+    const analyticsData = prepareAnalyticsData(customers, opportunities, 'territory');
     exportToCSV(analyticsData, 'territory-performance-analysis');
   };
 

@@ -178,7 +178,7 @@ export function CustomerAnalytics() {
                     beginAtZero: true,
                     grid: {
                       color: 'rgba(148, 163, 184, 0.1)',
-                      drawBorder: false,
+                      borderWidth: 0,
                     },
                     ticks: {
                       font: {

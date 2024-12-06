@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
+import { Page, Text, View, Document, StyleSheet, PDFDownloadLinkProps, BlobProvider } from "@react-pdf/renderer";
+import type { ReactElement } from "react";
 import { format, addDays } from "date-fns";
 import dynamic from 'next/dynamic';
 
-const PDFDownloadLink = dynamic(() => import('@react-pdf/renderer').then(mod => mod.PDFDownloadLink), {
+const PDFDownloadLink = dynamic<PDFDownloadLinkProps>(() => import('@react-pdf/renderer').then(mod => mod.PDFDownloadLink), {
   ssr: false
 });
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -239,7 +240,7 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
             className="w-full"
             style={{ width: '100%', textDecoration: 'none' }}
           >
-            {({ loading }: { loading: boolean; }): React.ReactElement => (
+            {({ loading }: { loading: boolean }): ReactElement => (
               <Button asChild className="w-full" disabled={loading}>
                 <div className="w-full text-center">
                   {loading ? 'Generating PDF...' : 'Download Quote PDF'}
