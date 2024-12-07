@@ -3,7 +3,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const maintenanceRecords = pgTable("maintenance_records", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: integer("id").primaryKey().notNull(),
   customerId: integer("customer_id").notNull(),
   machineId: text("machine_id").notNull(),
   serialNumber: text("serial_number").notNull(),
@@ -13,7 +13,7 @@ export const maintenanceRecords = pgTable("maintenance_records", {
   status: text("status").notNull().default("pending"),
   technicianNotes: text("technician_notes").default(""),
   partsUsed: jsonb("parts_used").$type<Array<{ name: string; quantity: number }>>().default([]),
-  cost: decimal("cost", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  cost: decimal("cost").notNull().default("0"), // Keeping original precision
   scheduledDate: timestamp("scheduled_date").notNull(),
   completedDate: timestamp("completed_date"),
   nextMaintenanceDate: timestamp("next_maintenance_date"),
@@ -22,7 +22,7 @@ export const maintenanceRecords = pgTable("maintenance_records", {
 });
 
 export const customers = pgTable("customers", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: integer("id").primaryKey().notNull(),
   name: text("name").notNull(),
   company: text("company").notNull(),
   email: text("email").notNull(),
@@ -31,28 +31,30 @@ export const customers = pgTable("customers", {
   website: text("website"),
   notes: text("notes"),
   machineTypes: jsonb("machine_types").$type<Array<{ type: string; quantity: number }>>().default([]),
-  state: text("state").array(),
+  state: text("state"),
+  city: text("city"), // Preserving city column
+  business_locations: text("business_locations"), // Preserving business_locations column
   serviceTerritory: text("service_territory"),
   serviceHours: text("service_hours"),
   contractTerms: text("contract_terms"),
-  maintenanceHistory: text("maintenance_history"), // JSON array as text
+  maintenanceHistory: text("maintenance_history"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const products = pgTable("products", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: integer("id").primaryKey().notNull(),
   name: text("name").notNull(),
   category: text("category").notNull(), // machine, cooler, part, etc.
   description: text("description").notNull(),
   specs: text("specs").notNull(), // JSON string of technical specs
-  price: decimal("price").notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   imageUrl: text("image_url"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const opportunities = pgTable("opportunities", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: integer("id").primaryKey().notNull(),
   customerId: integer("customer_id").notNull(),
   productId: integer("product_id").notNull(),
   stage: text("stage").notNull().default("prospecting"), // Current pipeline stage
@@ -70,7 +72,7 @@ export const opportunities = pgTable("opportunities", {
 });
 
 export const activities = pgTable("activities", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: integer("id").primaryKey().notNull(),
   customerId: integer("customer_id").notNull(),
   type: text("type").notNull(), // call, email, meeting, etc.
   description: text("description").notNull(),
