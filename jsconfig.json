@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./client/src/*"],
+      "@db/*": ["./db/*"],
+      "@/components/*": ["./client/src/components/*"],
+      "@/components/ui": ["./client/src/components/ui"],
+      "@/components/ui/*": ["./client/src/components/ui/*"],
+      "@/lib/*": ["./client/src/lib/*"],
+      "@/hooks/*": ["./client/src/hooks/*"],
+      "@/styles/*": ["./client/src/styles/*"]
+    }
+  },
+  "include": ["client/src/**/*"],
+  "exclude": ["node_modules", "build", "dist"]
+}
