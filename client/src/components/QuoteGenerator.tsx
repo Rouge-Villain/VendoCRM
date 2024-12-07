@@ -116,15 +116,15 @@ interface QuoteOpportunity {
   customerId: number;
   productId: number;
   value: string;
-  status: string;
-  stage: string;
-  createdAt: Date | null;
-  updatedAt: Date | null;
+  status: 'open' | 'closed-won' | 'closed-lost';
+  stage: 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closed-won' | 'closed-lost';
+  createdAt: string | null;
+  updatedAt: string | null;
   notes: string | null;
   probability: number | null;
-  expectedCloseDate: Date | null;
+  expectedCloseDate: string | null;
   lostReason: string | null;
-  nextFollowUp: Date | null;
+  nextFollowUp: string | null;
 }
 
 interface QuoteGeneratorProps {
@@ -203,25 +203,27 @@ const QuoteDocument: React.FC<QuoteDocumentProps> = ({ opportunity, customer, pr
 );
 
 export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGeneratorProps) {
-  const { data: customer } = useQuery<Customer>({
+  const { data: customer } = useQuery<Customer, Error>({
     queryKey: ["customers", opportunity.customerId],
     queryFn: async () => {
       const response = await fetch(`/api/customers/${opportunity.customerId}`);
       if (!response.ok) {
         throw new Error(`Error fetching customer: ${response.statusText}`);
       }
-      return response.json();
+      const data: Customer = await response.json();
+      return data;
     },
   });
 
-  const { data: product } = useQuery<Product>({
+  const { data: product } = useQuery<Product, Error>({
     queryKey: ["products", opportunity.productId],
     queryFn: async () => {
       const response = await fetch(`/api/products/${opportunity.productId}`);
       if (!response.ok) {
         throw new Error(`Error fetching product: ${response.statusText}`);
       }
-      return response.json();
+      const data: Product = await response.json();
+      return data;
     },
   });
 
@@ -246,11 +248,11 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
                 fileName={`quote-${opportunity.id}.pdf`}
                 style={{ textDecoration: 'none' }}
               >
-                {({ url, loading, error }: { url: string | undefined; loading: boolean; error: Error | undefined }) => (
+                {({ url, loading, error }: RenderProps) => (
                   <Button 
                     className="w-full"
                     disabled={loading || !!error}
-                    asChild
+                    asChild={true}
                   >
                     <a
                       href={url || '#'}

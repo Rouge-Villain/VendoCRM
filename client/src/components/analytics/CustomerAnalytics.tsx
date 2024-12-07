@@ -34,6 +34,12 @@ ChartJS.register(
 
 type AcquisitionTrends = Record<string, number>;
 type MachineDistribution = Record<string, number>;
+type MachineType = string;
+
+// Type guard to check if value is a valid machine type string
+function isMachineType(value: unknown): value is MachineType {
+  return typeof value === 'string' && value.length > 0;
+}
 
 interface ChartDataset {
   label?: string;
@@ -94,7 +100,9 @@ export function CustomerAnalytics() {
   const machineDistribution = customers?.reduce<MachineDistribution>((acc, customer) => {
     if (Array.isArray(customer.machineTypes)) {
       customer.machineTypes.forEach(type => {
-        acc[type] = (acc[type] || 0) + 1;
+        if (isMachineType(type)) {
+          acc[type] = (acc[type] || 0) + 1;
+        }
       });
     }
     return acc;
@@ -178,7 +186,7 @@ export function CustomerAnalytics() {
                       padding: 20,
                       font: {
                         size: 12,
-                        weight: '500',
+                        weight: 500,
                         family: 'system-ui'
                       },
                       color: 'rgb(100, 116, 139)',
@@ -192,7 +200,7 @@ export function CustomerAnalytics() {
                     },
                     titleFont: {
                       size: 14,
-                      weight: '600',
+                      weight: 600,
                       family: 'system-ui'
                     },
                     bodyFont: {
@@ -292,7 +300,7 @@ export function CustomerAnalytics() {
                     padding: 12,
                     titleFont: {
                       size: 14,
-                      weight: '500',
+                      weight: 500,
                     },
                     bodyFont: {
                       size: 12,

@@ -55,11 +55,23 @@ export function WinLossAnalytics() {
   });
 
   // Calculate win/loss ratio by stage with values
-  const stageAnalysis = opportunities?.reduce((acc, opp) => {
-    if (!acc[opp.stage]) {
-      acc[opp.stage] = { 
-        won: 0, 
-        lost: 0, 
+  const stageAnalysis = opportunities?.reduce<Record<Stage, {
+    won: number;
+    lost: number;
+    total: number;
+    wonValue: number;
+    lostValue: number;
+    totalValue: number;
+    winRate: number;
+    avgTimeInStage: number;
+    conversionRate: number;
+    productWins: Record<number, number>;
+    productLosses: Record<number, number>;
+  }>>((acc, opp) => {
+    if (!acc[opp.stage as Stage]) {
+      acc[opp.stage as Stage] = {
+        won: 0,
+        lost: 0,
         total: 0,
         wonValue: 0,
         lostValue: 0,
@@ -67,29 +79,29 @@ export function WinLossAnalytics() {
         winRate: 0,
         avgTimeInStage: 0,
         conversionRate: 0,
-        productWins: {} as Record<number, number>,
-        productLosses: {} as Record<number, number>
+        productWins: {},
+        productLosses: {}
       };
     }
     const value = Number(opp.value) || 0;
-    acc[opp.stage].totalValue += value;
+    const currentStage = opp.stage as Stage;
+    acc[currentStage].totalValue += value;
     
     // Track wins and losses by product
-    if (!acc[opp.stage].productWins[opp.productId]) {
-      acc[opp.stage].productWins[opp.productId] = 0;
+    if (!acc[currentStage].productWins[opp.productId]) {
+      acc[currentStage].productWins[opp.productId] = 0;
     }
-    if (!acc[opp.stage].productLosses[opp.productId]) {
-      acc[opp.stage].productLosses[opp.productId] = 0;
+    if (!acc[currentStage].productLosses[opp.productId]) {
+      acc[currentStage].productLosses[opp.productId] = 0;
     }
-    
     if (opp.status === 'closed-won') {
-      acc[opp.stage].won++;
-      acc[opp.stage].wonValue += value;
-      acc[opp.stage].productWins[opp.productId]++;
+      acc[currentStage].won++;
+      acc[currentStage].wonValue += value;
+      acc[currentStage].productWins[opp.productId]++;
     } else if (opp.status === 'closed-lost') {
-      acc[opp.stage].lost++;
-      acc[opp.stage].lostValue += value;
-      acc[opp.stage].productLosses[opp.productId]++;
+      acc[currentStage].lost++;
+      acc[currentStage].lostValue += value;
+      acc[currentStage].productLosses[opp.productId]++;
     }
     
     // Calculate time in stage

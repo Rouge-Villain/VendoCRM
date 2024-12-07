@@ -52,39 +52,64 @@ export function AdvancedAnalytics() {
   });
 
   // Calculate service territory coverage
-  const territoryCoverage = customers?.reduce((acc, customer) => {
-    if (customer.serviceTerritory) {
-      acc[customer.serviceTerritory] = {
-        customers: (acc[customer.serviceTerritory]?.customers || 0) + 1,
-        machines: (acc[customer.serviceTerritory]?.machines || 0) + (Array.isArray(customer.machineTypes) ? customer.machineTypes.length : 0),
-        revenue: opportunities?.reduce((sum, opp) => 
-          opp.customerId === customer.id ? sum + Number(opp.value) : sum
-        , 0) || 0
+  interface TerritoryCoverage {
+    customers: number;
+    machines: number;
+    revenue: number;
+  }
+
+  const territoryCoverage = customers?.reduce<Record<string, TerritoryCoverage>>((acc, customer) => {
+    const territory = customer.serviceTerritory;
+    if (typeof territory === 'string') {
+      const currentTerritory = acc[territory] || { customers: 0, machines: 0, revenue: 0 };
+      acc[territory] = {
+        customers: currentTerritory.customers + 1,
+        machines: currentTerritory.machines + (Array.isArray(customer.machineTypes) ? customer.machineTypes.length : 0),
+        revenue: currentTerritory.revenue + (opportunities?.reduce((sum, opp) => 
+          opp.customerId === customer.id ? sum + Number(opp.value || 0) : sum
+        , 0) || 0)
       };
     }
     return acc;
-  }, {} as Record<string, { customers: number; machines: number; revenue: number }>);
+  }, {});
 
   // Calculate sales performance by quarter
-  const quarterlyPerformance = opportunities?.reduce((acc, opp) => {
-    if (opp.createdAt) {
-      const date = new Date(opp.createdAt);
+  interface QuarterlyMetrics {
+    revenue: number;
+    count: number;
+    conversion: number;
+  }
+
+  const quarterlyPerformance = opportunities?.reduce<Record<string, QuarterlyMetrics>>((acc, opp) => {
+    const createdAt = opp.createdAt;
+    if (createdAt) {
+      const date = new Date(createdAt);
       const quarter = `Q${Math.floor((date.getMonth() + 3) / 3)} ${date.getFullYear()}`;
+      const currentMetrics = acc[quarter] || { revenue: 0, count: 0, conversion: 0 };
+      
       acc[quarter] = {
-        revenue: (acc[quarter]?.revenue || 0) + Number(opp.value),
-        count: (acc[quarter]?.count || 0) + 1,
-        conversion: acc[quarter]?.conversion || 0
+        revenue: currentMetrics.revenue + Number(opp.value || 0),
+        count: currentMetrics.count + 1,
+        conversion: currentMetrics.conversion
       };
+
       // Calculate conversion rate
-      const quarterlyOpps = opportunities.filter(o => {
-        const oppDate = new Date(o.createdAt!);
-        return oppDate.getFullYear() === date.getFullYear() && 
-               Math.floor(oppDate.getMonth() / 3) === Math.floor(date.getMonth() / 3);
-      });
-      acc[quarter].conversion = (quarterlyOpps.filter(o => o.status === 'closed').length / quarterlyOpps.length) * 100;
+      if (opportunities) {
+        const quarterlyOpps = opportunities.filter(o => {
+          if (!o.createdAt) return false;
+          const oppDate = new Date(o.createdAt);
+          return oppDate.getFullYear() === date.getFullYear() && 
+                 Math.floor(oppDate.getMonth() / 3) === Math.floor(date.getMonth() / 3);
+        });
+
+        const closedOpps = quarterlyOpps.filter(o => o.status === 'closed');
+        acc[quarter].conversion = quarterlyOpps.length > 0 
+          ? (closedOpps.length / quarterlyOpps.length) * 100 
+          : 0;
+      }
     }
     return acc;
-  }, {} as Record<string, { revenue: number; count: number; conversion: number }>);
+  }, {});
 
   const territoryData = {
     labels: Object.keys(territoryCoverage || {}),
