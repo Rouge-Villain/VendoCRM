@@ -269,3 +269,155 @@ export function registerRoutes(app: Express) {
   });
 
 }
+
+  // ERP Routes
+  // Inventory Management
+  app.get("/api/inventory", async (req, res) => {
+    try {
+      const result = await db.select().from(inventory);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch inventory" });
+    }
+  });
+
+  app.post("/api/inventory", async (req, res) => {
+    try {
+      const result = await db.insert(inventory).values(req.body).returning();
+      res.json(result[0]);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid inventory data" });
+    }
+  });
+
+  // Suppliers
+  app.get("/api/suppliers", async (req, res) => {
+    try {
+      const result = await db.select().from(suppliers);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch suppliers" });
+    }
+  });
+
+  app.post("/api/suppliers", async (req, res) => {
+    try {
+      const result = await db.insert(suppliers).values(req.body).returning();
+      res.json(result[0]);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid supplier data" });
+    }
+  });
+
+  // Purchase Orders
+  app.get("/api/purchase-orders", async (req, res) => {
+    try {
+      const result = await db.select().from(purchase_orders);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch purchase orders" });
+    }
+  });
+
+  app.post("/api/purchase-orders", async (req, res) => {
+    try {
+      const { items, ...orderData } = req.body;
+      const order = await db.insert(purchase_orders).values(orderData).returning();
+      
+      if (items && items.length > 0) {
+        await db.insert(purchase_order_items).values(
+          items.map((item: any) => ({
+            ...item,
+            purchaseOrderId: order[0].id
+          }))
+        );
+      }
+      
+      res.json(order[0]);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid purchase order data" });
+    }
+  });
+
+  // Invoices
+  app.get("/api/invoices", async (req, res) => {
+    try {
+      const result = await db.select().from(invoices);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch invoices" });
+    }
+  });
+
+  app.post("/api/invoices", async (req, res) => {
+    try {
+      const { items, ...invoiceData } = req.body;
+      const invoice = await db.insert(invoices).values(invoiceData).returning();
+      
+      if (items && items.length > 0) {
+        await db.insert(invoice_items).values(
+          items.map((item: any) => ({
+            ...item,
+            invoiceId: invoice[0].id
+          }))
+        );
+      }
+      
+      res.json(invoice[0]);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid invoice data" });
+    }
+  });
+
+  // Payments
+  app.get("/api/payments", async (req, res) => {
+    try {
+      const result = await db.select().from(payments);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch payments" });
+    }
+  });
+
+  app.post("/api/payments", async (req, res) => {
+    try {
+      const result = await db.insert(payments).values(req.body).returning();
+      res.json(result[0]);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid payment data" });
+    }
+  });
+
+  // Stock Movements
+  app.get("/api/stock-movements", async (req, res) => {
+    try {
+      const result = await db.select().from(stock_movements);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stock movements" });
+    }
+  });
+
+  app.post("/api/stock-movements", async (req, res) => {
+    try {
+      const result = await db.insert(stock_movements).values(req.body).returning();
+      
+      // Update inventory quantities
+      await db.transaction(async (tx) => {
+        const movement = result[0];
+        const updateQuantity = movement.type === 'in' ? movement.quantity : -movement.quantity;
+        
+        await tx.update(inventory)
+          .set({
+            quantity: sql`quantity + ${updateQuantity}`,
+            updatedAt: new Date()
+          })
+          .where(eq(inventory.productId, movement.productId));
+      });
+      
+      res.json(result[0]);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid stock movement data" });
+    }
+  });
+

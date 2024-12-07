@@ -107,3 +107,137 @@ export const insertMaintenanceSchema = createInsertSchema(maintenanceRecords);
 export const selectMaintenanceSchema = createSelectSchema(maintenanceRecords);
 export type InsertMaintenance = z.infer<typeof insertMaintenanceSchema>;
 export type Maintenance = z.infer<typeof selectMaintenanceSchema>;
+
+// ERP System Tables
+export const inventory = pgTable("inventory", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  productId: integer("product_id").notNull(),
+  quantity: integer("quantity").notNull().default(0),
+  locationCode: text("location_code").notNull(),
+  minimumStock: integer("minimum_stock").default(0),
+  maximumStock: integer("maximum_stock"),
+  reorderPoint: integer("reorder_point").default(0),
+  unitCost: decimal("unit_cost", { precision: 10, scale: 2 }).notNull(),
+  lastRestockDate: timestamp("last_restock_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const suppliers = pgTable("suppliers", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  name: text("name").notNull(),
+  contactPerson: text("contact_person").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  address: text("address").notNull(),
+  taxId: text("tax_id"),
+  paymentTerms: text("payment_terms"),
+  rating: integer("rating"),
+  status: text("status").default("active"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const purchase_orders = pgTable("purchase_orders", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  supplierId: integer("supplier_id").notNull(),
+  orderDate: timestamp("order_date").notNull(),
+  expectedDeliveryDate: timestamp("expected_delivery_date"),
+  status: text("status").notNull().default("draft"),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  paymentStatus: text("payment_status").default("pending"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const purchase_order_items = pgTable("purchase_order_items", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  purchaseOrderId: integer("purchase_order_id").notNull(),
+  productId: integer("product_id").notNull(),
+  quantity: integer("quantity").notNull(),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  receivedQuantity: integer("received_quantity").default(0),
+  status: text("status").default("pending"),
+});
+
+export const invoices = pgTable("invoices", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  customerId: integer("customer_id").notNull(),
+  opportunityId: integer("opportunity_id"),
+  invoiceDate: timestamp("invoice_date").notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").default("draft"),
+  paymentStatus: text("payment_status").default("pending"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const invoice_items = pgTable("invoice_items", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  invoiceId: integer("invoice_id").notNull(),
+  productId: integer("product_id").notNull(),
+  quantity: integer("quantity").notNull(),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  description: text("description"),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+});
+
+export const payments = pgTable("payments", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  invoiceId: integer("invoice_id").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentDate: timestamp("payment_date").notNull(),
+  paymentMethod: text("payment_method").notNull(),
+  transactionId: text("transaction_id"),
+  status: text("status").default("pending"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const stock_movements = pgTable("stock_movements", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  productId: integer("product_id").notNull(),
+  type: text("type").notNull(), // in, out, transfer
+  quantity: integer("quantity").notNull(),
+  fromLocation: text("from_location"),
+  toLocation: text("to_location"),
+  reference: text("reference"), // PO number, invoice number, etc.
+  referenceId: integer("reference_id"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  createdBy: text("created_by").notNull(),
+});
+
+// Zod Schemas for ERP tables
+export const insertInventorySchema = createInsertSchema(inventory);
+export const selectInventorySchema = createSelectSchema(inventory);
+export type InsertInventory = z.infer<typeof insertInventorySchema>;
+export type Inventory = z.infer<typeof selectInventorySchema>;
+
+export const insertSupplierSchema = createInsertSchema(suppliers);
+export const selectSupplierSchema = createSelectSchema(suppliers);
+export type InsertSupplier = z.infer<typeof insertSupplierSchema>;
+export type Supplier = z.infer<typeof selectSupplierSchema>;
+
+export const insertPurchaseOrderSchema = createInsertSchema(purchase_orders);
+export const selectPurchaseOrderSchema = createSelectSchema(purchase_orders);
+export type InsertPurchaseOrder = z.infer<typeof insertPurchaseOrderSchema>;
+export type PurchaseOrder = z.infer<typeof selectPurchaseOrderSchema>;
+
+export const insertInvoiceSchema = createInsertSchema(invoices);
+export const selectInvoiceSchema = createSelectSchema(invoices);
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+export type Invoice = z.infer<typeof selectInvoiceSchema>;
+
+export const insertPaymentSchema = createInsertSchema(payments);
+export const selectPaymentSchema = createSelectSchema(payments);
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type Payment = z.infer<typeof selectPaymentSchema>;
+
+export const insertStockMovementSchema = createInsertSchema(stock_movements);
+export const selectStockMovementSchema = createSelectSchema(stock_movements);
+export type InsertStockMovement = z.infer<typeof insertStockMovementSchema>;
+export type StockMovement = z.infer<typeof selectStockMovementSchema>;

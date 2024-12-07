@@ -1,7 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
-import { Page, Text, View, Document, StyleSheet, PDFDownloadLink } from "@react-pdf/renderer";
+import {
+  Page,
+  Text,
+  View,
+  Document,
+  StyleSheet,
+  PDFDownloadLink,
+  PDFDownloadLinkProps,
+} from "@react-pdf/renderer";
+import type { PDFDownloadLinkRenderProps } from '@react-pdf/renderer';
 import { format, addDays } from "date-fns";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import type { Customer, Product } from "@db/schema";
 
@@ -16,7 +31,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 30,
     color: '#1a56db',
-    fontWeight: 'bold',
   },
   companyInfo: {
     fontSize: 10,
@@ -27,11 +41,9 @@ const styles = StyleSheet.create({
   section: {
     margin: 10,
     padding: 10,
-    borderRadius: 4,
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: 'bold',
     marginBottom: 10,
     color: '#374151',
     paddingBottom: 5,
@@ -48,13 +60,6 @@ const styles = StyleSheet.create({
     width: 'auto',
     marginVertical: 15,
   },
-  tableHeader: {
-    backgroundColor: '#f3f4f6',
-    flexDirection: 'row',
-    borderBottomColor: '#e5e7eb',
-    borderBottomWidth: 1,
-    paddingVertical: 8,
-  },
   tableRow: {
     flexDirection: 'row',
     borderBottomColor: '#e5e7eb',
@@ -69,11 +74,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#4b5563',
   },
-  tableCellHeader: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#374151',
-  },
   total: {
     marginTop: 20,
     paddingTop: 10,
@@ -84,13 +84,12 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: 12,
-    fontWeight: 'bold',
     color: '#374151',
   },
   totalAmount: {
     fontSize: 12,
-    fontWeight: 'bold',
     color: '#1a56db',
+    marginLeft: 4,
   },
   footer: {
     position: 'absolute',
@@ -106,7 +105,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// Types
 interface QuoteOpportunity {
   id: number;
   customerId: number;
@@ -135,8 +133,7 @@ interface QuoteDocumentProps {
   product?: Product;
 }
 
-// Quote Document Component
-const QuoteDocument = ({ opportunity, customer, product }: QuoteDocumentProps) => (
+const QuoteDocument: React.FC<QuoteDocumentProps> = ({ opportunity, customer, product }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.companyInfo}>
@@ -159,69 +156,41 @@ const QuoteDocument = ({ opportunity, customer, product }: QuoteDocumentProps) =
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Customer Details</Text>
-        <Text style={styles.text}>Company: {customer?.company}</Text>
-        <Text style={styles.text}>Contact: {customer?.name}</Text>
-        <Text style={styles.text}>Email: {customer?.email}</Text>
-        <Text style={styles.text}>Phone: {customer?.phone}</Text>
-        <Text style={styles.text}>Address: {customer?.address}</Text>
+        <Text style={styles.text}>Company: {customer?.company || 'N/A'}</Text>
+        <Text style={styles.text}>Contact: {customer?.name || 'N/A'}</Text>
+        <Text style={styles.text}>Email: {customer?.email || 'N/A'}</Text>
+        <Text style={styles.text}>Phone: {customer?.phone || 'N/A'}</Text>
+        <Text style={styles.text}>Address: {customer?.address || 'N/A'}</Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Equipment Details</Text>
-        <View style={styles.table}>
-          <View style={styles.tableHeader}>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellHeader}>Product</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellHeader}>Description</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellHeader}>Quantity</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellHeader}>Price</Text>
-            </View>
+        <View style={styles.tableRow}>
+          <View style={styles.tableCol}>
+            <Text style={styles.tableCell}>{product?.name || 'N/A'}</Text>
           </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>{product?.name}</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>{product?.description}</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>1</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>${product?.price?.toLocaleString()}</Text>
-            </View>
+          <View style={styles.tableCol}>
+            <Text style={styles.tableCell}>{product?.description || 'N/A'}</Text>
+          </View>
+          <View style={styles.tableCol}>
+            <Text style={styles.tableCell}>1</Text>
+          </View>
+          <View style={styles.tableCol}>
+            <Text style={styles.tableCell}>
+              ${Number(product?.price || 0).toLocaleString()}
+            </Text>
           </View>
         </View>
         <View style={styles.total}>
-          <Text style={styles.totalLabel}>Total Investment: </Text>
-          <Text style={styles.totalAmount}>${Number(opportunity.value).toLocaleString()}</Text>
+          <Text style={styles.totalLabel}>Total Investment:</Text>
+          <Text style={styles.totalAmount}>
+            ${Number(opportunity.value).toLocaleString()}
+          </Text>
         </View>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Service Agreement</Text>
-        <Text style={styles.text}>• Equipment Installation and Setup</Text>
-        <Text style={styles.text}>• Preventive Maintenance Schedule</Text>
-        <Text style={styles.text}>• 24/7 Technical Support</Text>
-        <Text style={styles.text}>• Product Restocking Services</Text>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Terms and Conditions</Text>
-        <Text style={styles.text}>1. This proposal is valid for 30 days from the date of issue</Text>
-        <Text style={styles.text}>2. Standard delivery and installation: 2-4 weeks from order confirmation</Text>
-        <Text style={styles.text}>3. Payment terms: Net 30 days from invoice date</Text>
-        <Text style={styles.text}>4. Warranty: 12 months parts and labor</Text>
-      </View>
-
       <View style={styles.footer}>
-        <Text>Thank you for considering our vending solutions. We look forward to serving your refreshment needs.</Text>
+        <Text>Thank you for considering our vending solutions.</Text>
       </View>
     </Page>
   </Document>
@@ -259,23 +228,41 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
         </DialogHeader>
         <div className="p-4">
           {typeof window !== 'undefined' && (
-            <Button asChild className="w-full">
+            <div className="space-y-4">
               <PDFDownloadLink
-                document={<QuoteDocument opportunity={opportunity} customer={customer} product={product} />}
+                document={
+                  <QuoteDocument 
+                    opportunity={opportunity} 
+                    customer={customer} 
+                    product={product}
+                  />
+                }
                 fileName={`quote-${opportunity.id}.pdf`}
-                className="w-full inline-flex items-center justify-center"
+                style={{ textDecoration: 'none' }}
               >
-                {({ loading, error }) => (
-                  loading ? 'Generating PDF...' : error ? 'Error generating PDF' : 'Download Quote PDF'
+                {({ url, loading, error }: PDFDownloadLinkRenderProps) => (
+                  <Button 
+                    className="w-full"
+                    disabled={loading || !!error}
+                    asChild
+                  >
+                    <a
+                      href={url || '#'}
+                      className="w-full inline-flex items-center justify-center"
+                      download={`quote-${opportunity.id}.pdf`}
+                    >
+                      {loading ? 'Generating PDF...' : error ? 'Error generating PDF' : 'Download Quote PDF'}
+                    </a>
+                  </Button>
                 )}
               </PDFDownloadLink>
-            </Button>
+              <div className="p-4 border rounded-lg bg-muted">
+                <p className="text-center text-sm text-muted-foreground">
+                  Click the button above to download the quote as a PDF
+                </p>
+              </div>
+            </div>
           )}
-          <div className="mt-4 p-4 border rounded-lg bg-muted">
-            <p className="text-center text-sm text-muted-foreground">
-              Click the button above to download the quote as a PDF
-            </p>
-          </div>
         </div>
       </DialogContent>
     </Dialog>

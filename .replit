@@ -34,6 +34,10 @@ args = "Backend Server"
 task = "workflow.run"
 args = "Frontend"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Database Migration"
+
 [[workflows.workflow]]
 name = "Vending CRM"
 author = "agent"
@@ -78,3 +82,17 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "cd client && npm run dev"
 waitForPort = 5173
+
+[[workflows.workflow]]
+name = "Database Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run db:push"
