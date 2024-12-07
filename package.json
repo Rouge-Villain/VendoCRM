@@ -58,6 +58,8 @@
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-pdf": "^7.0.0",
     "@types/react-window": "^1.8.8",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
     "chart.js": "^4.4.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

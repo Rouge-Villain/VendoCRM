@@ -68,8 +68,13 @@ export function WinLossAnalytics() {
     productWins: Record<number, number>;
     productLosses: Record<number, number>;
   }>>((acc, opp) => {
-    if (!acc[opp.stage as Stage]) {
-      acc[opp.stage as Stage] = {
+    const stage = opp.stage as Stage;
+    if (!stages.some(s => s.id === stage)) {
+      return acc;
+    }
+    
+    if (!acc[stage]) {
+      acc[stage] = {
         won: 0,
         lost: 0,
         total: 0,
@@ -83,36 +88,38 @@ export function WinLossAnalytics() {
         productLosses: {}
       };
     }
+    
     const value = Number(opp.value) || 0;
-    const currentStage = opp.stage as Stage;
-    acc[currentStage].totalValue += value;
+    acc[stage].totalValue += value;
     
     // Track wins and losses by product
-    if (!acc[currentStage].productWins[opp.productId]) {
-      acc[currentStage].productWins[opp.productId] = 0;
+    if (!acc[stage].productWins[opp.productId]) {
+      acc[stage].productWins[opp.productId] = 0;
     }
-    if (!acc[currentStage].productLosses[opp.productId]) {
-      acc[currentStage].productLosses[opp.productId] = 0;
+    if (!acc[stage].productLosses[opp.productId]) {
+      acc[stage].productLosses[opp.productId] = 0;
     }
     if (opp.status === 'closed-won') {
-      acc[currentStage].won++;
-      acc[currentStage].wonValue += value;
-      acc[currentStage].productWins[opp.productId]++;
+      acc[stage].won++;
+      acc[stage].wonValue += value;
+      acc[stage].productWins[opp.productId]++;
     } else if (opp.status === 'closed-lost') {
-      acc[currentStage].lost++;
-      acc[currentStage].lostValue += value;
-      acc[currentStage].productLosses[opp.productId]++;
+      acc[stage].lost++;
+      acc[stage].lostValue += value;
+      acc[stage].productLosses[opp.productId]++;
     }
     
     // Calculate time in stage
     if (opp.updatedAt && opp.createdAt) {
       const timeInStage = new Date(opp.updatedAt).getTime() - new Date(opp.createdAt).getTime();
-      acc[opp.stage].avgTimeInStage = (acc[opp.stage].avgTimeInStage * acc[opp.stage].total + timeInStage) / (acc[opp.stage].total + 1);
+      const currentTotal = acc[stage].total;
+      const currentAvg = acc[stage].avgTimeInStage;
+      acc[stage].avgTimeInStage = (currentAvg * currentTotal + timeInStage) / (currentTotal + 1);
     }
     
-    acc[opp.stage].total++;
-    acc[opp.stage].winRate = acc[opp.stage].total > 0 ? 
-      (acc[opp.stage].won / acc[opp.stage].total) * 100 : 0;
+    acc[stage].total++;
+    acc[stage].winRate = acc[stage].total > 0 ? 
+      (acc[stage].won / acc[stage].total) * 100 : 0;
     
     return acc;
   }, {} as Record<string, { 
@@ -130,7 +137,16 @@ export function WinLossAnalytics() {
   }>);
 
   // Calculate monthly performance and projections with year-over-year comparison
-  const monthlyPerformance = opportunities?.reduce((acc, opp) => {
+  interface MonthlyMetrics {
+    totalValue: number;
+    wonValue: number;
+    count: number;
+    winRate: number;
+    target: number;
+    yearOverYear: number;
+  }
+
+  const monthlyPerformance = opportunities?.reduce<Record<string, MonthlyMetrics>>((acc, opp) => {
     if (opp.createdAt) {
       const date = new Date(opp.createdAt);
       const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });

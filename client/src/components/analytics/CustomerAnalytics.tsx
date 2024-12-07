@@ -98,15 +98,16 @@ export function CustomerAnalytics() {
   }, {});
 
   const machineDistribution = customers?.reduce<MachineDistribution>((acc, customer) => {
-    if (Array.isArray(customer.machineTypes)) {
-      customer.machineTypes.forEach(type => {
+    if (customer.machineTypes && typeof customer.machineTypes === 'object') {
+      const types = Array.isArray(customer.machineTypes) ? customer.machineTypes : [];
+      types.forEach(type => {
         if (isMachineType(type)) {
           acc[type] = (acc[type] || 0) + 1;
         }
       });
     }
     return acc;
-  }, {});
+  }, {} as MachineDistribution);
 
   const acquisitionChartData: ChartData = {
     labels: Object.keys(acquisitionTrends || {}),
@@ -291,7 +292,7 @@ export function CustomerAnalytics() {
                       padding: 20,
                       font: {
                         size: 12,
-                        weight: '500',
+                        weight: 500,
                       },
                     },
                   },

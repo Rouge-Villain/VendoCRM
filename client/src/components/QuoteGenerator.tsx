@@ -14,8 +14,12 @@ interface RenderProps {
   blob?: Blob;
   url?: string;
   loading: boolean;
-  error?: Error;
+  error?: Error | null;
 }
+
+type PDFRenderProps = PDFDownloadLinkProps & {
+  children: (props: RenderProps) => React.ReactNode;
+};
 import {
   Dialog,
   DialogContent,
@@ -111,13 +115,16 @@ const styles = StyleSheet.create({
   },
 });
 
+type OpportunityStatus = 'open' | 'closed-won' | 'closed-lost';
+type OpportunityStage = 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closed-won' | 'closed-lost';
+
 interface QuoteOpportunity {
   id: number;
   customerId: number;
   productId: number;
   value: string;
-  status: 'open' | 'closed-won' | 'closed-lost';
-  stage: 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closed-won' | 'closed-lost';
+  status: OpportunityStatus;
+  stage: OpportunityStage;
   createdAt: string | null;
   updatedAt: string | null;
   notes: string | null;
@@ -125,6 +132,8 @@ interface QuoteOpportunity {
   expectedCloseDate: string | null;
   lostReason: string | null;
   nextFollowUp: string | null;
+  assignedTo?: string;
+  lastContactDate?: string;
 }
 
 interface QuoteGeneratorProps {
