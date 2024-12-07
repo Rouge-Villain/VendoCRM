@@ -1,12 +1,9 @@
-import { ReactNode } from "react";
+import React from "react";
 import { Link, useLocation } from "wouter";
 import { LayoutDashboard, Users, Package, TrendingUp, BarChart, History, Wrench } from "lucide-react";
+import PropTypes from 'prop-types';
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children }) {
   const [location] = useLocation();
 
   const navigation = [
@@ -70,3 +67,7 @@ export default function Layout({ children }: LayoutProps) {
     </div>
   );
 }
+
+Layout.propTypes = {
+  children: PropTypes.node.isRequired
+};

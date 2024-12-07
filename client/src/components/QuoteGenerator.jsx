@@ -1,3 +1,4 @@
+import React from 'react';
 import { useQuery } from "@tanstack/react-query";
 import {
   Page,
@@ -103,68 +104,70 @@ const styles = StyleSheet.create({
   },
 });
 
-const QuoteDocument = ({ opportunity, customer, product }) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      <View style={styles.companyInfo}>
-        <Text>Your Vending Solutions Company</Text>
-        <Text>123 Business Street</Text>
-        <Text>City, State 12345</Text>
-        <Text>Tel: (555) 123-4567</Text>
-      </View>
+function QuoteDocument({ opportunity, customer, product }) {
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.companyInfo}>
+          <Text>Your Vending Solutions Company</Text>
+          <Text>123 Business Street</Text>
+          <Text>City, State 12345</Text>
+          <Text>Tel: (555) 123-4567</Text>
+        </View>
 
-      <View style={styles.header}>
-        <Text>Sales Proposal</Text>
-      </View>
+        <View style={styles.header}>
+          <Text>Sales Proposal</Text>
+        </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quote Information</Text>
-        <Text style={styles.text}>Quote Number: Q-{opportunity.id}</Text>
-        <Text style={styles.text}>Date: {format(new Date(), 'MMMM d, yyyy')}</Text>
-        <Text style={styles.text}>Valid Until: {format(addDays(new Date(), 30), 'MMMM d, yyyy')}</Text>
-      </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Quote Information</Text>
+          <Text style={styles.text}>Quote Number: Q-{opportunity.id}</Text>
+          <Text style={styles.text}>Date: {format(new Date(), 'MMMM d, yyyy')}</Text>
+          <Text style={styles.text}>Valid Until: {format(addDays(new Date(), 30), 'MMMM d, yyyy')}</Text>
+        </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Customer Details</Text>
-        <Text style={styles.text}>Company: {customer?.company || 'N/A'}</Text>
-        <Text style={styles.text}>Contact: {customer?.name || 'N/A'}</Text>
-        <Text style={styles.text}>Email: {customer?.email || 'N/A'}</Text>
-        <Text style={styles.text}>Phone: {customer?.phone || 'N/A'}</Text>
-        <Text style={styles.text}>Address: {customer?.address || 'N/A'}</Text>
-      </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Customer Details</Text>
+          <Text style={styles.text}>Company: {customer?.company || 'N/A'}</Text>
+          <Text style={styles.text}>Contact: {customer?.name || 'N/A'}</Text>
+          <Text style={styles.text}>Email: {customer?.email || 'N/A'}</Text>
+          <Text style={styles.text}>Phone: {customer?.phone || 'N/A'}</Text>
+          <Text style={styles.text}>Address: {customer?.address || 'N/A'}</Text>
+        </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Equipment Details</Text>
-        <View style={styles.tableRow}>
-          <View style={styles.tableCol}>
-            <Text style={styles.tableCell}>{product?.name || 'N/A'}</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Equipment Details</Text>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCell}>{product?.name || 'N/A'}</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCell}>{product?.description || 'N/A'}</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCell}>1</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCell}>
+                ${Number(product?.price || 0).toLocaleString()}
+              </Text>
+            </View>
           </View>
-          <View style={styles.tableCol}>
-            <Text style={styles.tableCell}>{product?.description || 'N/A'}</Text>
-          </View>
-          <View style={styles.tableCol}>
-            <Text style={styles.tableCell}>1</Text>
-          </View>
-          <View style={styles.tableCol}>
-            <Text style={styles.tableCell}>
-              ${Number(product?.price || 0).toLocaleString()}
+          <View style={styles.total}>
+            <Text style={styles.totalLabel}>Total Investment:</Text>
+            <Text style={styles.totalAmount}>
+              ${Number(opportunity.value).toLocaleString()}
             </Text>
           </View>
         </View>
-        <View style={styles.total}>
-          <Text style={styles.totalLabel}>Total Investment:</Text>
-          <Text style={styles.totalAmount}>
-            ${Number(opportunity.value).toLocaleString()}
-          </Text>
-        </View>
-      </View>
 
-      <View style={styles.footer}>
-        <Text>Thank you for considering our vending solutions.</Text>
-      </View>
-    </Page>
-  </Document>
-);
+        <View style={styles.footer}>
+          <Text>Thank you for considering our vending solutions.</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
 
 QuoteDocument.propTypes = {
   opportunity: PropTypes.shape({

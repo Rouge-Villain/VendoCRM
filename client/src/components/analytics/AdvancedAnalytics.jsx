@@ -187,7 +187,6 @@ export function AdvancedAnalytics() {
                 },
                 scales: {
                   y: {
-                    type: 'linear',
                     beginAtZero: true,
                     grid: {
                       color: 'rgba(148, 163, 184, 0.1)',
@@ -259,3 +258,22 @@ export function AdvancedAnalytics() {
     </div>
   );
 }
+
+AdvancedAnalytics.propTypes = {
+  customers: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      serviceTerritory: PropTypes.string,
+      machineTypes: PropTypes.arrayOf(PropTypes.string),
+    })
+  ),
+  opportunities: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      customerId: PropTypes.number.isRequired,
+      value: PropTypes.string.isRequired,
+      status: PropTypes.string.isRequired,
+      createdAt: PropTypes.string.isRequired,
+    })
+  ),
+};
