@@ -6,9 +6,9 @@ import {
   Document,
   StyleSheet,
   PDFDownloadLink,
-  PDFDownloadLinkProps,
 } from "@react-pdf/renderer";
 import type { PDFDownloadLinkProps } from '@react-pdf/renderer';
+import { format, addDays } from "date-fns";
 
 interface RenderProps {
   blob?: Blob;
@@ -16,7 +16,6 @@ interface RenderProps {
   loading: boolean;
   error?: Error;
 }
-import { format, addDays } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -247,7 +246,7 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
                 fileName={`quote-${opportunity.id}.pdf`}
                 style={{ textDecoration: 'none' }}
               >
-                {({ url, loading, error }: RenderProps) => (
+                {({ url, loading, error }: { url: string | undefined; loading: boolean; error: Error | undefined }) => (
                   <Button 
                     className="w-full"
                     disabled={loading || !!error}

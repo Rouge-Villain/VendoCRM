@@ -123,7 +123,6 @@ export function WinLossAnalytics() {
       const date = new Date(opp.createdAt);
       const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
       const year = date.getFullYear();
-      const month = date.getMonth();
       
       if (!acc[monthYear]) {
         // Set monthly target as 10% more than last year's same month

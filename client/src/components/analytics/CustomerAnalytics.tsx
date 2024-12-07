@@ -32,42 +32,75 @@ ChartJS.register(
   Filler
 );
 
+type AcquisitionTrends = Record<string, number>;
+type MachineDistribution = Record<string, number>;
+
+interface ChartDataset {
+  label?: string;
+  data: number[];
+  borderColor?: string;
+  backgroundColor: string | string[];
+  tension?: number;
+  fill?: boolean;
+  pointBackgroundColor?: string;
+  pointBorderColor?: string;
+  pointBorderWidth?: number;
+  pointRadius?: number;
+  pointHoverRadius?: number;
+  pointHoverBackgroundColor?: string;
+  pointHoverBorderColor?: string;
+  pointHoverBorderWidth?: number;
+  borderWidth?: number;
+  hoverOffset?: number;
+}
+
+interface ChartData {
+  labels: string[];
+  datasets: ChartDataset[];
+}
+
 export function CustomerAnalytics() {
-  const { data: customers } = useQuery({
+  const { data: customers } = useQuery<Customer[]>({
     queryKey: ["customers"],
     queryFn: async () => {
       const response = await fetch("/api/customers");
-      return response.json() as Promise<Customer[]>;
+      if (!response.ok) {
+        throw new Error(`Error fetching customers: ${response.statusText}`);
+      }
+      return response.json();
     },
   });
 
-  const { data: opportunities } = useQuery({
+  const { data: opportunities } = useQuery<Opportunity[]>({
     queryKey: ["opportunities"],
     queryFn: async () => {
       const response = await fetch("/api/opportunities");
-      return response.json() as Promise<Opportunity[]>;
+      if (!response.ok) {
+        throw new Error(`Error fetching opportunities: ${response.statusText}`);
+      }
+      return response.json();
     },
   });
 
-  const acquisitionTrends = customers?.reduce((acc, customer) => {
+  const acquisitionTrends = customers?.reduce<AcquisitionTrends>((acc, customer) => {
     if (customer.createdAt) {
       const date = new Date(customer.createdAt);
       const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
       acc[monthYear] = (acc[monthYear] || 0) + 1;
     }
     return acc;
-  }, {} as Record<string, number>);
+  }, {});
 
-  const machineDistribution = customers?.reduce((acc, customer) => {
+  const machineDistribution = customers?.reduce<MachineDistribution>((acc, customer) => {
     if (Array.isArray(customer.machineTypes)) {
-      (customer.machineTypes as string[]).forEach(type => {
+      customer.machineTypes.forEach(type => {
         acc[type] = (acc[type] || 0) + 1;
       });
     }
     return acc;
-  }, {} as Record<string, number>);
+  }, {});
 
-  const acquisitionChartData = {
+  const acquisitionChartData: ChartData = {
     labels: Object.keys(acquisitionTrends || {}),
     datasets: [
       {
@@ -89,7 +122,7 @@ export function CustomerAnalytics() {
     ],
   };
 
-  const machineChartData = {
+  const machineChartData: ChartData = {
     labels: Object.keys(machineDistribution || {}),
     datasets: [
       {
@@ -145,7 +178,7 @@ export function CustomerAnalytics() {
                       padding: 20,
                       font: {
                         size: 12,
-                        weight: 500,
+                        weight: '500',
                         family: 'system-ui'
                       },
                       color: 'rgb(100, 116, 139)',
@@ -159,7 +192,7 @@ export function CustomerAnalytics() {
                     },
                     titleFont: {
                       size: 14,
-                      weight: 600,
+                      weight: '600',
                       family: 'system-ui'
                     },
                     bodyFont: {
@@ -250,7 +283,7 @@ export function CustomerAnalytics() {
                       padding: 20,
                       font: {
                         size: 12,
-                        weight: 500,
+                        weight: '500',
                       },
                     },
                   },
@@ -259,7 +292,7 @@ export function CustomerAnalytics() {
                     padding: 12,
                     titleFont: {
                       size: 14,
-                      weight: 500,
+                      weight: '500',
                     },
                     bodyFont: {
                       size: 12,

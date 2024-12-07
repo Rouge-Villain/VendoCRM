@@ -15,7 +15,6 @@ import {
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import PropTypes from 'prop-types';
 
 ChartJS.register(
   CategoryScale,

@@ -14,28 +14,46 @@ import Analytics from "./pages/Analytics";
 import Timeline from "./pages/Timeline";
 import Maintenance from "./pages/Maintenance";
 
-function Router() {
+function Router(): JSX.Element {
   return (
     <Layout>
       <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/customers" component={Customers} />
-        <Route path="/products" component={Products} />
-        <Route path="/sales" component={Sales} />
-        <Route path="/analytics" component={Analytics} />
-        <Route path="/timeline" component={Timeline} />
-        <Route path="/maintenance" component={Maintenance} />
+        <Route path="/">
+          <Dashboard />
+        </Route>
+        <Route path="/customers">
+          <Customers />
+        </Route>
+        <Route path="/products">
+          <Products />
+        </Route>
+        <Route path="/sales">
+          <Sales />
+        </Route>
+        <Route path="/analytics">
+          <Analytics />
+        </Route>
+        <Route path="/timeline">
+          <Timeline />
+        </Route>
+        <Route path="/maintenance">
+          <Maintenance />
+        </Route>
         <Route>404 Page Not Found</Route>
       </Switch>
     </Layout>
   );
 }
 
-createRoot(document.getElementById("root")!).render(
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Failed to find the root element");
+
+const root = createRoot(rootElement);
+root.render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <Router />
       <Toaster />
     </QueryClientProvider>
-  </StrictMode>,
+  </StrictMode>
 );
