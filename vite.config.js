@@ -11,8 +11,13 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [
-    react(),
-    checker({ eslint: true, overlay: false }),
+    react({
+      include: /\.(jsx|tsx?)$/,
+    }),
+    checker({
+      typescript: true,
+      overlay: false,
+    }),
     runtimeErrorOverlay(),
     themePlugin(),
   ],

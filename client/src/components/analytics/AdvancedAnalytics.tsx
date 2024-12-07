@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import type { Customer, Opportunity } from "@db/schema";
 import { exportToCSV, prepareAnalyticsData } from '@/lib/exportData';
 import {
   Chart as ChartJS,
@@ -12,9 +13,9 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
-import { Line, Bar, Pie } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type Customer, type Opportunity } from "@db/schema";
+import PropTypes from 'prop-types';
 
 ChartJS.register(
   CategoryScale,

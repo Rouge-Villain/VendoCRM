@@ -19,6 +19,21 @@ import { FileDown as FileDownIcon } from "lucide-react";
 import { exportAnalyticsData } from "@/lib/exportData";
 import PropTypes from 'prop-types';
 
+// Define PropTypes for the component
+const customerShape = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  createdAt: PropTypes.string,
+  machineTypes: PropTypes.arrayOf(PropTypes.string),
+});
+
+const opportunityShape = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  customerId: PropTypes.number.isRequired,
+  value: PropTypes.string.isRequired,
+  status: PropTypes.string.isRequired,
+  createdAt: PropTypes.string.isRequired,
+});
+
 ChartJS.register(
   CategoryScale,
   LinearScale,

@@ -16,6 +16,21 @@ import { Line, Bar } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import PropTypes from 'prop-types';
 
+// Define PropTypes for the component
+const customerShape = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  serviceTerritory: PropTypes.string,
+  machineTypes: PropTypes.arrayOf(PropTypes.string),
+});
+
+const opportunityShape = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  customerId: PropTypes.number.isRequired,
+  value: PropTypes.string.isRequired,
+  status: PropTypes.string.isRequired,
+  createdAt: PropTypes.string.isRequired,
+});
+
 ChartJS.register(
   CategoryScale,
   LinearScale,

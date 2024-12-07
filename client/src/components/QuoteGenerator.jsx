@@ -19,6 +19,14 @@ import {
 import { Button } from "@/components/ui/button";
 import PropTypes from 'prop-types';
 
+// Define types for clarity even though we're using PropTypes
+const opportunityType = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  customerId: PropTypes.number.isRequired,
+  productId: PropTypes.number.isRequired,
+  value: PropTypes.string.isRequired,
+}).isRequired;
+
 // PDF styles
 const styles = StyleSheet.create({
   page: {

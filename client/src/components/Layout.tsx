@@ -3,7 +3,11 @@ import { Link, useLocation } from "wouter";
 import { LayoutDashboard, Users, Package, TrendingUp, BarChart, History, Wrench } from "lucide-react";
 import PropTypes from 'prop-types';
 
-export default function Layout({ children }) {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+export default function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
 
   const navigation = [
