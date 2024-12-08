@@ -6,7 +6,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { DealPipeline } from "../components/DealPipeline";
 import { DealForm } from "../components/DealForm";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { type Opportunity } from "@db/schema";
 import { SalesAnalytics } from "@/components/analytics/SalesAnalytics";
 import { WinLossAnalytics } from "@/components/analytics/WinLossAnalytics";
 
@@ -16,7 +15,7 @@ export default function Sales() {
     queryKey: ["opportunities"],
     queryFn: async () => {
       const response = await fetch("/api/opportunities");
-      return response.json() as Promise<Opportunity[]>;
+      return response.json();
     },
   });
 

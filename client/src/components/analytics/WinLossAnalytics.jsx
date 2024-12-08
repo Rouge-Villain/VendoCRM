@@ -13,18 +13,14 @@ import {
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import type { Opportunity, Product } from "../../../db/schema";
-
-
 
 const stages = [
   { id: "prospecting", name: "Prospecting" },
   { id: "qualification", name: "Qualification" },
   { id: "closed-won", name: "Closed Won" },
   { id: "closed-lost", name: "Closed Lost" }
-] as const;
+];
 
-type Stage = typeof stages[number]['id'];
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -42,33 +38,27 @@ export function WinLossAnalytics() {
     queryKey: ["opportunities"],
     queryFn: async () => {
       const response = await fetch("/api/opportunities");
-      return response.json() as Promise<Opportunity[]>;
+      if (!response.ok) {
+        throw new Error(`Error fetching opportunities: ${response.statusText}`);
+      }
+      return response.json();
     },
   });
 
-  const { data: products } = useQuery<Product[]>({
+  const { data: products } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
       const response = await fetch("/api/products");
+      if (!response.ok) {
+        throw new Error(`Error fetching products: ${response.statusText}`);
+      }
       return response.json();
     },
   });
 
   // Calculate win/loss ratio by stage with values
-  const stageAnalysis = opportunities?.reduce<Record<Stage, {
-    won: number;
-    lost: number;
-    total: number;
-    wonValue: number;
-    lostValue: number;
-    totalValue: number;
-    winRate: number;
-    avgTimeInStage: number;
-    conversionRate: number;
-    productWins: Record<number, number>;
-    productLosses: Record<number, number>;
-  }>>((acc, opp) => {
-    const stage = opp.stage as Stage;
+  const stageAnalysis = opportunities?.reduce((acc, opp) => {
+    const stage = opp.stage;
     if (!stages.some(s => s.id === stage)) {
       return acc;
     }
@@ -122,31 +112,10 @@ export function WinLossAnalytics() {
       (acc[stage].won / acc[stage].total) * 100 : 0;
     
     return acc;
-  }, {} as Record<string, { 
-    won: number; 
-    lost: number; 
-    total: number;
-    wonValue: number;
-    lostValue: number;
-    totalValue: number;
-    winRate: number;
-    avgTimeInStage: number;
-    conversionRate: number;
-    productWins: Record<number, number>;
-    productLosses: Record<number, number>;
-  }>);
+  }, {});
 
   // Calculate monthly performance and projections with year-over-year comparison
-  interface MonthlyMetrics {
-    totalValue: number;
-    wonValue: number;
-    count: number;
-    winRate: number;
-    target: number;
-    yearOverYear: number;
-  }
-
-  const monthlyPerformance = opportunities?.reduce<Record<string, MonthlyMetrics>>((acc, opp) => {
+  const monthlyPerformance = opportunities?.reduce((acc, opp) => {
     if (opp.createdAt) {
       const date = new Date(opp.createdAt);
       const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
@@ -184,14 +153,7 @@ export function WinLossAnalytics() {
       acc[monthYear].yearOverYear = lastYearValue ? ((acc[monthYear].wonValue - lastYearValue) / lastYearValue) * 100 : 0;
     }
     return acc;
-  }, {} as Record<string, { 
-    totalValue: number; 
-    wonValue: number; 
-    count: number; 
-    winRate: number;
-    target: number;
-    yearOverYear: number;
-  }>);
+  }, {});
 
   // Calculate yearly projection based on last 3 months trend
   const monthKeys = Object.keys(monthlyPerformance ?? {});
@@ -210,12 +172,7 @@ export function WinLossAnalytics() {
   const lastMonthData = monthlyPerformance?.[lastMonth];
   const baseValue = lastMonthData?.wonValue ?? 0;
 
-  type ProjectedMonth = {
-    projectedValue: number;
-    isProjection: boolean;
-  };
-
-  const projectedMonths = Array.from({ length: 6 }).reduce<Record<string, ProjectedMonth>>((acc, _, index) => {
+  const projectedMonths = Array.from({ length: 6 }).reduce((acc, _, index) => {
     const date = new Date();
     date.setMonth(date.getMonth() + index + 1);
     const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
@@ -270,7 +227,7 @@ export function WinLossAnalytics() {
         label: 'Projected Revenue',
         data: [
           ...Array(Object.keys(monthlyPerformance || {}).length).fill(null),
-          ...Object.values(projectedMonths).map((m: { projectedValue: number }) => m.projectedValue),
+          ...Object.values(projectedMonths).map(m => m.projectedValue),
         ],
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
@@ -324,7 +281,7 @@ export function WinLossAnalytics() {
                 maintainAspectRatio: false,
                 plugins: {
                   legend: {
-                    position: 'top' as const,
+                    position: 'top',
                   },
                   tooltip: {
                     mode: 'index',
@@ -352,21 +309,7 @@ export function WinLossAnalytics() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {stages.map((stage) => {
-              type StageMetrics = {
-                avgTimeInStage: number;
-                total: number;
-                won: number;
-                lost: number;
-                conversionRate: number;
-                winRate: number;
-                wonValue: number;
-                lostValue: number;
-                totalValue: number;
-                productWins: Record<number, number>;
-                productLosses: Record<number, number>;
-              };
-
-              const metrics: StageMetrics = stageAnalysis?.[stage.id] || {
+              const metrics = stageAnalysis?.[stage.id] || {
                 avgTimeInStage: 0,
                 total: 0,
                 won: 0,
@@ -415,50 +358,6 @@ export function WinLossAnalytics() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Product Performance Analysis</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {products?.map((product) => {
-              const productStats = Object.values(stageAnalysis || {}).reduce(
-                (acc, stage) => {
-                  acc.wins += stage.productWins[product.id] || 0;
-                  acc.losses += stage.productLosses[product.id] || 0;
-                  return acc;
-                },
-                { wins: 0, losses: 0 }
-              );
-              
-              const total = productStats.wins + productStats.losses;
-              const winRate = total > 0 ? (productStats.wins / total) * 100 : 0;
-              
-              return (
-                <div key={product.id} className="p-4 rounded-lg border">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-medium">{product.name}</h4>
-                    <span className={`text-sm font-semibold ${winRate >= 50 ? 'text-green-600' : 'text-red-600'}`}>
-                      {winRate.toFixed(1)}% Win Rate
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-sm text-muted-foreground">Won Deals</div>
-                      <div className="text-lg font-semibold text-green-600">{productStats.wins}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Lost Deals</div>
-                      <div className="text-lg font-semibold text-red-600">{productStats.losses}</div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle>Monthly Performance & Projections</CardTitle>
         </CardHeader>
         <CardContent>
@@ -470,7 +369,7 @@ export function WinLossAnalytics() {
                 maintainAspectRatio: false,
                 plugins: {
                   legend: {
-                    position: 'top' as const,
+                    position: 'top',
                   },
                   tooltip: {
                     mode: 'index',

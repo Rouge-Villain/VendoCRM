@@ -13,7 +13,6 @@ import {
 } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import type { Opportunity } from "../../../db/schema";
 import { addMonths, format, startOfMonth } from "date-fns";
 
 ChartJS.register(
@@ -33,7 +32,7 @@ export function SalesAnalytics() {
     queryKey: ["opportunities"],
     queryFn: async () => {
       const response = await fetch("/api/opportunities");
-      return response.json() as Promise<Opportunity[]>;
+      return response.json();
     },
   });
 
@@ -48,7 +47,7 @@ export function SalesAnalytics() {
       acc.reasons[opp.lostReason || 'Other'] = (acc.reasons[opp.lostReason || 'Other'] || 0) + 1;
     }
     return acc;
-  }, { won: 0, lost: 0, wonValue: 0, lostValue: 0, reasons: {} as Record<string, number> });
+  }, { won: 0, lost: 0, wonValue: 0, lostValue: 0, reasons: {} });
 
   // Calculate monthly performance (last 12 months)
   const last12Months = Array.from({ length: 12 }, (_, i) => {
@@ -65,7 +64,7 @@ export function SalesAnalytics() {
       lost: 0,
     };
     return acc;
-  }, {} as Record<string, { deals: number; value: number; won: number; lost: number; }>);
+  }, {});
 
   opportunities?.forEach(opp => {
     if (opp.createdAt) {
@@ -155,13 +154,13 @@ export function SalesAnalytics() {
                   responsive: true,
                   plugins: {
                     legend: {
-                      position: 'top' as const,
+                      position: 'top',
                     },
                     tooltip: {
                       callbacks: {
                         label: (context) => {
                           const label = context.label?.split(' (')[0];
-                          const value = context.raw as number;
+                          const value = context.raw;
                           const moneyValue = label === 'Won' ? winLossData?.wonValue : winLossData?.lostValue;
                           return [
                             `${label}: ${value} deals`,
@@ -197,7 +196,7 @@ export function SalesAnalytics() {
                   responsive: true,
                   plugins: {
                     legend: {
-                      position: 'top' as const,
+                      position: 'top',
                     },
                   },
                 }}
@@ -220,7 +219,7 @@ export function SalesAnalytics() {
                 maintainAspectRatio: false,
                 plugins: {
                   legend: {
-                    position: 'top' as const,
+                    position: 'top',
                   },
                   tooltip: {
                     mode: 'index',
