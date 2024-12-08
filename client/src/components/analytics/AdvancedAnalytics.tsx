@@ -59,6 +59,15 @@ export function AdvancedAnalytics() {
     revenue: number;
   }
 
+  // Type guard for machine type
+  function isMachineType(value: unknown): value is { type: string; quantity?: number } | string {
+    if (typeof value === 'string') return true;
+    if (typeof value === 'object' && value !== null) {
+      return 'type' in value && typeof (value as { type: unknown }).type === 'string';
+    }
+    return false;
+  }
+
   const territoryCoverage = customers?.reduce<Record<string, TerritoryCoverage>>((acc, customer) => {
     const territory = customer.serviceTerritory;
     if (typeof territory === 'string') {
@@ -67,9 +76,21 @@ export function AdvancedAnalytics() {
       const opportunityRevenue = customerOpportunities.reduce((sum, opp) => 
         sum + Number(opp.value?.toString() || '0'), 0);
       
+      const machineCount = Array.isArray(customer.machineTypes)
+        ? customer.machineTypes.reduce((count, machine) => {
+            if (isMachineType(machine)) {
+              if (typeof machine === 'object' && 'quantity' in machine) {
+                return count + (machine.quantity || 1);
+              }
+              return count + 1;
+            }
+            return count;
+          }, 0)
+        : 0;
+      
       acc[territory] = {
         customers: currentTerritory.customers + 1,
-        machines: currentTerritory.machines + (Array.isArray(customer.machineTypes) ? customer.machineTypes.length : 0),
+        machines: currentTerritory.machines + machineCount,
         revenue: currentTerritory.revenue + opportunityRevenue
       };
     }
@@ -114,38 +135,60 @@ export function AdvancedAnalytics() {
     return acc;
   }, {});
 
-  const territoryData = {
+  interface ChartDataset {
+    type?: 'bar' | 'line';
+    label: string;
+    data: number[];
+    backgroundColor?: string | string[];
+    borderColor?: string;
+    yAxisID?: 'y' | 'y1';
+    borderWidth?: number;
+    tension?: number;
+  }
+
+  interface ChartData {
+    labels: string[];
+    datasets: ChartDataset[];
+  }
+
+  const territoryData: ChartData = {
     labels: Object.keys(territoryCoverage || {}),
     datasets: [
       {
+        type: 'bar',
         label: 'Customers',
         data: Object.values(territoryCoverage || {}).map(t => t.customers),
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
+        borderWidth: 1,
       },
       {
+        type: 'bar',
         label: 'Machines',
         data: Object.values(territoryCoverage || {}).map(t => t.machines),
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        borderWidth: 1,
       },
     ],
   };
 
-  const performanceData = {
+  const performanceData: ChartData = {
     labels: Object.keys(quarterlyPerformance || {}),
     datasets: [
       {
-        type: 'line' as const,
+        type: 'line',
         label: 'Revenue',
         data: Object.values(quarterlyPerformance || {}).map(q => q.revenue),
         borderColor: 'rgb(75, 192, 192)',
         yAxisID: 'y',
+        tension: 0.4,
       },
       {
-        type: 'line' as const,
+        type: 'line',
         label: 'Conversion Rate (%)',
         data: Object.values(quarterlyPerformance || {}).map(q => q.conversion),
         borderColor: 'rgb(255, 99, 132)',
         yAxisID: 'y1',
+        tension: 0.4,
       },
     ],
   };

@@ -41,12 +41,20 @@ function isMachineType(value: unknown): value is MachineType {
   return typeof value === 'string' && value.length > 0;
 }
 
-interface ChartDataset {
-  type?: 'line' | 'bar' | 'pie';
+type ChartType = 'line' | 'bar' | 'pie';
+
+interface BaseChartDataset {
+  type?: ChartType;
   label?: string;
   data: number[];
   borderColor?: string;
   backgroundColor: string | string[];
+  borderWidth?: number;
+  yAxisID?: string;
+}
+
+interface LineChartDataset extends BaseChartDataset {
+  type?: 'line';
   tension?: number;
   fill?: boolean;
   pointBackgroundColor?: string;
@@ -57,10 +65,14 @@ interface ChartDataset {
   pointHoverBackgroundColor?: string;
   pointHoverBorderColor?: string;
   pointHoverBorderWidth?: number;
-  borderWidth?: number;
-  hoverOffset?: number;
-  yAxisID?: string;
 }
+
+interface PieChartDataset extends BaseChartDataset {
+  type?: 'pie';
+  hoverOffset?: number;
+}
+
+type ChartDataset = LineChartDataset | PieChartDataset;
 
 interface ChartData {
   labels: string[];
@@ -100,16 +112,27 @@ export function CustomerAnalytics() {
   }, {});
 
   const machineDistribution = customers?.reduce<MachineDistribution>((acc, customer) => {
-    if (customer.machineTypes && typeof customer.machineTypes === 'object') {
-      const types = Array.isArray(customer.machineTypes) ? customer.machineTypes : [];
-      types.forEach(type => {
-        if (isMachineType(type)) {
+    if (customer.machineTypes) {
+      const types = Array.isArray(customer.machineTypes) 
+        ? customer.machineTypes
+        : typeof customer.machineTypes === 'string' 
+        ? [customer.machineTypes]
+        : [];
+
+      types.forEach(machineType => {
+        const type = typeof machineType === 'object' && machineType !== null
+          ? machineType.type
+          : typeof machineType === 'string'
+          ? machineType
+          : null;
+
+        if (type && typeof type === 'string') {
           acc[type] = (acc[type] || 0) + 1;
         }
       });
     }
     return acc;
-  }, {} as MachineDistribution);
+  }, {});
 
   const acquisitionChartData: ChartData = {
     labels: Object.keys(acquisitionTrends || {}),

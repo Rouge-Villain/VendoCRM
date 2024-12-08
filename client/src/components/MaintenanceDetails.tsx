@@ -6,21 +6,21 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from "../components/ui/dialog";
+import { Button } from "../components/ui/button";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-} from "@/components/ui/form";
+} from "../components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "../components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { type Maintenance } from "@db/schema";
 import { format } from "date-fns";

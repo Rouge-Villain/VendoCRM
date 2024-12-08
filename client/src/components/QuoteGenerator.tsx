@@ -10,18 +10,18 @@ import {
 import type { PDFDownloadLinkProps } from '@react-pdf/renderer';
 import { format, addDays } from "date-fns";
 
-interface RenderProps {
+type RenderProps = {
   blob?: Blob;
   url?: string;
   loading: boolean;
   error?: Error | null;
-}
+};
 
-type PDFRenderProps = PDFDownloadLinkProps & {
+interface PDFRenderProps extends PDFDownloadLinkProps {
   children: (props: RenderProps) => React.ReactNode;
   style?: React.CSSProperties;
   className?: string;
-};
+}
 import {
   Dialog,
   DialogContent,
@@ -117,25 +117,14 @@ const styles = StyleSheet.create({
   },
 });
 
+import { type Opportunity as DBOpportunity } from "@db/schema";
+
 type OpportunityStatus = 'open' | 'closed-won' | 'closed-lost';
 type OpportunityStage = 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closed-won' | 'closed-lost';
 
-interface QuoteOpportunity {
-  id: number;
-  customerId: number;
-  productId: number;
-  value: string;
-  status: OpportunityStatus;
-  stage: OpportunityStage;
-  createdAt: string | null;
-  updatedAt: string | null;
-  notes: string | null;
-  probability: number | null;
-  expectedCloseDate: string | null;
-  lostReason: string | null;
-  nextFollowUp: string | null;
-  assignedTo?: string;
-  lastContactDate?: string;
+// Extend the database type with our specific UI needs
+interface QuoteOpportunity extends Omit<DBOpportunity, 'value'> {
+  value: string; // Override value as string since we handle conversion in the UI
 }
 
 interface QuoteGeneratorProps {
