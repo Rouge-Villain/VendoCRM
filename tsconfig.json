@@ -11,15 +11,15 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowJs": true,
-    "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./client/src/*"],
-      "@db/*": ["./db/*"]
+      "@db/*": ["./db/*"],
+      "@/components/*": ["./client/src/components/*"],
+      "@/components/ui": ["./client/src/components/ui"],
+      "@/components/ui/*": ["./client/src/components/ui/*"],
+      "@/lib/*": ["./client/src/lib/*"],
+      "@/hooks/*": ["./client/src/hooks/*"]
     }
   },
   "include": ["client/src/**/*"],

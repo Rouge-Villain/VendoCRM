@@ -22,14 +22,10 @@ export default defineConfig({
     themePlugin(),
   ],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "client/src"),
-      "@db": path.resolve(__dirname, "db"),
-      "@/components": path.resolve(__dirname, "client/src/components"),
-      "@/lib": path.resolve(__dirname, "client/src/lib"),
-      "@/hooks": path.resolve(__dirname, "client/src/hooks"),
-      "@/components/ui": path.resolve(__dirname, "client/src/components/ui"),
-    },
+    alias: [
+      { find: '@', replacement: path.resolve(__dirname, 'client/src') },
+      { find: '@db', replacement: path.resolve(__dirname, 'db') },
+    ],
   },
   root: path.resolve(__dirname, "client"),
   build: {

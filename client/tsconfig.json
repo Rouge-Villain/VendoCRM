@@ -18,7 +18,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@db/*": ["../db/*"]
+      "@db/*": ["../db/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/components/ui": ["./src/components/ui"],
+      "@/components/ui/*": ["./src/components/ui/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/hooks/*": ["./src/hooks/*"]
     }
   },
   "include": ["src/**/*"],

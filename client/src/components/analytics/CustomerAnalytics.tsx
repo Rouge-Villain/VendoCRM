@@ -30,7 +30,7 @@ ChartJS.register(
   Legend,
   ArcElement,
   Filler
-);
+) as unknown;
 
 type AcquisitionTrends = Record<string, number>;
 type MachineDistribution = Record<string, number>;
@@ -72,11 +72,14 @@ interface PieChartDataset extends BaseChartDataset {
   hoverOffset?: number;
 }
 
-type ChartDataset = LineChartDataset | PieChartDataset;
+type ChartDataset<TType extends keyof ChartTypeRegistry = keyof ChartTypeRegistry> = 
+  TType extends 'line' ? LineChartDataset :
+  TType extends 'pie' ? PieChartDataset :
+  never;
 
-interface ChartData {
+interface ChartData<TType extends keyof ChartTypeRegistry = keyof ChartTypeRegistry> {
   labels: string[];
-  datasets: ChartDataset[];
+  datasets: ChartDataset<TType>[];
 }
 
 export function CustomerAnalytics() {

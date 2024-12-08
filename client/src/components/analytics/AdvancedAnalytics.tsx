@@ -12,7 +12,9 @@ import {
   Tooltip,
   Legend,
   ArcElement,
-  ChartOptions
+  ChartOptions,
+  ChartData,
+  ChartTypeRegistry
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +30,28 @@ ChartJS.register(
   Legend,
   ArcElement
 );
+
+type ChartType = keyof ChartTypeRegistry;
+
+interface BaseDataset {
+  label: string;
+  data: number[];
+  backgroundColor?: string | string[];
+  borderColor?: string;
+  borderWidth?: number;
+}
+
+interface LineDataset extends BaseDataset {
+  type: 'line';
+  tension?: number;
+  yAxisID?: 'y' | 'y1';
+}
+
+interface BarDataset extends BaseDataset {
+  type: 'bar';
+}
+
+type Dataset = LineDataset | BarDataset;
 
 export function AdvancedAnalytics() {
   const { data: customers, isError: isCustomersError, error: customersError } = useQuery({
@@ -135,23 +159,7 @@ export function AdvancedAnalytics() {
     return acc;
   }, {});
 
-  interface ChartDataset {
-    type?: 'bar' | 'line';
-    label: string;
-    data: number[];
-    backgroundColor?: string | string[];
-    borderColor?: string;
-    yAxisID?: 'y' | 'y1';
-    borderWidth?: number;
-    tension?: number;
-  }
-
-  interface ChartData {
-    labels: string[];
-    datasets: ChartDataset[];
-  }
-
-  const territoryData: ChartData = {
+  const territoryData: ChartData<'bar'> = {
     labels: Object.keys(territoryCoverage || {}),
     datasets: [
       {
@@ -171,7 +179,7 @@ export function AdvancedAnalytics() {
     ],
   };
 
-  const performanceData: ChartData = {
+  const performanceData: ChartData<'line'> = {
     labels: Object.keys(quarterlyPerformance || {}),
     datasets: [
       {

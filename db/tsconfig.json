@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "skipLibCheck": true,
     "allowJs": true,
     "declaration": true,
@@ -10,8 +10,10 @@
     "outDir": "./dist",
     "strict": true,
     "composite": true,
-    "rootDir": "."
+    "rootDir": ".",
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   },
-  "include": ["./**/*"],
+  "include": ["./**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
