@@ -14,22 +14,13 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "allowJs": true,
-    "esModuleInterop": true,
+    "composite": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./client/src/*"],
-      "@db/*": ["./db/*"]
+      "@/*": ["./src/*"],
+      "@db/*": ["../db/*"]
     }
   },
-  "include": ["client/src/**/*"],
-  "references": [
-    {
-      "path": "./client"
-    },
-    {
-      "path": "./db"
-    }
-  ],
-  "exclude": ["node_modules", "build", "dist"]
+  "include": ["src/**/*"],
+  "references": [{ "path": "../db" }]
 }

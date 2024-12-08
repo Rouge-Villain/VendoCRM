@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "../hooks/use-toast";
 import { type Maintenance } from "@db/schema";
 import { format } from "date-fns";
 import { MaintenanceDetails } from "./MaintenanceDetails";

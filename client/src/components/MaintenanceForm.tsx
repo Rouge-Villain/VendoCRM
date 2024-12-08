@@ -5,7 +5,7 @@ import { Calendar } from "../components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import { Button } from "../components/ui/button";
+import { Button } from "./ui/button";
 import {
   Form,
   FormField,
@@ -13,16 +13,16 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from "../components/ui/form";
-import { Input } from "../components/ui/input";
+} from "./ui/form";
+import { Input } from "./ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+} from "./ui/select";
+import { useToast } from "../hooks/use-toast";
 import { z } from "zod";
 import { type Customer } from "@db/schema";
 
