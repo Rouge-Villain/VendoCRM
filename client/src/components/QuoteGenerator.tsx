@@ -10,17 +10,19 @@ import {
 import type { PDFDownloadLinkProps } from '@react-pdf/renderer';
 import { format, addDays } from "date-fns";
 
-type RenderProps = {
+interface PDFRenderProps {
   blob?: Blob;
   url?: string;
   loading: boolean;
   error?: Error | null;
-};
+}
 
-interface PDFRenderProps extends PDFDownloadLinkProps {
-  children: (props: RenderProps) => React.ReactNode;
+interface PDFDownloadLinkRenderProps extends PDFDownloadLinkProps {
+  children: (props: PDFRenderProps) => React.ReactNode;
   style?: React.CSSProperties;
   className?: string;
+  fileName: string;
+  document: React.ReactElement;
 }
 import {
   Dialog,
@@ -28,9 +30,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import type { Customer, Product } from "@db/schema";
+} from "./ui/dialog";
+import { Button } from "./ui/button";
+import type { Customer, Product } from "../../db/schema";
 
 // PDF styles
 const styles = StyleSheet.create({

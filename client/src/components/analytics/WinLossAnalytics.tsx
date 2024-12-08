@@ -12,8 +12,8 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type Opportunity, type Product } from "@db/schema";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import type { Opportunity, Product } from "../../../db/schema";
 
 
 
