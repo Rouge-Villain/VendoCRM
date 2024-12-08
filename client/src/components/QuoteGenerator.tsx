@@ -250,7 +250,7 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
                 fileName={`quote-${opportunity.id}.pdf`}
                 style={{ textDecoration: 'none' }}
               >
-                {({ url, loading, error }: RenderProps) => (
+                {({ url, loading, error }: PDFRenderProps) => (
                   <Button 
                     className="w-full"
                     disabled={loading || !!error}

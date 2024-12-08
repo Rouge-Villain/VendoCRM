@@ -12,12 +12,16 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  ChartTypeRegistry,
+} from 'chart.js';
+import type { 
+  ChartData, 
   ChartOptions,
-  ChartData,
-  ChartTypeRegistry
+  ScriptableContext,
+  TooltipItem,
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui";
 
 ChartJS.register(
   CategoryScale,
@@ -29,7 +33,7 @@ ChartJS.register(
   Tooltip,
   Legend,
   ArcElement
-);
+) as void;
 
 type ChartType = keyof ChartTypeRegistry;
 
@@ -39,19 +43,78 @@ interface BaseDataset {
   backgroundColor?: string | string[];
   borderColor?: string;
   borderWidth?: number;
+  fill?: boolean;
+  pointStyle?: 'circle' | 'cross' | 'crossRot' | 'dash' | 'line' | 'rect' | 'rectRounded' | 'rectRot' | 'star' | 'triangle';
 }
 
 interface LineDataset extends BaseDataset {
   type: 'line';
   tension?: number;
   yAxisID?: 'y' | 'y1';
+  pointRadius?: number;
+  pointHoverRadius?: number;
+  pointBackgroundColor?: string;
+  pointBorderColor?: string;
+  pointBorderWidth?: number;
 }
 
 interface BarDataset extends BaseDataset {
   type: 'bar';
+  categoryPercentage?: number;
+  barPercentage?: number;
+  borderRadius?: number;
 }
 
 type Dataset = LineDataset | BarDataset;
+
+interface ChartOptions extends ChartOptions<ChartType> {
+  responsive: boolean;
+  maintainAspectRatio: boolean;
+  plugins: {
+    legend: {
+      position: 'top' | 'bottom' | 'left' | 'right';
+      labels: {
+        font: Partial<{
+          size: number;
+          family: string;
+          weight: string | number;
+        }>;
+      };
+    };
+    title?: {
+      display: boolean;
+      text: string;
+    };
+  };
+  scales?: {
+    y?: {
+      type: 'linear';
+      display: boolean;
+      position?: 'left' | 'right';
+      beginAtZero?: boolean;
+      title?: {
+        display: boolean;
+        text: string;
+      };
+      grid?: {
+        color?: string;
+        drawOnChartArea?: boolean;
+      };
+    };
+    y1?: {
+      type: 'linear';
+      display: boolean;
+      position?: 'left' | 'right';
+      grid?: {
+        drawOnChartArea?: boolean;
+      };
+      title?: {
+        display: boolean;
+        text: string;
+      };
+    };
+  };
+}
 
 export function AdvancedAnalytics() {
   const { data: customers, isError: isCustomersError, error: customersError } = useQuery({
