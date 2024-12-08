@@ -19,6 +19,8 @@ interface RenderProps {
 
 type PDFRenderProps = PDFDownloadLinkProps & {
   children: (props: RenderProps) => React.ReactNode;
+  style?: React.CSSProperties;
+  className?: string;
 };
 import {
   Dialog,
