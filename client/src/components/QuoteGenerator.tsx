@@ -221,9 +221,9 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
       if (!response.ok) {
         throw new Error(`Error fetching customer: ${response.statusText}`);
       }
-      const data: Customer = await response.json();
-      return data;
+      return response.json() as Promise<Customer>;
     },
+    enabled: !!opportunity.customerId,
   });
 
   const { data: product } = useQuery<Product, Error>({

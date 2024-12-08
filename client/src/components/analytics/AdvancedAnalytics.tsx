@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Customer, Opportunity } from "@db/schema";
-import { exportToCSV, prepareAnalyticsData } from '@/lib/exportData';
+import { exportToCSV, prepareAnalyticsData } from '../../lib/exportData';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -63,12 +63,14 @@ export function AdvancedAnalytics() {
     const territory = customer.serviceTerritory;
     if (typeof territory === 'string') {
       const currentTerritory = acc[territory] || { customers: 0, machines: 0, revenue: 0 };
+      const customerOpportunities = opportunities?.filter(opp => opp.customerId === customer.id) || [];
+      const opportunityRevenue = customerOpportunities.reduce((sum, opp) => 
+        sum + Number(opp.value?.toString() || '0'), 0);
+      
       acc[territory] = {
         customers: currentTerritory.customers + 1,
         machines: currentTerritory.machines + (Array.isArray(customer.machineTypes) ? customer.machineTypes.length : 0),
-        revenue: currentTerritory.revenue + (opportunities?.reduce((sum, opp) => 
-          opp.customerId === customer.id ? sum + Number(opp.value || 0) : sum
-        , 0) || 0)
+        revenue: currentTerritory.revenue + opportunityRevenue
       };
     }
     return acc;

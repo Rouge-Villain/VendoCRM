@@ -4,7 +4,7 @@ import { Switch, Route } from "wouter";
 import "./index.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "./components/ui/toaster";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
@@ -14,7 +14,7 @@ import Analytics from "./pages/Analytics";
 import Timeline from "./pages/Timeline";
 import Maintenance from "./pages/Maintenance";
 
-function Router(): JSX.Element {
+const AppRouter = (): JSX.Element => {
   return (
     <Layout>
       <Switch>
@@ -39,11 +39,15 @@ function Router(): JSX.Element {
         <Route path="/maintenance">
           <Maintenance />
         </Route>
-        <Route>404 Page Not Found</Route>
+        <Route>
+          <div className="flex items-center justify-center h-full">
+            <h1 className="text-2xl font-bold text-gray-900">404 Page Not Found</h1>
+          </div>
+        </Route>
       </Switch>
     </Layout>
   );
-}
+};
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Failed to find the root element");
@@ -52,7 +56,7 @@ const root = createRoot(rootElement);
 root.render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Router />
+      <AppRouter />
       <Toaster />
     </QueryClientProvider>
   </StrictMode>

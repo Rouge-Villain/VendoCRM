@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileDown as FileDownIcon } from "lucide-react";
 import { type Customer, type Opportunity } from "@db/schema";
-import { exportAnalyticsData } from "@/lib/exportData";
+import { exportAnalyticsData } from "../../lib/exportData";
 
 ChartJS.register(
   CategoryScale,
@@ -42,6 +42,7 @@ function isMachineType(value: unknown): value is MachineType {
 }
 
 interface ChartDataset {
+  type?: 'line' | 'bar' | 'pie';
   label?: string;
   data: number[];
   borderColor?: string;
@@ -58,6 +59,7 @@ interface ChartDataset {
   pointHoverBorderWidth?: number;
   borderWidth?: number;
   hoverOffset?: number;
+  yAxisID?: string;
 }
 
 interface ChartData {
