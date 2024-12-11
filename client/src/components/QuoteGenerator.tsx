@@ -8,6 +8,8 @@ import {
   StyleSheet,
   PDFViewer,
   BlobProvider,
+  type PDFProps,
+  type StyleProp,
 } from "@react-pdf/renderer";
 import {
   Dialog,
@@ -19,8 +21,12 @@ import {
 import { Button } from "./ui/button";
 import { useQuery } from "@tanstack/react-query";
 
+// Define PDF style types
+type StyleKeys = 'page' | 'header' | 'companyInfo' | 'section' | 'sectionTitle' | 'text' | 'total';
+type PDFStyles = Record<StyleKeys, StyleProp>;
+
 // PDF styles
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<PDFStyles>({
   page: {
     flexDirection: "column",
     backgroundColor: "#FFFFFF",
@@ -103,6 +109,12 @@ interface QuoteGeneratorProps {
   onOpenChange: (open: boolean) => void;
 }
 
+interface BlobProviderRenderProps {
+  url: string | null;
+  loading: boolean;
+  error: Error | null;
+}
+
 export const QuoteGenerator: React.FC<QuoteGeneratorProps> = ({ opportunity, open, onOpenChange }) => {
   const { data: customer } = useQuery<Customer>({
     queryKey: ["customers", opportunity.customerId],
@@ -111,7 +123,7 @@ export const QuoteGenerator: React.FC<QuoteGeneratorProps> = ({ opportunity, ope
       if (!response.ok) {
         throw new Error(`Error fetching customer: ${response.statusText}`);
       }
-      return response.json() as Promise<Customer>;
+      return response.json();
     },
     enabled: !!opportunity.customerId,
   });
@@ -123,7 +135,7 @@ export const QuoteGenerator: React.FC<QuoteGeneratorProps> = ({ opportunity, ope
       if (!response.ok) {
         throw new Error(`Error fetching product: ${response.statusText}`);
       }
-      return response.json() as Promise<Product>;
+      return response.json();
     },
     enabled: !!opportunity.productId,
   });
@@ -139,7 +151,7 @@ export const QuoteGenerator: React.FC<QuoteGeneratorProps> = ({ opportunity, ope
           {typeof window !== "undefined" && (
             <div className="space-y-4">
               <BlobProvider document={<QuoteDocument opportunity={opportunity} customer={customer} product={product} />}>
-                {({ url, loading, error }) => (
+                {({ url, loading, error }: BlobProviderRenderProps) => (
                   <Button
                     className="w-full"
                     disabled={loading || !!error}
