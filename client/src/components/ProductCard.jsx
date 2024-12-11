@@ -1,12 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { type Product } from "@db/schema";
 
-interface ProductCardProps {
-  product: Product;
-  imageUrl: string;
-}
-
-export function ProductCard({ product, imageUrl }: ProductCardProps) {
+export function ProductCard({ product, imageUrl }) {
   const specs = JSON.parse(product.specs);
 
   return (
@@ -28,7 +22,7 @@ export function ProductCard({ product, imageUrl }: ProductCardProps) {
               {Object.entries(specs).map(([key, value]) => (
                 <div key={key}>
                   <dt className="text-gray-500">{key}</dt>
-                  <dd className="font-medium">{value as string}</dd>
+                  <dd className="font-medium">{value}</dd>
                 </div>
               ))}
             </dl>

@@ -24,7 +24,6 @@ import { AlertCircle, FileText } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import type { Opportunity, Customer, Product } from "@db/schema";
 import { QuoteGenerator } from "./QuoteGenerator";
 
 const stages = [
@@ -32,19 +31,9 @@ const stages = [
   { id: "qualification", name: "Qualification" },
   { id: "closed-won", name: "Closed Won" },
   { id: "closed-lost", name: "Closed Lost" }
-] as const;
+];
 
-type Stage = typeof stages[number]['id'];
-
-const DraggableDealCard = React.memo(({ 
-  opportunity, 
-  customers, 
-  products 
-}: { 
-  opportunity: Opportunity; 
-  customers?: Customer[];
-  products?: Product[];
-}) => {
+const DraggableDealCard = React.memo(({ opportunity, customers, products }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: opportunity.id.toString(),
   });
@@ -117,19 +106,7 @@ const DraggableDealCard = React.memo(({
 
 DraggableDealCard.displayName = "DraggableDealCard";
 
-const DroppableStage = React.memo(({ 
-  stage, 
-  opportunities, 
-  customers, 
-  products,
-  metrics
-}: { 
-  stage: typeof stages[number];
-  opportunities: Opportunity[];
-  customers?: Customer[];
-  products?: Product[];
-  metrics: { count: number; totalValue: number; weightedValue: number; avgProbability: number; };
-}) => {
+const DroppableStage = React.memo(({ stage, opportunities, customers, products, metrics }) => {
   const { setNodeRef, isOver: isDraggingOver } = useDroppable({
     id: stage.id,
   });
@@ -209,7 +186,7 @@ DroppableStage.displayName = "DroppableStage";
 export function DealPipeline() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [draggedDeal, setDraggedDeal] = useState<Opportunity | null>(null);
+  const [draggedDeal, setDraggedDeal] = useState(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -221,7 +198,7 @@ export function DealPipeline() {
     })
   );
 
-  const collisionDetectionStrategy: CollisionDetection = (args) => {
+  const collisionDetectionStrategy = (args) => {
     const pointerCollisions = pointerWithin(args);
     return pointerCollisions.length > 0 ? [pointerCollisions[0]] : [];
   };
@@ -233,11 +210,11 @@ export function DealPipeline() {
       if (!response.ok) {
         throw new Error("Failed to fetch opportunities");
       }
-      return response.json() as Promise<Opportunity[]>;
+      return response.json();
     },
   });
 
-  const { data: customers } = useQuery<Customer[]>({
+  const { data: customers } = useQuery({
     queryKey: ["customers"],
     queryFn: async () => {
       const response = await fetch("/api/customers");
@@ -245,7 +222,7 @@ export function DealPipeline() {
     },
   });
 
-  const { data: products } = useQuery<Product[]>({
+  const { data: products } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
       const response = await fetch("/api/products");
@@ -254,7 +231,7 @@ export function DealPipeline() {
   });
 
   const updateStageMutation = useMutation({
-    mutationFn: async ({ id, stage }: { id: number; stage: Stage }) => {
+    mutationFn: async ({ id, stage }) => {
       const response = await fetch(`/api/opportunities/${id}/stage`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -275,7 +252,7 @@ export function DealPipeline() {
         description: `Deal moved to ${stages.find(s => s.id === data.stage)?.name}`,
       });
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast({
         title: 'Error',
         description: error.message,
@@ -284,20 +261,20 @@ export function DealPipeline() {
     },
   });
 
-  const handleDragStart = useCallback((event: DragStartEvent) => {
+  const handleDragStart = useCallback((event) => {
     const { active } = event;
     const dealId = parseInt(active.id.toString());
     const deal = opportunities?.find(d => d.id === dealId);
     if (deal) setDraggedDeal(deal);
   }, [opportunities]);
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event) => {
     const { active, over } = event;
     
     if (!over) return;
 
     const dealId = parseInt(active.id.toString());
-    const newStage = over.id.toString() as Stage;
+    const newStage = over.id.toString();
     
     const deal = opportunities?.find(d => d.id === dealId);
     if (deal && deal.stage !== newStage) {
@@ -354,7 +331,7 @@ export function DealPipeline() {
       avgProbability
     };
     return acc;
-  }, {} as Record<string, { count: number; totalValue: number; weightedValue: number; avgProbability: number; }>);
+  }, {});
 
   return (
     <DndContext
