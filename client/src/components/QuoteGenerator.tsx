@@ -83,8 +83,8 @@ const styles = StyleSheet.create({
 
 interface QuoteDocumentProps {
   opportunity: Opportunity;
-  customer?: Customer;
-  product?: Product;
+  customer: Customer | undefined;
+  product: Product | undefined;
 }
 
 interface QuoteGeneratorProps {
@@ -93,11 +93,18 @@ interface QuoteGeneratorProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const QuoteDocument: React.FC<QuoteDocumentProps> = ({
+type BlobProviderRenderProps = {
+  blob: Blob | null;
+  url: string | null;
+  loading: boolean;
+  error: Error | null;
+}
+
+const QuoteDocument = ({
   opportunity,
   customer,
   product,
-}) => (
+}: QuoteDocumentProps): React.ReactElement => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.companyInfo}>
@@ -174,7 +181,7 @@ export function QuoteGenerator({
                   />
                 }
               >
-                {({ url, loading, error }) => (
+                {({ url, loading, error }: BlobProviderRenderProps) => (
                   <Button
                     className="w-full"
                     disabled={loading || !!error}

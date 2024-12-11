@@ -85,28 +85,40 @@ export const activities = pgTable("activities", {
 });
 
 // Zod Schemas
+// Base schemas created from database tables
 export const insertCustomerSchema = createInsertSchema(customers);
 export const selectCustomerSchema = createSelectSchema(customers);
-export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
-export type Customer = z.infer<typeof selectCustomerSchema>;
+export const customerSchema = selectCustomerSchema;  // For client-side validation
 
 export const insertProductSchema = createInsertSchema(products);
 export const selectProductSchema = createSelectSchema(products);
-export type InsertProduct = z.infer<typeof insertProductSchema>;
-export type Product = z.infer<typeof selectProductSchema>;
+export const productSchema = selectProductSchema;  // For client-side validation
 
 export const insertOpportunitySchema = createInsertSchema(opportunities);
 export const selectOpportunitySchema = createSelectSchema(opportunities);
-export type InsertOpportunity = z.infer<typeof insertOpportunitySchema>;
-export type Opportunity = z.infer<typeof selectOpportunitySchema>;
+export const opportunitySchema = selectOpportunitySchema;  // For client-side validation
 
 export const insertActivitySchema = createInsertSchema(activities);
 export const selectActivitySchema = createSelectSchema(activities);
-export type InsertActivity = z.infer<typeof insertActivitySchema>;
-export type Activity = z.infer<typeof selectActivitySchema>;
+export const activitySchema = selectActivitySchema;  // For client-side validation
 
 export const insertMaintenanceSchema = createInsertSchema(maintenanceRecords);
 export const selectMaintenanceSchema = createSelectSchema(maintenanceRecords);
+export const maintenanceSchema = selectMaintenanceSchema;  // For client-side validation
+
+// Type exports
+export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
+export type Customer = z.infer<typeof selectCustomerSchema>;
+
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type Product = z.infer<typeof selectProductSchema>;
+
+export type InsertOpportunity = z.infer<typeof insertOpportunitySchema>;
+export type Opportunity = z.infer<typeof selectOpportunitySchema>;
+
+export type InsertActivity = z.infer<typeof insertActivitySchema>;
+export type Activity = z.infer<typeof selectActivitySchema>;
+
 export type InsertMaintenance = z.infer<typeof insertMaintenanceSchema>;
 export type Maintenance = z.infer<typeof selectMaintenanceSchema>;
 
