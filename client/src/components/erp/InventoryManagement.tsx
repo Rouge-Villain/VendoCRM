@@ -15,10 +15,11 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { type Inventory } from "@db/schema";
+import { type InsertInventory } from "@db/schema";
 import { AlertCircle, Package } from "lucide-react";
 
 export function InventoryManagement() {
-  const { data: inventory, isError, error } = useQuery<Inventory[]>({
+  const { data: inventory, isError, error } = useQuery<Inventory[], Error>({
     queryKey: ["inventory"],
     queryFn: async () => {
       const response = await fetch("/api/inventory");
