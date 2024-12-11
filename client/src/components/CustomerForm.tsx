@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { type InsertCustomer, insertCustomerSchema } from "@db/schema";
+import { type InsertCustomer, customerSchema } from "@db/schema";
 
 const MACHINE_TYPES = [
   { id: "cooler", label: "Cooler" },

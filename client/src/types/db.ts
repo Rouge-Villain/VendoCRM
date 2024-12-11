@@ -18,18 +18,23 @@ export const opportunitySchema = z.object({
 
 export const customerSchema = z.object({
   id: z.number(),
+  name: z.string(),
   company: z.string(),
   contact: z.string(),
   email: z.string().email(),
   phone: z.string(),
   address: z.string(),
+  state: z.string().optional(),
+  notes: z.string().optional(),
+  website: z.string().optional(),
+  maintenanceHistory: z.string().optional(),
   serviceTerritory: z.string(),
   machineTypes: z.array(z.object({
     type: z.string(),
     quantity: z.number().optional()
   })),
-  createdAt: z.date(),
-  updatedAt: z.date().optional()
+  createdAt: z.union([z.date(), z.string()]),
+  updatedAt: z.union([z.date(), z.string()]).optional()
 });
 
 export const productSchema = z.object({
@@ -39,14 +44,23 @@ export const productSchema = z.object({
   price: z.number(),
   specs: z.string(),
   category: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date().optional()
+  createdAt: z.union([z.date(), z.string()]),
+  updatedAt: z.union([z.date(), z.string()]).optional()
 });
 
-// Export types
-export type Customer = z.infer<typeof customerSchema>;
-export type Product = z.infer<typeof productSchema>;
-export type Opportunity = z.infer<typeof opportunitySchema>;
+export const activitySchema = z.object({
+  id: z.number(),
+  customerId: z.number(),
+  type: z.string(),
+  description: z.string(),
+  outcome: z.string().optional(),
+  nextSteps: z.string().optional(),
+  contactMethod: z.string(),
+  contactedBy: z.string(),
+  followUpDate: z.union([z.date(), z.string()]).optional(),
+  createdAt: z.union([z.date(), z.string()]),
+  updatedAt: z.union([z.date(), z.string()]).optional()
+});
 
 export const maintenanceSchema = z.object({
   id: z.number(),
@@ -67,15 +81,19 @@ export const maintenanceSchema = z.object({
   scheduledDate: z.union([z.date(), z.string()]).optional(),
   completedDate: z.union([z.date(), z.string()]).optional(),
   nextMaintenanceDate: z.union([z.date(), z.string()]).optional(),
-  date: z.union([z.date(), z.string()]),
-  type: z.string(),
-  parts: z.array(z.object({
-    name: z.string(),
-    quantity: z.number(),
-    cost: z.number()
-  })),
   createdAt: z.union([z.date(), z.string()]),
   updatedAt: z.union([z.date(), z.string()]).optional()
 });
 
+// Export types
+export type Customer = z.infer<typeof customerSchema>;
+export type Product = z.infer<typeof productSchema>;
+export type Opportunity = z.infer<typeof opportunitySchema>;
+export type Activity = z.infer<typeof activitySchema>;
 export type Maintenance = z.infer<typeof maintenanceSchema>;
+
+// Export insert types (for form submissions)
+export type InsertCustomer = z.input<typeof customerSchema>;
+export type InsertOpportunity = z.input<typeof opportunitySchema>;
+export type InsertActivity = z.input<typeof activitySchema>;
+export type InsertMaintenance = z.input<typeof maintenanceSchema>;

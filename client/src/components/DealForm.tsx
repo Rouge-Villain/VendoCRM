@@ -18,12 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { type InsertOpportunity, insertOpportunitySchema } from "@db/schema";
+import { type InsertOpportunity, opportunitySchema } from "@db/schema";
 
 interface DealFormProps {
   onSuccess: () => void;
@@ -50,7 +46,7 @@ export function DealForm({ onSuccess }: DealFormProps) {
   });
 
   const form = useForm<InsertOpportunity>({
-    resolver: zodResolver(insertOpportunitySchema),
+    resolver: zodResolver(opportunitySchema),
     defaultValues: {
       customerId: undefined,
       productId: undefined,
