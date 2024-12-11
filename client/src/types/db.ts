@@ -1,6 +1,22 @@
 import { z } from "zod";
+import type {
+  Customer as DbCustomer,
+  Opportunity as DbOpportunity,
+  Activity as DbActivity,
+  Maintenance as DbMaintenance,
+  Product as DbProduct,
+} from "../../../db/schema";
 
-// Database schema types using Zod for runtime validation
+// Re-export the types from the database schema
+export type {
+  Customer,
+  Opportunity,
+  Activity,
+  Maintenance,
+  Product,
+} from "../../../db/schema";
+
+// Additional client-side types and schemas
 export const opportunitySchema = z.object({
   id: z.number(),
   customerId: z.number(),
@@ -97,3 +113,29 @@ export type InsertCustomer = z.input<typeof customerSchema>;
 export type InsertOpportunity = z.input<typeof opportunitySchema>;
 export type InsertActivity = z.input<typeof activitySchema>;
 export type InsertMaintenance = z.input<typeof maintenanceSchema>;
+
+// Re-export schema functions for validation
+export const validateCustomer = (data: unknown): Customer => customerSchema.parse(data);
+export const validateOpportunity = (data: unknown): Opportunity => opportunitySchema.parse(data);
+export const validateActivity = (data: unknown): Activity => activitySchema.parse(data);
+export const validateMaintenance = (data: unknown): Maintenance => maintenanceSchema.parse(data);
+
+// Export analytics-specific types
+export interface MachineType {
+  type: string;
+  quantity?: number;
+}
+
+export interface AnalyticsData {
+  period?: string;
+  newCustomers?: number;
+  totalMachines?: number;
+  revenue?: number;
+  machineType?: string;
+  count?: number;
+  totalRevenue?: number;
+  customersUsing?: number;
+  territory?: string;
+  customerCount?: number;
+  machineCount?: number;
+}

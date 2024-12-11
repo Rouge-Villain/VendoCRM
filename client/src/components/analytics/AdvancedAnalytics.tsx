@@ -10,7 +10,6 @@ import {
   Tooltip,
   Legend,
   ArcElement,
-  ChartOptions,
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -39,17 +38,6 @@ interface QuarterlyMetrics {
   revenue: number;
   count: number;
   conversion: number;
-}
-
-interface ChartDataset {
-  type?: 'bar' | 'line';
-  label: string;
-  data: number[];
-  backgroundColor?: string;
-  borderColor?: string;
-  borderWidth?: number;
-  yAxisID?: string;
-  tension?: number;
 }
 
 export function AdvancedAnalytics() {
