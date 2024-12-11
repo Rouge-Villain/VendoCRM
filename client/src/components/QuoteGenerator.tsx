@@ -54,25 +54,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: "#4b5563",
   },
-  table: {
-    display: "flex",
-    width: "auto",
-    marginVertical: 15,
-  },
-  tableRow: {
-    flexDirection: "row",
-    borderBottomColor: "#e5e7eb",
-    borderBottomWidth: 1,
-    paddingVertical: 8,
-  },
-  tableCol: {
-    width: "25%",
-    paddingHorizontal: 8,
-  },
-  tableCell: {
-    fontSize: 10,
-    color: "#4b5563",
-  },
   total: {
     fontSize: 14,
     marginTop: 20,
@@ -81,14 +62,13 @@ const styles = StyleSheet.create({
   },
 });
 
-/**
- * PDF Document component for generating quotes
- * @param {Object} props - Component props
- * @param {Object} props.opportunity - Opportunity details
- * @param {Object} props.customer - Customer details
- * @param {Object} props.product - Product details
- */
-const QuoteDocument = ({ opportunity, customer, product }) => (
+interface QuoteDocumentProps {
+  opportunity: Opportunity;
+  customer?: Customer | null;
+  product?: Product | null;
+}
+
+const QuoteDocument: React.FC<QuoteDocumentProps> = ({ opportunity, customer, product }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.companyInfo}>
@@ -122,27 +102,28 @@ interface QuoteGeneratorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-export function QuoteGenerator({ opportunity, open, onOpenChange }) {
-  const { data: customer } = useQuery({
+
+export const QuoteGenerator: React.FC<QuoteGeneratorProps> = ({ opportunity, open, onOpenChange }) => {
+  const { data: customer } = useQuery<Customer>({
     queryKey: ["customers", opportunity.customerId],
     queryFn: async () => {
       const response = await fetch(`/api/customers/${opportunity.customerId}`);
       if (!response.ok) {
         throw new Error(`Error fetching customer: ${response.statusText}`);
       }
-      return response.json();
+      return response.json() as Promise<Customer>;
     },
     enabled: !!opportunity.customerId,
   });
 
-  const { data: product } = useQuery({
+  const { data: product } = useQuery<Product>({
     queryKey: ["products", opportunity.productId],
     queryFn: async () => {
       const response = await fetch(`/api/products/${opportunity.productId}`);
       if (!response.ok) {
         throw new Error(`Error fetching product: ${response.statusText}`);
       }
-      return response.json();
+      return response.json() as Promise<Product>;
     },
     enabled: !!opportunity.productId,
   });
@@ -187,32 +168,4 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }) {
       </DialogContent>
     </Dialog>
   );
-}
-
-// PropTypes validation for QuoteDocument component
-QuoteDocument.propTypes = {
-  opportunity: PropTypes.shape({
-    value: PropTypes.number.isRequired,
-  }).isRequired,
-  customer: PropTypes.shape({
-    company: PropTypes.string,
-    contact: PropTypes.string,
-    email: PropTypes.string,
-  }),
-  product: PropTypes.shape({
-    name: PropTypes.string,
-    description: PropTypes.string,
-    specs: PropTypes.string,
-  }),
-};
-
-// PropTypes validation for QuoteGenerator component
-QuoteGenerator.propTypes = {
-  opportunity: PropTypes.shape({
-    customerId: PropTypes.number.isRequired,
-    productId: PropTypes.number.isRequired,
-    value: PropTypes.number.isRequired,
-  }).isRequired,
-  open: PropTypes.bool.isRequired,
-  onOpenChange: PropTypes.func.isRequired,
 };

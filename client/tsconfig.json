@@ -29,21 +29,16 @@
     "paths": {
       "@/*": ["./src/*"],
       "@db/*": ["./src/types/*"],
-      "@db/schema": ["./src/types/db.ts"],
       "@/components/*": ["./src/components/*"],
       "@/components/ui": ["./src/components/ui"],
       "@/components/ui/*": ["./src/components/ui/*"],
       "@/lib/*": ["./src/lib/*"],
       "@/hooks/*": ["./src/hooks/*"]
-    },
-    "rootDirs": [".", ".."]
+    }
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.js",
-    "src/**/*.jsx",
-    "../db/**/*.ts"
+    "src/**/*.tsx"
   ],
   "exclude": ["node_modules"]
 }

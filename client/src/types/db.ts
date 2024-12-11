@@ -52,35 +52,32 @@ export const activitySchema = z.object({
   updatedAt: z.date().optional()
 });
 
-// Re-export all types from schema
-export type {
-  Customer,
-  InsertCustomer,
-  Product,
-  InsertProduct,
-  Opportunity,
-  InsertOpportunity,
-  Activity,
-  InsertActivity,
-  Maintenance,
-  InsertMaintenance,
-  Inventory,
-  InsertInventory,
-  Supplier,
-  InsertSupplier,
-  PurchaseOrder,
-  InsertPurchaseOrder,
-  Invoice,
-  InsertInvoice,
-  Payment,
-  InsertPayment,
-};
-
-// Define types from schemas
+// Export schema-derived types
 export type Customer = z.infer<typeof customerSchema>;
 export type Opportunity = z.infer<typeof opportunitySchema>;
 export type Product = z.infer<typeof productSchema>;
 export type Activity = z.infer<typeof activitySchema>;
+
+// Export base type interfaces
+export interface InsertCustomer extends Omit<Customer, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface InsertProduct extends Omit<Product, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface InsertOpportunity extends Omit<Opportunity, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface InsertActivity extends Omit<Activity, 'id' | 'createdAt' | 'updatedAt'> {}
+
+// Analytics types
+export interface AnalyticsData {
+  period?: string;
+  newCustomers?: number;
+  totalMachines?: number;
+  revenue?: number;
+  machineType?: string;
+  count?: number;
+  totalRevenue?: number;
+  customersUsing?: number;
+  territory?: string;
+  customerCount?: number;
+  machineCount?: number;
+}
 
 // Utility types
 export interface MachineType {
@@ -115,18 +112,6 @@ export const validateOpportunity = (data: unknown): Opportunity => opportunitySc
 export const validateProduct = (data: unknown): Product => productSchema.parse(data);
 export const validateActivity = (data: unknown): Activity => activitySchema.parse(data);
 
-// Define Part interface for maintenance records
-export interface Part {
-  name: string;
-  quantity: number;
-  cost?: number;
-}
-
-// Extended maintenance type with parts
-export type MaintenanceWithParts = Omit<Maintenance, 'partsUsed'> & {
-  partsUsed: Part[];
-};
-
 // Client-side date handling helper
 export const dateSchema = z.union([z.string(), z.date()]).transform(val => 
   typeof val === 'string' ? new Date(val) : val
@@ -138,38 +123,3 @@ export const validateDate = (date: string | Date | null | undefined): Date | nul
   const parsed = dateSchema.safeParse(date);
   return parsed.success ? parsed.data : null;
 };
-
-// Machine type interface
-export interface MachineType {
-  type: string;
-  quantity: number;
-}
-
-// Analytics-specific types
-export interface AnalyticsData {
-  period?: string;
-  newCustomers?: number;
-  totalMachines?: number;
-  revenue?: number;
-  machineType?: string;
-  count?: number;
-  totalRevenue?: number;
-  customersUsing?: number;
-  territory?: string;
-  customerCount?: number;
-  machineCount?: number;
-}
-
-// Form validation types
-export type ValidatedCustomer = z.infer<typeof customerSchema>;
-export type ValidatedOpportunity = z.infer<typeof opportunitySchema>;
-export type ValidatedActivity = z.infer<typeof activitySchema>;
-export type ValidatedMaintenance = z.infer<typeof maintenanceSchema>;
-export type ValidatedProduct = z.infer<typeof productSchema>;
-
-// Form validation functions
-export const validateCustomer = (data: unknown): ValidatedCustomer => customerSchema.parse(data);
-export const validateOpportunity = (data: unknown): ValidatedOpportunity => opportunitySchema.parse(data);
-export const validateActivity = (data: unknown): ValidatedActivity => activitySchema.parse(data);
-export const validateMaintenance = (data: unknown): ValidatedMaintenance => maintenanceSchema.parse(data);
-export const validateProduct = (data: unknown): ValidatedProduct => productSchema.parse(data);

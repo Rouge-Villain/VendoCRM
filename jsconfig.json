@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "allowJs": true,
     "checkJs": false,
@@ -11,7 +11,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./client/src/*"],
-      "@db/*": ["./db/*"],
+      "@db/*": ["./client/src/types/*"],
       "@/components/*": ["./client/src/components/*"],
       "@/components/ui": ["./client/src/components/ui"],
       "@/components/ui/*": ["./client/src/components/ui/*"],
@@ -20,6 +20,11 @@
       "@/styles/*": ["./client/src/styles/*"]
     }
   },
-  "include": ["client/src/**/*.js", "client/src/**/*.jsx"],
+  "include": [
+    "client/src/**/*.js",
+    "client/src/**/*.jsx",
+    "client/src/**/*.ts",
+    "client/src/**/*.tsx"
+  ],
   "exclude": ["node_modules", "build", "dist"]
 }

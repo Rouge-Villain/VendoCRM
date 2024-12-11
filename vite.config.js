@@ -1,4 +1,4 @@
-import { defineConfig, type UserConfig } from "vite";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
 import path from "path";
@@ -9,7 +9,7 @@ import checker from "vite-plugin-checker";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const config: UserConfig = {
+export default defineConfig({
   plugins: [
     react({
       include: /\.(js|jsx|ts|tsx)$/,
@@ -20,8 +20,9 @@ const config: UserConfig = {
     checker({
       typescript: true,
       eslint: {
-        lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
+        lintCommand: 'eslint "./client/src/**/*.{ts,tsx}"',
       },
+      overlay: true,
     }),
   ],
   resolve: {
@@ -42,9 +43,13 @@ const config: UserConfig = {
   },
   server: {
     port: 3001,
-    host: true,
+    host: "0.0.0.0",
     strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+      }
+    }
   }
-};
-
-export default defineConfig(config);
+});
