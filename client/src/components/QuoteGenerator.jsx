@@ -16,11 +16,7 @@ import {
   DialogDescription,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { type Customer, type Product, type Opportunity } from "@db/schema";
-import { type BlobProvider as ReactPDFBlobProvider } from "@react-pdf/renderer";
 import { useQuery } from "@tanstack/react-query";
-
-type BlobProviderRenderProps = Parameters<NonNullable<ReactPDFBlobProvider["children"]>>[0];
 
 // PDF styles
 const styles = StyleSheet.create({
@@ -84,26 +80,7 @@ const styles = StyleSheet.create({
   },
 });
 
-interface QuoteDocumentProps {
-  opportunity: Opportunity;
-  customer: Customer | undefined;
-  product: Product | undefined;
-}
-
-interface QuoteGeneratorProps {
-  opportunity: Opportunity;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-import type { BlobProviderProps } from "@react-pdf/renderer";
-type BlobProviderRenderProps = BlobProviderProps["children"] extends (props: infer T) => any ? T : never;
-
-const QuoteDocument = ({
-  opportunity,
-  customer,
-  product,
-}: QuoteDocumentProps): React.ReactElement => (
+const QuoteDocument = ({ opportunity, customer, product }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.companyInfo}>
@@ -132,12 +109,8 @@ const QuoteDocument = ({
   </Document>
 );
 
-export function QuoteGenerator({
-  opportunity,
-  open,
-  onOpenChange,
-}: QuoteGeneratorProps) {
-  const { data: customer } = useQuery<Customer>({
+export function QuoteGenerator({ opportunity, open, onOpenChange }) {
+  const { data: customer } = useQuery({
     queryKey: ["customers", opportunity.customerId],
     queryFn: async () => {
       const response = await fetch(`/api/customers/${opportunity.customerId}`);
@@ -149,7 +122,7 @@ export function QuoteGenerator({
     enabled: !!opportunity.customerId,
   });
 
-  const { data: product } = useQuery<Product>({
+  const { data: product } = useQuery({
     queryKey: ["products", opportunity.productId],
     queryFn: async () => {
       const response = await fetch(`/api/products/${opportunity.productId}`);
@@ -171,16 +144,8 @@ export function QuoteGenerator({
         <div className="p-4">
           {typeof window !== "undefined" && (
             <div className="space-y-4">
-              <BlobProvider
-                document={
-                  <QuoteDocument
-                    opportunity={opportunity}
-                    customer={customer}
-                    product={product}
-                  />
-                }
-              >
-                {({ url, loading, error }: BlobProviderRenderProps) => (
+              <BlobProvider document={<QuoteDocument opportunity={opportunity} customer={customer} product={product} />}>
+                {({ url, loading, error }) => (
                   <Button
                     className="w-full"
                     disabled={loading || !!error}
@@ -200,11 +165,7 @@ export function QuoteGenerator({
               </BlobProvider>
               <div className="border rounded-lg p-4">
                 <PDFViewer style={{ width: "100%", height: "500px" }}>
-                  <QuoteDocument
-                    opportunity={opportunity}
-                    customer={customer}
-                    product={product}
-                  />
+                  <QuoteDocument opportunity={opportunity} customer={customer} product={product} />
                 </PDFViewer>
               </div>
             </div>

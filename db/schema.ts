@@ -105,6 +105,16 @@ export const inventory = pgTable("inventory", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const purchase_order_items = pgTable("purchase_order_items", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  purchaseOrderId: integer("purchase_order_id").notNull(),
+  productId: integer("product_id").notNull(),
+  quantity: integer("quantity").notNull(),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  receivedQuantity: integer("received_quantity").default(0),
+  status: text("status").default("pending"),
+});
+
 export const suppliers = pgTable("suppliers", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   name: text("name").notNull(),
@@ -157,6 +167,30 @@ export const payments = pgTable("payments", {
   status: text("status").default("pending"),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const invoice_items = pgTable("invoice_items", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  invoiceId: integer("invoice_id").notNull(),
+  productId: integer("product_id").notNull(),
+  quantity: integer("quantity").notNull(),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  description: text("description"),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+});
+
+export const stock_movements = pgTable("stock_movements", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  productId: integer("product_id").notNull(),
+  type: text("type").notNull(), // in, out, transfer
+  quantity: integer("quantity").notNull(),
+  fromLocation: text("from_location"),
+  toLocation: text("to_location"),
+  reference: text("reference"), // PO number, invoice number, etc.
+  referenceId: integer("reference_id"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  createdBy: text("created_by").notNull(),
 });
 
 // Schema Definitions
@@ -230,40 +264,6 @@ export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 
 export type Payment = z.infer<typeof selectPaymentSchema>;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
-
-export const purchase_order_items = pgTable("purchase_order_items", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  purchaseOrderId: integer("purchase_order_id").notNull(),
-  productId: integer("product_id").notNull(),
-  quantity: integer("quantity").notNull(),
-  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
-  receivedQuantity: integer("received_quantity").default(0),
-  status: text("status").default("pending"),
-});
-
-export const invoice_items = pgTable("invoice_items", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  invoiceId: integer("invoice_id").notNull(),
-  productId: integer("product_id").notNull(),
-  quantity: integer("quantity").notNull(),
-  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
-  description: text("description"),
-  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
-});
-
-export const stock_movements = pgTable("stock_movements", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  productId: integer("product_id").notNull(),
-  type: text("type").notNull(), // in, out, transfer
-  quantity: integer("quantity").notNull(),
-  fromLocation: text("from_location"),
-  toLocation: text("to_location"),
-  reference: text("reference"), // PO number, invoice number, etc.
-  referenceId: integer("reference_id"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow(),
-  createdBy: text("created_by").notNull(),
-});
 
 export const insertStockMovementSchema = createInsertSchema(stock_movements);
 export const selectStockMovementSchema = createSelectSchema(stock_movements);
