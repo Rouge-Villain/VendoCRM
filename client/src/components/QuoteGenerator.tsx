@@ -1,38 +1,24 @@
-import { useQuery } from "@tanstack/react-query";
+import React from "react";
 import {
+  Document,
   Page,
   Text,
   View,
-  Document,
   StyleSheet,
-  PDFDownloadLink,
+  PDFViewer,
+  BlobProvider,
 } from "@react-pdf/renderer";
-import type { PDFDownloadLinkProps } from '@react-pdf/renderer';
 import { format, addDays } from "date-fns";
-
-interface PDFRenderProps {
-  blob?: Blob;
-  url?: string;
-  loading: boolean;
-  error?: Error | null;
-}
-
-interface PDFDownloadLinkRenderProps extends PDFDownloadLinkProps {
-  children: (props: PDFRenderProps) => React.ReactNode;
-  style?: React.CSSProperties;
-  className?: string;
-  fileName: string;
-  document: React.ReactElement;
-}
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription
+  DialogDescription,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-import type { Customer, Product } from "../../db/schema";
+import type { Customer, Product, Opportunity } from "@db/schema";
+import { useQuery } from "@tanstack/react-query";
 
 // PDF styles
 const styles = StyleSheet.create({
@@ -119,14 +105,9 @@ const styles = StyleSheet.create({
   },
 });
 
-import { type Opportunity as DBOpportunity } from "../../db/schema";
-
-type OpportunityStatus = 'open' | 'closed-won' | 'closed-lost';
-type OpportunityStage = 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closed-won' | 'closed-lost';
-
-// Extend the database type with our specific UI needs
-interface QuoteOpportunity extends Omit<DBOpportunity, 'value'> {
-  value: string; // Override value as string since we handle conversion in the UI
+// Extend the Opportunity type with UI-specific needs
+interface QuoteOpportunity extends Omit<Opportunity, 'value'> {
+  value: string;
 }
 
 interface QuoteGeneratorProps {
@@ -165,7 +146,7 @@ const QuoteDocument: React.FC<QuoteDocumentProps> = ({ opportunity, customer, pr
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Customer Details</Text>
         <Text style={styles.text}>Company: {customer?.company || 'N/A'}</Text>
-        <Text style={styles.text}>Contact: {customer?.name || 'N/A'}</Text>
+        <Text style={styles.text}>Contact: {customer?.contact || 'N/A'}</Text>
         <Text style={styles.text}>Email: {customer?.email || 'N/A'}</Text>
         <Text style={styles.text}>Phone: {customer?.phone || 'N/A'}</Text>
         <Text style={styles.text}>Address: {customer?.address || 'N/A'}</Text>
@@ -205,28 +186,28 @@ const QuoteDocument: React.FC<QuoteDocumentProps> = ({ opportunity, customer, pr
 );
 
 export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGeneratorProps) {
-  const { data: customer } = useQuery<Customer, Error>({
+  const { data: customer } = useQuery<Customer>({
     queryKey: ["customers", opportunity.customerId],
     queryFn: async () => {
       const response = await fetch(`/api/customers/${opportunity.customerId}`);
       if (!response.ok) {
         throw new Error(`Error fetching customer: ${response.statusText}`);
       }
-      return response.json() as Promise<Customer>;
+      return response.json();
     },
     enabled: !!opportunity.customerId,
   });
 
-  const { data: product } = useQuery<Product, Error>({
+  const { data: product } = useQuery<Product>({
     queryKey: ["products", opportunity.productId],
     queryFn: async () => {
       const response = await fetch(`/api/products/${opportunity.productId}`);
       if (!response.ok) {
         throw new Error(`Error fetching product: ${response.statusText}`);
       }
-      const data: Product = await response.json();
-      return data;
+      return response.json();
     },
+    enabled: !!opportunity.productId,
   });
 
   return (
@@ -239,7 +220,7 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
         <div className="p-4">
           {typeof window !== 'undefined' && (
             <div className="space-y-4">
-              <PDFDownloadLink
+              <BlobProvider
                 document={
                   <QuoteDocument 
                     opportunity={opportunity} 
@@ -247,29 +228,34 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
                     product={product}
                   />
                 }
-                fileName={`quote-${opportunity.id}.pdf`}
-                style={{ textDecoration: 'none' }}
               >
-                {({ url, loading, error }: PDFRenderProps) => (
+                {({ url, loading, error }) => (
                   <Button 
                     className="w-full"
                     disabled={loading || !!error}
-                    asChild={true}
+                    onClick={() => {
+                      if (url) {
+                        window.open(url, '_blank');
+                      }
+                    }}
                   >
-                    <a
-                      href={url || '#'}
-                      className="w-full inline-flex items-center justify-center"
-                      download={`quote-${opportunity.id}.pdf`}
-                    >
-                      {loading ? 'Generating PDF...' : error ? 'Error generating PDF' : 'Download Quote PDF'}
-                    </a>
+                    {loading ? 'Generating PDF...' : error ? 'Error generating PDF' : 'Download Quote PDF'}
                   </Button>
                 )}
-              </PDFDownloadLink>
+              </BlobProvider>
               <div className="p-4 border rounded-lg bg-muted">
                 <p className="text-center text-sm text-muted-foreground">
                   Click the button above to download the quote as a PDF
                 </p>
+              </div>
+              <div className="border rounded-lg p-4">
+                <PDFViewer style={{ width: "100%", height: "500px" }}>
+                  <QuoteDocument
+                    opportunity={opportunity}
+                    customer={customer}
+                    product={product}
+                  />
+                </PDFViewer>
               </div>
             </div>
           )}

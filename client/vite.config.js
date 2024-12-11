@@ -8,9 +8,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@db': path.resolve(__dirname, './src/types'),
-      '../../db/schema': path.resolve(__dirname, './src/types/db.js')
+      '@db/schema': path.resolve(__dirname, './src/types/db'),
+      '../../db/schema': path.resolve(__dirname, './src/types/db')
     },
-    extensions: ['.js', '.jsx', '.ts', '.tsx']
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json']
   },
   server: {
     port: 3000,
@@ -21,7 +22,7 @@ export default defineConfig({
     sourcemap: true
   },
   esbuild: {
-    loader: "jsx",
+    loader: "tsx",
     include: /src\/.*\.[jt]sx?$/,
     exclude: [],
   },

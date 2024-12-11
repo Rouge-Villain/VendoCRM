@@ -1,7 +1,6 @@
-// Database schema types using Zod for runtime validation
-import { z } from "zod";
-
-export const opportunitySchema = z.object({
+// This file is deprecated. Please use db.ts instead.
+// Keeping this file temporarily for backwards compatibility
+export * from './db';
   id: z.number(),
   customerId: z.number(),
   productId: z.number(),

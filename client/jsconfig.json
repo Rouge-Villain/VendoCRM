@@ -4,12 +4,13 @@
     "paths": {
       "@/*": ["./src/*"],
       "@db/*": ["./src/types/*"],
-      "../../db/schema": ["./src/types/db"]
+      "@db/schema": ["./src/types/db.ts"],
+      "../../db/schema": ["./src/types/db.ts"]
     },
     "jsx": "react",
     "target": "ES6",
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "allowJs": true,
     "esModuleInterop": true,
     "strict": true,
