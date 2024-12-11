@@ -20,15 +20,19 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@db/schema": ["./src/types/db"],
-      "@db/*": ["./src/types/*"],
+      "@db/schema": ["../db/schema"],
+      "@db/*": ["../db/*"],
       "@/components/*": ["./src/components/*"],
       "@/components/ui": ["./src/components/ui"],
       "@/components/ui/*": ["./src/components/ui/*"],
       "@/lib/*": ["./src/lib/*"],
       "@/hooks/*": ["./src/hooks/*"]
-    }
+    },
+    "rootDirs": [".", ".."]
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*",
+    "../db/**/*"
+  ],
   "exclude": ["node_modules"]
 }

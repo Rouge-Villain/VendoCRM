@@ -13,7 +13,7 @@ import {
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { exportToCSV, prepareAnalyticsData } from '../../lib/utils';
+import { exportToCSV, prepareAnalyticsData } from '@/lib/exportData';
 import { type Customer, type Opportunity } from "@/types/db";
 
 ChartJS.register(

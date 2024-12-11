@@ -5,63 +5,71 @@ import type {
   Activity as DbActivity,
   Maintenance as DbMaintenance,
   Product as DbProduct,
-} from "../../../db/schema";
+} from "@db/schema";
 
-// Re-export the types from the database schema
-export type {
-  Customer,
-  Opportunity,
-  Activity,
-  Maintenance,
-  Product,
-} from "../../../db/schema";
+// Client-side schema definitions with proper date handling
+export const dateSchema = z.union([z.string(), z.date()]).transform(val => 
+  typeof val === 'string' ? new Date(val) : val
+);
 
-// Additional client-side types and schemas
 export const opportunitySchema = z.object({
   id: z.number(),
   customerId: z.number(),
   productId: z.number(),
-  value: z.union([z.number(), z.string()]),  // Support both number and string formats
+  value: z.union([z.number(), z.string()]).transform(val => 
+    typeof val === 'string' ? parseFloat(val) : val
+  ),
   stage: z.string(),
   status: z.string(),
-  probability: z.number().optional(),
-  expectedCloseDate: z.union([z.date(), z.string()]).optional(),
-  notes: z.string().optional(),
-  assignedTo: z.string().optional(),
-  createdAt: z.union([z.date(), z.string()]),
-  updatedAt: z.union([z.date(), z.string()]).optional()
+  probability: z.number().nullable(),
+  expectedCloseDate: dateSchema.nullable(),
+  notes: z.string().nullable(),
+  lostReason: z.string().nullable(),
+  assignedTo: z.string().nullable(),
+  lastContactDate: dateSchema.nullable(),
+  nextFollowUp: dateSchema.nullable(),
+  createdAt: dateSchema.nullable(),
+  updatedAt: dateSchema.nullable()
 });
 
 export const customerSchema = z.object({
   id: z.number(),
   name: z.string(),
   company: z.string(),
-  contact: z.string(),
   email: z.string().email(),
   phone: z.string(),
   address: z.string(),
-  state: z.string().optional(),
-  notes: z.string().optional(),
-  website: z.string().optional(),
-  maintenanceHistory: z.string().optional(),
-  serviceTerritory: z.string(),
-  machineTypes: z.array(z.object({
-    type: z.string(),
-    quantity: z.number().optional()
-  })),
-  createdAt: z.union([z.date(), z.string()]),
-  updatedAt: z.union([z.date(), z.string()]).optional()
+  website: z.string().nullable(),
+  notes: z.string().nullable(),
+  machineTypes: z.array(
+    z.union([
+      z.string(),
+      z.object({
+        type: z.string(),
+        quantity: z.number().optional()
+      })
+    ])
+  ),
+  state: z.string().nullable(),
+  city: z.string().nullable(),
+  business_locations: z.string().nullable(),
+  serviceTerritory: z.string().nullable(),
+  serviceHours: z.string().nullable(),
+  contractTerms: z.string().nullable(),
+  maintenanceHistory: z.string().nullable(),
+  createdAt: dateSchema.nullable(),
+  updatedAt: dateSchema.nullable()
 });
 
 export const productSchema = z.object({
   id: z.number(),
   name: z.string(),
-  description: z.string(),
-  price: z.number(),
-  specs: z.string(),
   category: z.string(),
-  createdAt: z.union([z.date(), z.string()]),
-  updatedAt: z.union([z.date(), z.string()]).optional()
+  description: z.string(),
+  specs: z.string(),
+  price: z.number(),
+  imageUrl: z.string().nullable(),
+  createdAt: dateSchema.nullable()
 });
 
 export const activitySchema = z.object({
@@ -69,58 +77,58 @@ export const activitySchema = z.object({
   customerId: z.number(),
   type: z.string(),
   description: z.string(),
-  outcome: z.string().optional(),
-  nextSteps: z.string().optional(),
+  outcome: z.string().nullable(),
+  nextSteps: z.string().nullable(),
   contactMethod: z.string(),
   contactedBy: z.string(),
-  followUpDate: z.union([z.date(), z.string()]).optional(),
-  createdAt: z.union([z.date(), z.string()]),
-  updatedAt: z.union([z.date(), z.string()]).optional()
+  followUpDate: dateSchema.nullable(),
+  createdAt: dateSchema.nullable()
 });
 
 export const maintenanceSchema = z.object({
   id: z.number(),
   customerId: z.number(),
-  machineId: z.number(),
+  machineId: z.string(),
   serialNumber: z.string(),
   machineType: z.string(),
   maintenanceType: z.string(),
   description: z.string(),
   status: z.string(),
-  technicianNotes: z.string().optional(),
+  technicianNotes: z.string().nullable(),
   partsUsed: z.array(z.object({
     name: z.string(),
-    quantity: z.number(),
-    cost: z.number()
-  })).optional(),
-  cost: z.number().optional(),
-  scheduledDate: z.union([z.date(), z.string()]).optional(),
-  completedDate: z.union([z.date(), z.string()]).optional(),
-  nextMaintenanceDate: z.union([z.date(), z.string()]).optional(),
-  createdAt: z.union([z.date(), z.string()]),
-  updatedAt: z.union([z.date(), z.string()]).optional()
+    quantity: z.number()
+  })).nullable(),
+  cost: z.number(),
+  scheduledDate: dateSchema,
+  completedDate: dateSchema.nullable(),
+  nextMaintenanceDate: dateSchema.nullable(),
+  createdAt: dateSchema.nullable(),
+  updatedAt: dateSchema.nullable()
 });
 
-// Export types
-export type Customer = z.infer<typeof customerSchema>;
-export type Product = z.infer<typeof productSchema>;
-export type Opportunity = z.infer<typeof opportunitySchema>;
-export type Activity = z.infer<typeof activitySchema>;
-export type Maintenance = z.infer<typeof maintenanceSchema>;
+// Re-export database types
+export type { DbCustomer as Customer };
+export type { DbOpportunity as Opportunity };
+export type { DbActivity as Activity };
+export type { DbMaintenance as Maintenance };
+export type { DbProduct as Product };
 
-// Export insert types (for form submissions)
-export type InsertCustomer = z.input<typeof customerSchema>;
-export type InsertOpportunity = z.input<typeof opportunitySchema>;
-export type InsertActivity = z.input<typeof activitySchema>;
-export type InsertMaintenance = z.input<typeof maintenanceSchema>;
+// Export validated types for forms
+export type ValidatedCustomer = z.infer<typeof customerSchema>;
+export type ValidatedOpportunity = z.infer<typeof opportunitySchema>;
+export type ValidatedActivity = z.infer<typeof activitySchema>;
+export type ValidatedMaintenance = z.infer<typeof maintenanceSchema>;
+export type ValidatedProduct = z.infer<typeof productSchema>;
 
-// Re-export schema functions for validation
-export const validateCustomer = (data: unknown): Customer => customerSchema.parse(data);
-export const validateOpportunity = (data: unknown): Opportunity => opportunitySchema.parse(data);
-export const validateActivity = (data: unknown): Activity => activitySchema.parse(data);
-export const validateMaintenance = (data: unknown): Maintenance => maintenanceSchema.parse(data);
+// Export validation functions
+export const validateCustomer = (data: unknown): ValidatedCustomer => customerSchema.parse(data);
+export const validateOpportunity = (data: unknown): ValidatedOpportunity => opportunitySchema.parse(data);
+export const validateActivity = (data: unknown): ValidatedActivity => activitySchema.parse(data);
+export const validateMaintenance = (data: unknown): ValidatedMaintenance => maintenanceSchema.parse(data);
+export const validateProduct = (data: unknown): ValidatedProduct => productSchema.parse(data);
 
-// Export analytics-specific types
+// Analytics-specific types
 export interface MachineType {
   type: string;
   quantity?: number;
@@ -139,3 +147,10 @@ export interface AnalyticsData {
   customerCount?: number;
   machineCount?: number;
 }
+
+// Export date validation helper
+export const validateDate = (date: string | Date | null | undefined): Date | null => {
+  if (!date) return null;
+  const parsed = dateSchema.safeParse(date);
+  return parsed.success ? parsed.data : null;
+};

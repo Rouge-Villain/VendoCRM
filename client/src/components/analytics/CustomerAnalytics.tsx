@@ -16,8 +16,8 @@ import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { FileDown as FileDownIcon } from "lucide-react";
-import { type Customer, type Opportunity } from "@/types/db";
-import { exportAnalyticsData } from "@/lib/utils";
+import { type Customer, type Opportunity, type MachineType } from "@/types/db";
+import { exportAnalyticsData } from "@/lib/exportData";
 
 // Register ChartJS components
 ChartJS.register(
@@ -33,13 +33,48 @@ ChartJS.register(
   Filler
 );
 
-// Type definitions
+// Type definitions for our analytics data
 interface AcquisitionData {
   [monthYear: string]: number;
 }
 
 interface MachineData {
   [machineType: string]: number;
+}
+
+// Line chart specific types
+interface LineChartDataset {
+  type: 'line';
+  label: string;
+  data: number[];
+  borderColor: string;
+  backgroundColor: string;
+  tension: number;
+  fill: boolean;
+  pointBackgroundColor: string;
+  pointBorderColor: string;
+  pointBorderWidth: number;
+  pointRadius: number;
+  pointHoverRadius: number;
+}
+
+interface LineChartData {
+  labels: string[];
+  datasets: LineChartDataset[];
+}
+
+// Pie chart specific types
+interface PieChartDataset {
+  type: 'pie';
+  label: string;
+  data: number[];
+  backgroundColor: string[];
+  hoverOffset: number;
+}
+
+interface PieChartData {
+  labels: string[];
+  datasets: PieChartDataset[];
 }
 
 export function CustomerAnalytics() {
@@ -78,18 +113,23 @@ export function CustomerAnalytics() {
   // Calculate machine type distribution
   const machineDistribution = customers?.reduce<MachineData>((acc, customer) => {
     if (Array.isArray(customer.machineTypes)) {
-      customer.machineTypes.forEach(machine => {
-        const type = typeof machine === 'string' ? machine : machine.type;
-        acc[type] = (acc[type] || 0) + 1;
+      customer.machineTypes.forEach((machine) => {
+        if (typeof machine === 'string') {
+          acc[machine] = (acc[machine] || 0) + 1;
+        } else if (typeof machine === 'object' && machine !== null) {
+          const { type, quantity = 1 } = machine;
+          acc[type] = (acc[type] || 0) + quantity;
+        }
       });
     }
     return acc;
   }, {});
 
-  const acquisitionChartData = {
+  const acquisitionChartData: LineChartData = {
     labels: Object.keys(acquisitionTrends || {}),
     datasets: [
       {
+        type: 'line',
         label: 'New Customers',
         data: Object.values(acquisitionTrends || {}),
         borderColor: 'rgb(99, 102, 241)',
@@ -103,12 +143,13 @@ export function CustomerAnalytics() {
         pointHoverRadius: 6,
       },
     ],
-  } as const;
+  };
 
-  const machineChartData = {
+  const machineChartData: PieChartData = {
     labels: Object.keys(machineDistribution || {}),
     datasets: [
       {
+        type: 'pie',
         label: 'Machine Distribution',
         data: Object.values(machineDistribution || {}),
         backgroundColor: [
@@ -122,7 +163,7 @@ export function CustomerAnalytics() {
         hoverOffset: 15,
       },
     ],
-  } as const;
+  };
 
   return (
     <div className="space-y-6">
@@ -150,7 +191,7 @@ export function CustomerAnalytics() {
                 maintainAspectRatio: false,
                 plugins: {
                   legend: {
-                    position: 'top' as const,
+                    position: 'top',
                   },
                 },
                 scales: {
@@ -159,9 +200,12 @@ export function CustomerAnalytics() {
                     grid: {
                       color: 'rgba(148, 163, 184, 0.1)',
                     },
+                    ticks: {
+                      stepSize: 1,
+                    },
                   },
                 },
-              }}
+              } as const}
             />
           </div>
         </CardContent>
@@ -191,10 +235,10 @@ export function CustomerAnalytics() {
                 maintainAspectRatio: false,
                 plugins: {
                   legend: {
-                    position: 'right' as const,
+                    position: 'right',
                   },
                 },
-              }}
+              } as const}
             />
           </div>
         </CardContent>
