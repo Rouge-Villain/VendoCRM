@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { customerSchema, productSchema, opportunitySchema } from "../types/db";
+import { type Customer, type Product, type Opportunity } from "@db/schema";
 
 // PDF styles
 const styles = StyleSheet.create({
@@ -87,24 +87,11 @@ function QuoteDocument({ opportunity, customer, product }) {
   );
 }
 
-QuoteDocument.propTypes = {
-  opportunity: PropTypes.shape({
-    id: PropTypes.number,
-    value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    customerId: PropTypes.number,
-    productId: PropTypes.number,
-  }),
-  customer: PropTypes.shape({
-    company: PropTypes.string,
-    contact: PropTypes.string,
-    email: PropTypes.string,
-  }),
-  product: PropTypes.shape({
-    name: PropTypes.string,
-    description: PropTypes.string,
-    specs: PropTypes.string,
-  }),
-};
+interface QuoteDocumentProps {
+  opportunity: Opportunity;
+  customer?: Customer;
+  product?: Product;
+}
 
 export function QuoteGenerator({ opportunity, open, onOpenChange }) {
   const [customer, setCustomer] = useState(null);

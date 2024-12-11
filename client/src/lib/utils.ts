@@ -1,32 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { type Customer, type Opportunity } from "@/types/db";
-interface BaseAnalyticsData {
-  [key: string]: any;
-}
 
-interface AcquisitionData extends BaseAnalyticsData {
-  period: string;
-  newCustomers: number;
-  totalMachines: number;
-  revenue: number;
-}
-
-interface DistributionData extends BaseAnalyticsData {
-  machineType: string;
-  count: number;
-  totalRevenue: number;
-  customersUsing: number;
-}
-
-interface TerritoryData extends BaseAnalyticsData {
-  territory: string;
-  customerCount: number;
-  machineCount: number;
-  totalRevenue: number;
-}
-
-type AnalyticsData = AcquisitionData | DistributionData | TerritoryData;
+// Remove unused interfaces and type as they are now moved to exportData.ts
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

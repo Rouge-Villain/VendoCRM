@@ -40,6 +40,22 @@ interface QuarterlyMetrics {
   conversion: number;
 }
 
+type ChartDataset = {
+  type: 'line' | 'bar';
+  label: string;
+  data: number[];
+  backgroundColor?: string;
+  borderColor?: string;
+  borderWidth?: number;
+  yAxisID?: string;
+  tension?: number;
+};
+
+interface ChartData {
+  labels: string[];
+  datasets: ChartDataset[];
+}
+
 export function AdvancedAnalytics() {
   const { data: customers, isError: isCustomersError, error: customersError } = useQuery<Customer[], Error>({
     queryKey: ["customers"],
@@ -65,28 +81,35 @@ export function AdvancedAnalytics() {
 
   // Calculate service territory coverage
   const territoryCoverage = customers?.reduce<Record<string, TerritoryCoverage>>((acc, customer) => {
-    const territory = customer.serviceTerritory;
-    if (typeof territory === 'string') {
-      const currentTerritory = acc[territory] || { customers: 0, machines: 0, revenue: 0 };
-      const customerOpportunities = opportunities?.filter(opp => opp.customerId === customer.id) || [];
-      const opportunityRevenue = customerOpportunities.reduce((sum, opp) => 
-        sum + Number(opp.value?.toString() || '0'), 0);
-      
-      const machineCount = Array.isArray(customer.machineTypes)
-        ? customer.machineTypes.reduce((count, machine) => {
-            if (typeof machine === 'object' && machine !== null) {
-              return count + (machine.quantity || 1);
-            }
-            return count + 1;
-          }, 0)
-        : 0;
-      
-      acc[territory] = {
-        customers: currentTerritory.customers + 1,
-        machines: currentTerritory.machines + machineCount,
-        revenue: currentTerritory.revenue + opportunityRevenue
-      };
-    }
+    const territory = customer.serviceTerritory || 'Unassigned';
+    const currentTerritory = acc[territory] || { customers: 0, machines: 0, revenue: 0 };
+    
+    // Calculate revenue from opportunities
+    const customerOpportunities = opportunities?.filter(opp => opp.customerId === customer.id) || [];
+    const opportunityRevenue = customerOpportunities.reduce((sum, opp) => 
+      sum + Number(opp.value?.toString() || '0'), 0);
+    
+    // Calculate machine count with proper type checking
+    const machineCount = Array.isArray(customer.machineTypes) 
+      ? customer.machineTypes.reduce((total: number, machine: unknown): number => {
+          if (typeof machine === 'string') {
+            return total + 1;
+          }
+          if (typeof machine === 'object' && machine !== null && 'quantity' in machine) {
+            const quantity = (machine as { quantity?: number }).quantity;
+            return total + (typeof quantity === 'number' ? quantity : 1);
+          }
+          return total;
+        }, 0)
+      : 0;
+    
+    // Update territory data with explicit number types
+    acc[territory] = {
+      customers: Number(currentTerritory.customers) + 1,
+      machines: Number(currentTerritory.machines) + Number(machineCount),
+      revenue: Number(currentTerritory.revenue) + Number(opportunityRevenue)
+    };
+    
     return acc;
   }, {});
 

@@ -16,7 +16,7 @@ import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { FileDown as FileDownIcon } from "lucide-react";
-import { type Customer, type Opportunity, type MachineType } from "@/types/db";
+import { type Customer, type Opportunity } from "@db/schema";
 import { exportAnalyticsData } from "@/lib/exportData";
 
 // Register ChartJS components
@@ -33,48 +33,40 @@ ChartJS.register(
   Filler
 );
 
-// Type definitions for our analytics data
-interface AcquisitionData {
-  [monthYear: string]: number;
+// Analytics data types
+type AcquisitionData = Record<string, number>;
+type MachineData = Record<string, number>;
+
+// Chart.js types for specific chart types
+interface LineChartOptions {
+  responsive: boolean
+  maintainAspectRatio: boolean
+  plugins: {
+    legend: {
+      position: 'top'
+    }
+  }
+  scales: {
+    y: {
+      beginAtZero: boolean
+      grid: {
+        color: string
+      }
+      ticks: {
+        stepSize: number
+      }
+    }
+  }
 }
 
-interface MachineData {
-  [machineType: string]: number;
-}
-
-// Line chart specific types
-interface LineChartDataset {
-  type: 'line';
-  label: string;
-  data: number[];
-  borderColor: string;
-  backgroundColor: string;
-  tension: number;
-  fill: boolean;
-  pointBackgroundColor: string;
-  pointBorderColor: string;
-  pointBorderWidth: number;
-  pointRadius: number;
-  pointHoverRadius: number;
-}
-
-interface LineChartData {
-  labels: string[];
-  datasets: LineChartDataset[];
-}
-
-// Pie chart specific types
-interface PieChartDataset {
-  type: 'pie';
-  label: string;
-  data: number[];
-  backgroundColor: string[];
-  hoverOffset: number;
-}
-
-interface PieChartData {
-  labels: string[];
-  datasets: PieChartDataset[];
+interface PieChartOptions {
+  responsive: boolean
+  maintainAspectRatio: boolean
+  plugins: {
+    legend: {
+      position: 'right'
+    }
+  }
 }
 
 export function CustomerAnalytics() {
@@ -116,20 +108,20 @@ export function CustomerAnalytics() {
       customer.machineTypes.forEach((machine) => {
         if (typeof machine === 'string') {
           acc[machine] = (acc[machine] || 0) + 1;
-        } else if (typeof machine === 'object' && machine !== null) {
-          const { type, quantity = 1 } = machine;
-          acc[type] = (acc[type] || 0) + quantity;
+        } else if (typeof machine === 'object' && machine !== null && 'type' in machine) {
+          const machineObj = machine as { type: string; quantity?: number };
+          acc[machineObj.type] = (acc[machineObj.type] || 0) + (machineObj.quantity || 1);
         }
       });
     }
     return acc;
   }, {});
 
-  const acquisitionChartData: LineChartData = {
+  const acquisitionChartData = {
     labels: Object.keys(acquisitionTrends || {}),
     datasets: [
       {
-        type: 'line',
+        type: 'line' as const,
         label: 'New Customers',
         data: Object.values(acquisitionTrends || {}),
         borderColor: 'rgb(99, 102, 241)',
@@ -145,11 +137,11 @@ export function CustomerAnalytics() {
     ],
   };
 
-  const machineChartData: PieChartData = {
+  const machineChartData = {
     labels: Object.keys(machineDistribution || {}),
     datasets: [
       {
-        type: 'pie',
+        type: 'pie' as const,
         label: 'Machine Distribution',
         data: Object.values(machineDistribution || {}),
         backgroundColor: [
@@ -186,26 +178,28 @@ export function CustomerAnalytics() {
           <div className="h-[300px]">
             <Line
               data={acquisitionChartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: 'top',
+              options={
+                {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'top'
+                    }
                   },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    grid: {
-                      color: 'rgba(148, 163, 184, 0.1)',
-                    },
-                    ticks: {
-                      stepSize: 1,
-                    },
-                  },
-                },
-              } as const}
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      grid: {
+                        color: 'rgba(148, 163, 184, 0.1)'
+                      },
+                      ticks: {
+                        stepSize: 1
+                      }
+                    }
+                  }
+                } as LineChartOptions
+              }
             />
           </div>
         </CardContent>
@@ -230,15 +224,17 @@ export function CustomerAnalytics() {
           <div className="h-[300px]">
             <Pie
               data={machineChartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: 'right',
-                  },
-                },
-              } as const}
+              options={
+                {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'right'
+                    }
+                  }
+                } as PieChartOptions
+              }
             />
           </div>
         </CardContent>
