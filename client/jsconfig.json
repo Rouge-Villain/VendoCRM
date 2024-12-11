@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["./*"],
+      "@db/*": ["./types/*"]
+    },
+    "jsx": "react",
+    "target": "ES6",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowJs": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

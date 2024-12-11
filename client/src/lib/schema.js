@@ -1,77 +1,82 @@
-import { z } from 'zod';
+import PropTypes from 'prop-types';
 
-// Customer schema
-export const customerSchema = z.object({
-  id: z.number(),
-  company: z.string(),
-  contact: z.string(),
-  email: z.string().email(),
-  phone: z.string(),
-  address: z.string(),
-  serviceTerritory: z.string(),
-  machineTypes: z.array(z.object({
-    type: z.string(),
-    quantity: z.number().optional()
-  })).optional(),
-  createdAt: z.string().or(z.date()),
-  updatedAt: z.string().or(z.date()).optional()
+// Customer Type
+export const CustomerType = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  company: PropTypes.string.isRequired,
+  contact: PropTypes.string.isRequired,
+  email: PropTypes.string.isRequired,
+  phone: PropTypes.string.isRequired,
+  address: PropTypes.string.isRequired,
+  serviceTerritory: PropTypes.string.isRequired,
+  machineTypes: PropTypes.arrayOf(PropTypes.shape({
+    type: PropTypes.string.isRequired,
+    quantity: PropTypes.number
+  })),
+  createdAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
+  updatedAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)])
 });
 
-// Product schema
-export const productSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  description: z.string(),
-  price: z.number(),
-  specs: z.string(),
-  category: z.string(),
-  createdAt: z.string().or(z.date()),
-  updatedAt: z.string().or(z.date()).optional()
+// Product Type
+export const ProductType = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  name: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  price: PropTypes.number.isRequired,
+  specs: PropTypes.string.isRequired,
+  category: PropTypes.string.isRequired,
+  createdAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
+  updatedAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)])
 });
 
-// Opportunity schema
-export const opportunitySchema = z.object({
-  id: z.number(),
-  customerId: z.number(),
-  productId: z.number(),
-  value: z.number(),
-  stage: z.string(),
-  status: z.string(),
-  probability: z.number().optional(),
-  expectedCloseDate: z.string().or(z.date()).optional(),
-  notes: z.string().optional(),
-  assignedTo: z.string().optional(),
-  createdAt: z.string().or(z.date()),
-  updatedAt: z.string().or(z.date()).optional()
+// Opportunity Type
+export const OpportunityType = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  customerId: PropTypes.number.isRequired,
+  productId: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
+  stage: PropTypes.string.isRequired,
+  status: PropTypes.string.isRequired,
+  probability: PropTypes.number,
+  expectedCloseDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+  notes: PropTypes.string,
+  assignedTo: PropTypes.string,
+  createdAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
+  updatedAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)])
 });
 
-// Activity schema
-export const activitySchema = z.object({
-  id: z.number(),
-  customerId: z.number(),
-  type: z.string(),
-  description: z.string(),
-  date: z.string().or(z.date()),
-  createdAt: z.string().or(z.date()),
-  updatedAt: z.string().or(z.date()).optional()
+// Activity Type
+export const ActivityType = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  customerId: PropTypes.number.isRequired,
+  type: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  date: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
+  createdAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
+  updatedAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)])
 });
 
-// Maintenance schema
-export const maintenanceSchema = z.object({
-  id: z.number(),
-  customerId: z.number(),
-  machineId: z.number(),
-  date: z.string().or(z.date()),
-  type: z.string(),
-  description: z.string(),
-  status: z.string(),
-  parts: z.array(z.object({
-    name: z.string(),
-    quantity: z.number(),
-    cost: z.number()
-  })).optional(),
-  createdAt: z.string().or(z.date()),
-  updatedAt: z.string().or(z.date()).optional()
+// Maintenance Type
+export const MaintenanceType = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  customerId: PropTypes.number.isRequired,
+  machineId: PropTypes.number.isRequired,
+  date: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
+  type: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  status: PropTypes.string.isRequired,
+  parts: PropTypes.arrayOf(PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    quantity: PropTypes.number.isRequired,
+    cost: PropTypes.number.isRequired
+  })),
+  createdAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
+  updatedAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)])
 });
 
-export const insertActivitySchema = activitySchema.omit({ id: true, createdAt: true, updatedAt: true });
+// Part Type
+export const PartType = PropTypes.shape({
+  name: PropTypes.string.isRequired,
+  quantity: PropTypes.number.isRequired,
+  cost: PropTypes.number.isRequired
+});

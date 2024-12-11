@@ -1,3 +1,4 @@
+import React from "react";
 import { SalesAnalytics } from "../components/analytics/SalesAnalytics";
 import { CustomerAnalytics } from "../components/analytics/CustomerAnalytics";
 import { AdvancedAnalytics } from "../components/analytics/AdvancedAnalytics";
