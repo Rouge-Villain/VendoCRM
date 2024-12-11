@@ -11,15 +11,16 @@ import {
   Legend,
   ArcElement,
   Filler,
+  ChartOptions,
+  ChartData,
 } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { FileDown as FileDownIcon } from "lucide-react";
-import { type Customer, type Opportunity } from "@db/schema";
+import { type Customer, type Opportunity, type MachineType } from "@/types/db";
 import { exportAnalyticsData } from "@/lib/exportData";
 
-// Register ChartJS components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -33,44 +34,20 @@ ChartJS.register(
   Filler
 );
 
-// Analytics data types
-type AcquisitionData = Record<string, number>;
-type MachineData = Record<string, number>;
-
-// Chart.js types for specific chart types
-interface LineChartOptions {
-  responsive: boolean
-  maintainAspectRatio: boolean
-  plugins: {
-    legend: {
-      position: 'top'
-    }
-  }
-  scales: {
-    y: {
-      beginAtZero: boolean
-      grid: {
-        color: string
-      }
-      ticks: {
-        stepSize: number
-      }
-    }
-  }
+// Type definitions
+interface AcquisitionMetrics {
+  [key: string]: number;
 }
 
-interface PieChartOptions {
-  responsive: boolean
-  maintainAspectRatio: boolean
-  plugins: {
-    legend: {
-      position: 'right'
-    }
-  }
+interface MachineDistribution {
+  [key: string]: number;
 }
+
+type LineChartData = ChartData<'line', number[], string>;
+type PieChartData = ChartData<'pie', number[], string>;
 
 export function CustomerAnalytics() {
-  const { data: customers } = useQuery<Customer[], Error>({
+  const { data: customers } = useQuery<Customer[]>({
     queryKey: ["customers"],
     queryFn: async () => {
       const response = await fetch("/api/customers");
@@ -81,7 +58,7 @@ export function CustomerAnalytics() {
     },
   });
 
-  const { data: opportunities } = useQuery<Opportunity[], Error>({
+  const { data: opportunities } = useQuery<Opportunity[]>({
     queryKey: ["opportunities"],
     queryFn: async () => {
       const response = await fetch("/api/opportunities");
@@ -93,7 +70,7 @@ export function CustomerAnalytics() {
   });
 
   // Calculate customer acquisition trends
-  const acquisitionTrends = customers?.reduce<AcquisitionData>((acc, customer) => {
+  const acquisitionTrends = customers?.reduce<AcquisitionMetrics>((acc, customer) => {
     if (customer.createdAt) {
       const date = new Date(customer.createdAt);
       const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
@@ -103,45 +80,35 @@ export function CustomerAnalytics() {
   }, {});
 
   // Calculate machine type distribution
-  const machineDistribution = customers?.reduce<MachineData>((acc, customer) => {
+  const machineDistribution = customers?.reduce<MachineDistribution>((acc, customer) => {
     if (Array.isArray(customer.machineTypes)) {
       customer.machineTypes.forEach((machine) => {
-        if (typeof machine === 'string') {
-          acc[machine] = (acc[machine] || 0) + 1;
-        } else if (typeof machine === 'object' && machine !== null && 'type' in machine) {
-          const machineObj = machine as { type: string; quantity?: number };
-          acc[machineObj.type] = (acc[machineObj.type] || 0) + (machineObj.quantity || 1);
-        }
+        const type = typeof machine === 'string' ? machine : machine.type;
+        const quantity = typeof machine === 'string' ? 1 : (machine.quantity ?? 1);
+        acc[type] = (acc[type] ?? 0) + quantity;
       });
     }
     return acc;
   }, {});
 
-  const acquisitionChartData = {
+  const acquisitionChartData: LineChartData = {
     labels: Object.keys(acquisitionTrends || {}),
     datasets: [
       {
-        type: 'line' as const,
         label: 'New Customers',
         data: Object.values(acquisitionTrends || {}),
         borderColor: 'rgb(99, 102, 241)',
         backgroundColor: 'rgba(99, 102, 241, 0.1)',
         tension: 0.4,
         fill: true,
-        pointBackgroundColor: 'rgb(99, 102, 241)',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
       },
     ],
   };
 
-  const machineChartData = {
+  const machineChartData: PieChartData = {
     labels: Object.keys(machineDistribution || {}),
     datasets: [
       {
-        type: 'pie' as const,
         label: 'Machine Distribution',
         data: Object.values(machineDistribution || {}),
         backgroundColor: [
@@ -152,9 +119,36 @@ export function CustomerAnalytics() {
           'rgba(249, 115, 22, 0.7)',
           'rgba(147, 51, 234, 0.7)',
         ],
-        hoverOffset: 15,
       },
     ],
+  };
+
+  const lineChartOptions: ChartOptions<'line'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(148, 163, 184, 0.1)',
+        },
+      },
+    },
+  };
+
+  const pieChartOptions: ChartOptions<'pie'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right',
+      },
+    },
   };
 
   return (
@@ -178,28 +172,7 @@ export function CustomerAnalytics() {
           <div className="h-[300px]">
             <Line
               data={acquisitionChartData}
-              options={
-                {
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      position: 'top'
-                    }
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      grid: {
-                        color: 'rgba(148, 163, 184, 0.1)'
-                      },
-                      ticks: {
-                        stepSize: 1
-                      }
-                    }
-                  }
-                } as LineChartOptions
-              }
+              options={lineChartOptions}
             />
           </div>
         </CardContent>
@@ -224,17 +197,7 @@ export function CustomerAnalytics() {
           <div className="h-[300px]">
             <Pie
               data={machineChartData}
-              options={
-                {
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      position: 'right'
-                    }
-                  }
-                } as PieChartOptions
-              }
+              options={pieChartOptions}
             />
           </div>
         </CardContent>

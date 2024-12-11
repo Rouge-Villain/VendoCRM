@@ -51,10 +51,25 @@ type ChartDataset = {
   tension?: number;
 };
 
-interface ChartData {
+// Define specific chart data types
+type TerritoryChartData = {
   labels: string[];
-  datasets: ChartDataset[];
-}
+  datasets: Array<ChartDataset & {
+    type: 'bar';
+    backgroundColor: string;
+    borderWidth: number;
+  }>;
+};
+
+type PerformanceChartData = {
+  labels: string[];
+  datasets: Array<ChartDataset & {
+    type: 'line';
+    borderColor: string;
+    yAxisID: string;
+    tension: number;
+  }>;
+};
 
 export function AdvancedAnalytics() {
   const { data: customers, isError: isCustomersError, error: customersError } = useQuery<Customer[], Error>({
@@ -144,18 +159,18 @@ export function AdvancedAnalytics() {
     return acc;
   }, {});
 
-  const territoryData = {
+  const territoryData: TerritoryChartData = {
     labels: Object.keys(territoryCoverage || {}),
     datasets: [
       {
-        type: 'bar' as const,
+        type: 'bar',
         label: 'Customers',
         data: Object.values(territoryCoverage || {}).map(t => t.customers),
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
         borderWidth: 1,
       },
       {
-        type: 'bar' as const,
+        type: 'bar',
         label: 'Machines',
         data: Object.values(territoryCoverage || {}).map(t => t.machines),
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
@@ -164,11 +179,11 @@ export function AdvancedAnalytics() {
     ],
   };
 
-  const performanceData = {
+  const performanceData: PerformanceChartData = {
     labels: Object.keys(quarterlyPerformance || {}),
     datasets: [
       {
-        type: 'line' as const,
+        type: 'line',
         label: 'Revenue',
         data: Object.values(quarterlyPerformance || {}).map(q => q.revenue),
         borderColor: 'rgb(75, 192, 192)',
@@ -176,7 +191,7 @@ export function AdvancedAnalytics() {
         tension: 0.4,
       },
       {
-        type: 'line' as const,
+        type: 'line',
         label: 'Conversion Rate (%)',
         data: Object.values(quarterlyPerformance || {}).map(q => q.conversion),
         borderColor: 'rgb(255, 99, 132)',

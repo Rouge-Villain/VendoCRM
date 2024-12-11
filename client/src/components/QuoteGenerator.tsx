@@ -8,8 +8,7 @@ import {
   StyleSheet,
   PDFViewer,
   BlobProvider,
-  type PDFProps,
-  type StyleProp,
+  type Style,
 } from "@react-pdf/renderer";
 import {
   Dialog,
@@ -22,11 +21,8 @@ import { Button } from "./ui/button";
 import { useQuery } from "@tanstack/react-query";
 
 // Define PDF style types
-type StyleKeys = 'page' | 'header' | 'companyInfo' | 'section' | 'sectionTitle' | 'text' | 'total';
-type PDFStyles = Record<StyleKeys, StyleProp>;
-
-// PDF styles
-const styles = StyleSheet.create<PDFStyles>({
+// Define styles for PDF document
+const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
     backgroundColor: "#FFFFFF",
