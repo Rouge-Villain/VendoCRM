@@ -18,6 +18,10 @@ externalPort = 3000
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 5001
+externalPort = 3001
+
 [workflows]
 runButton = "Project"
 
@@ -54,8 +58,8 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5000
+args = "PORT=5001 npm run dev"
+waitForPort = 5001
 
 [[workflows.workflow]]
 name = "Database Migration"
@@ -98,5 +102,5 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd client && vite"
-waitForPort = 3000
+args = "cd client && npm run dev"
+waitForPort = 3001

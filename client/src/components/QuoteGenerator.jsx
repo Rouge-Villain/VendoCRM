@@ -1,5 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
+import type { Customer, Opportunity, Product } from "@/types/db";
 import {
   Document,
   Page,
@@ -117,13 +117,11 @@ const QuoteDocument = ({ opportunity, customer, product }) => (
   </Document>
 );
 
-/**
- * Quote Generator component for creating and displaying PDF quotes
- * @param {Object} props - Component props
- * @param {Object} props.opportunity - Opportunity object containing deal details
- * @param {boolean} props.open - Dialog open state
- * @param {Function} props.onOpenChange - Dialog state change handler
- */
+interface QuoteGeneratorProps {
+  opportunity: Opportunity;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
 export function QuoteGenerator({ opportunity, open, onOpenChange }) {
   const { data: customer } = useQuery({
     queryKey: ["customers", opportunity.customerId],

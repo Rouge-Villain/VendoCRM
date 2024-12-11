@@ -1,36 +1,56 @@
 import { z } from "zod";
-import {
-  type Customer,
-  type InsertCustomer,
-  type Product,
-  type InsertProduct,
-  type Opportunity,
-  type InsertOpportunity,
-  type Activity,
-  type InsertActivity,
-  type Maintenance,
-  type InsertMaintenance,
-  type Inventory,
-  type InsertInventory,
-  type Supplier,
-  type InsertSupplier,
-  type PurchaseOrder,
-  type InsertPurchaseOrder,
-  type Invoice,
-  type InsertInvoice,
-  type Payment,
-  type InsertPayment,
-  customerSchema,
-  opportunitySchema,
-  productSchema,
-  activitySchema,
-  maintenanceSchema,
-  inventorySchema,
-  supplierSchema,
-  purchaseOrderSchema,
-  invoiceSchema,
-  paymentSchema,
-} from "@db/schema";
+
+// Define base schemas
+export const customerSchema = z.object({
+  id: z.number(),
+  company: z.string(),
+  contact: z.string(),
+  email: z.string().email(),
+  phone: z.string(),
+  address: z.string(),
+  serviceTerritory: z.string(),
+  machineTypes: z.array(z.object({
+    type: z.string(),
+    quantity: z.number().optional()
+  })),
+  createdAt: z.date(),
+  updatedAt: z.date().optional()
+});
+
+export const opportunitySchema = z.object({
+  id: z.number(),
+  customerId: z.number(),
+  productId: z.number(),
+  value: z.number(),
+  stage: z.string(),
+  status: z.string(),
+  probability: z.number().optional(),
+  expectedCloseDate: z.date().optional(),
+  notes: z.string().optional(),
+  assignedTo: z.string().optional(),
+  createdAt: z.date(),
+  updatedAt: z.date().optional()
+});
+
+export const productSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  description: z.string(),
+  price: z.number(),
+  specs: z.string(),
+  category: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date().optional()
+});
+
+export const activitySchema = z.object({
+  id: z.number(),
+  type: z.string(),
+  description: z.string(),
+  customerId: z.number(),
+  createdAt: z.date(),
+  updatedAt: z.date().optional()
+});
 
 // Re-export all types from schema
 export type {
@@ -56,19 +76,44 @@ export type {
   InsertPayment,
 };
 
-// Export all schemas
-export {
-  customerSchema,
-  opportunitySchema,
-  productSchema,
-  activitySchema,
-  maintenanceSchema,
-  inventorySchema,
-  supplierSchema,
-  purchaseOrderSchema,
-  invoiceSchema,
-  paymentSchema,
-};
+// Define types from schemas
+export type Customer = z.infer<typeof customerSchema>;
+export type Opportunity = z.infer<typeof opportunitySchema>;
+export type Product = z.infer<typeof productSchema>;
+export type Activity = z.infer<typeof activitySchema>;
+
+// Utility types
+export interface MachineType {
+  type: string;
+  quantity: number;
+}
+
+export interface Part {
+  name: string;
+  quantity: number;
+  cost?: number;
+}
+
+// Analytics types
+export interface AnalyticsData {
+  period?: string;
+  newCustomers?: number;
+  totalMachines?: number;
+  revenue?: number;
+  machineType?: string;
+  count?: number;
+  totalRevenue?: number;
+  customersUsing?: number;
+  territory?: string;
+  customerCount?: number;
+  machineCount?: number;
+}
+
+// Validation helper functions
+export const validateCustomer = (data: unknown): Customer => customerSchema.parse(data);
+export const validateOpportunity = (data: unknown): Opportunity => opportunitySchema.parse(data);
+export const validateProduct = (data: unknown): Product => productSchema.parse(data);
+export const validateActivity = (data: unknown): Activity => activitySchema.parse(data);
 
 // Define Part interface for maintenance records
 export interface Part {

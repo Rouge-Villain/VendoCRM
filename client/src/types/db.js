@@ -59,8 +59,18 @@ export const maintenanceSchema = z.object({
   updatedAt: z.date().optional()
 });
 
-// Export schema types for JavaScript usage
-export const Customer = customerSchema;
-export const Product = productSchema;
-export const Opportunity = opportunitySchema;
-export const Maintenance = maintenanceSchema;
+export type Opportunity = z.infer<typeof opportunitySchema>;
+export type Customer = z.infer<typeof customerSchema>;
+export type Product = z.infer<typeof productSchema>;
+export type Maintenance = z.infer<typeof maintenanceSchema>;
+
+export type MachineType = {
+  type: string;
+  quantity?: number;
+};
+
+export type Part = {
+  name: string;
+  quantity: number;
+  cost: number;
+};
