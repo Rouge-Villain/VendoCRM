@@ -17,8 +17,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-import PropTypes from "prop-types";
-import { CustomerType, ProductType, OpportunityType } from "../lib/schema";
+import { customerSchema, productSchema, opportunitySchema } from "../types/db";
 
 // PDF styles
 const styles = StyleSheet.create({
@@ -179,7 +178,16 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }) {
 }
 
 QuoteGenerator.propTypes = {
-  opportunity: OpportunityType.isRequired,
+  opportunity: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    customerId: PropTypes.number.isRequired,
+    productId: PropTypes.number.isRequired,
+    stage: PropTypes.string,
+    status: PropTypes.string,
+    createdAt: PropTypes.string,
+    updatedAt: PropTypes.string
+  }).isRequired,
   open: PropTypes.bool.isRequired,
   onOpenChange: PropTypes.func.isRequired,
 };

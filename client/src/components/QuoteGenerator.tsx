@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   },
 });
 
-import { type Opportunity as DBOpportunity } from "@db/schema";
+import { type Opportunity as DBOpportunity } from "../../db/schema";
 
 type OpportunityStatus = 'open' | 'closed-won' | 'closed-lost';
 type OpportunityStage = 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closed-won' | 'closed-lost';

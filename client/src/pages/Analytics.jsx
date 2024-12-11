@@ -3,6 +3,7 @@ import { SalesAnalytics } from "../components/analytics/SalesAnalytics";
 import { CustomerAnalytics } from "../components/analytics/CustomerAnalytics";
 import { AdvancedAnalytics } from "../components/analytics/AdvancedAnalytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { cn } from "../lib/utils";
 
 export default function Analytics() {
   return (

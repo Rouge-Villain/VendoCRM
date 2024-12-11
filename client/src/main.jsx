@@ -3,16 +3,16 @@ import { createRoot } from "react-dom/client";
 import { Switch, Route } from "wouter";
 import "./index.css";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "./lib/queryClient.js";
+import { queryClient } from "./lib/queryClient";
 import { Toaster } from "./components/ui/toaster";
-import Layout from "./components/Layout.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
-import Customers from "./pages/Customers.jsx";
-import Products from "./pages/Products.jsx";
-import Sales from "./pages/Sales.jsx";
-import Analytics from "./pages/Analytics.jsx";
-import Timeline from "./pages/Timeline.jsx";
-import Maintenance from "./pages/Maintenance.jsx";
+import Layout from "./components/Layout";
+import Dashboard from "./pages/Dashboard";
+import Customers from "./pages/Customers";
+import Products from "./pages/Products";
+import Sales from "./pages/Sales";
+import Analytics from "./pages/Analytics";
+import Timeline from "./pages/Timeline";
+import Maintenance from "./pages/Maintenance";
 
 function AppRouter() {
   return (

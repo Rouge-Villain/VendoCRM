@@ -7,22 +7,30 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@db': path.resolve(__dirname, './src/types')
-    }
+      '@db': path.resolve(__dirname, './src/types'),
+      '../../db/schema': path.resolve(__dirname, './src/types/db.js')
+    },
+    extensions: ['.js', '.jsx', '.ts', '.tsx']
   },
   server: {
     port: 3000,
     host: '0.0.0.0'
   },
+  build: {
+    outDir: 'dist',
+    sourcemap: true
+  },
   esbuild: {
     loader: "jsx",
-    include: /src\/.*\.jsx?$/,
+    include: /src\/.*\.[jt]sx?$/,
     exclude: [],
   },
   optimizeDeps: {
     esbuildOptions: {
       loader: {
         '.js': 'jsx',
+        '.ts': 'tsx',
+        '.tsx': 'tsx',
       },
     },
   },
