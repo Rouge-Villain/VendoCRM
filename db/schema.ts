@@ -2,6 +2,7 @@ import { pgTable, text, integer, timestamp, decimal, jsonb } from "drizzle-orm/p
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Table Definitions
 export const maintenanceRecords = pgTable("maintenance_records", {
   id: integer("id").primaryKey().notNull(),
   customerId: integer("customer_id").notNull(),
@@ -13,7 +14,7 @@ export const maintenanceRecords = pgTable("maintenance_records", {
   status: text("status").notNull().default("pending"),
   technicianNotes: text("technician_notes").default(""),
   partsUsed: jsonb("parts_used").$type<Array<{ name: string; quantity: number }>>().default([]),
-  cost: decimal("cost").notNull().default("0"), // Keeping original precision
+  cost: decimal("cost").notNull().default("0"),
   scheduledDate: timestamp("scheduled_date").notNull(),
   completedDate: timestamp("completed_date"),
   nextMaintenanceDate: timestamp("next_maintenance_date"),
@@ -32,8 +33,8 @@ export const customers = pgTable("customers", {
   notes: text("notes"),
   machineTypes: jsonb("machine_types").$type<Array<{ type: string; quantity: number }>>().default([]),
   state: text("state"),
-  city: text("city"), // Preserving city column
-  business_locations: text("business_locations"), // Preserving business_locations column
+  city: text("city"),
+  business_locations: text("business_locations"),
   serviceTerritory: text("service_territory"),
   serviceHours: text("service_hours"),
   contractTerms: text("contract_terms"),
@@ -45,9 +46,9 @@ export const customers = pgTable("customers", {
 export const products = pgTable("products", {
   id: integer("id").primaryKey().notNull(),
   name: text("name").notNull(),
-  category: text("category").notNull(), // machine, cooler, part, etc.
+  category: text("category").notNull(),
   description: text("description").notNull(),
-  specs: text("specs").notNull(), // JSON string of technical specs
+  specs: text("specs").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   imageUrl: text("image_url"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -57,8 +58,8 @@ export const opportunities = pgTable("opportunities", {
   id: integer("id").primaryKey().notNull(),
   customerId: integer("customer_id").notNull(),
   productId: integer("product_id").notNull(),
-  stage: text("stage").notNull().default("prospecting"), // Current pipeline stage
-  status: text("status").notNull().default("open"), // open, won, lost
+  stage: text("stage").notNull().default("prospecting"),
+  status: text("status").notNull().default("open"),
   value: decimal("value", { precision: 10, scale: 2 }).notNull(),
   probability: integer("probability").default(0),
   expectedCloseDate: timestamp("expected_close_date"),
@@ -74,7 +75,7 @@ export const opportunities = pgTable("opportunities", {
 export const activities = pgTable("activities", {
   id: integer("id").primaryKey().notNull(),
   customerId: integer("customer_id").notNull(),
-  type: text("type").notNull(), // call, email, meeting, etc.
+  type: text("type").notNull(),
   description: text("description").notNull(),
   outcome: text("outcome"),
   nextSteps: text("next_steps"),
@@ -84,47 +85,8 @@ export const activities = pgTable("activities", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Zod Schemas
-// Base schemas created from database tables
-export const insertCustomerSchema = createInsertSchema(customers);
-export const selectCustomerSchema = createSelectSchema(customers);
-export const customerSchema = selectCustomerSchema;  // For client-side validation
-
-export const insertProductSchema = createInsertSchema(products);
-export const selectProductSchema = createSelectSchema(products);
-export const productSchema = selectProductSchema;  // For client-side validation
-
-export const insertOpportunitySchema = createInsertSchema(opportunities);
-export const selectOpportunitySchema = createSelectSchema(opportunities);
-export const opportunitySchema = selectOpportunitySchema;  // For client-side validation
-
-export const insertActivitySchema = createInsertSchema(activities);
-export const selectActivitySchema = createSelectSchema(activities);
-export const activitySchema = selectActivitySchema;  // For client-side validation
-
-export const insertMaintenanceSchema = createInsertSchema(maintenanceRecords);
-export const selectMaintenanceSchema = createSelectSchema(maintenanceRecords);
-export const maintenanceSchema = selectMaintenanceSchema;  // For client-side validation
-
-// Type exports
-export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
-export type Customer = z.infer<typeof selectCustomerSchema>;
-
-export type InsertProduct = z.infer<typeof insertProductSchema>;
-export type Product = z.infer<typeof selectProductSchema>;
-
-export type InsertOpportunity = z.infer<typeof insertOpportunitySchema>;
-export type Opportunity = z.infer<typeof selectOpportunitySchema>;
-
-export type InsertActivity = z.infer<typeof insertActivitySchema>;
-export type Activity = z.infer<typeof selectActivitySchema>;
-
-export type InsertMaintenance = z.infer<typeof insertMaintenanceSchema>;
-export type Maintenance = z.infer<typeof selectMaintenanceSchema>;
-
-// ERP System Tables
 export const inventory = pgTable("inventory", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   productId: integer("product_id").notNull(),
   quantity: integer("quantity").notNull().default(0),
   locationCode: text("location_code").notNull(),
@@ -138,7 +100,7 @@ export const inventory = pgTable("inventory", {
 });
 
 export const suppliers = pgTable("suppliers", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   name: text("name").notNull(),
   contactPerson: text("contact_person").notNull(),
   email: text("email").notNull(),
@@ -153,7 +115,7 @@ export const suppliers = pgTable("suppliers", {
 });
 
 export const purchase_orders = pgTable("purchase_orders", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   supplierId: integer("supplier_id").notNull(),
   orderDate: timestamp("order_date").notNull(),
   expectedDeliveryDate: timestamp("expected_delivery_date"),
@@ -165,18 +127,8 @@ export const purchase_orders = pgTable("purchase_orders", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const purchase_order_items = pgTable("purchase_order_items", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  purchaseOrderId: integer("purchase_order_id").notNull(),
-  productId: integer("product_id").notNull(),
-  quantity: integer("quantity").notNull(),
-  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
-  receivedQuantity: integer("received_quantity").default(0),
-  status: text("status").default("pending"),
-});
-
 export const invoices = pgTable("invoices", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   customerId: integer("customer_id").notNull(),
   opportunityId: integer("opportunity_id"),
   invoiceDate: timestamp("invoice_date").notNull(),
@@ -189,18 +141,8 @@ export const invoices = pgTable("invoices", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const invoice_items = pgTable("invoice_items", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  invoiceId: integer("invoice_id").notNull(),
-  productId: integer("product_id").notNull(),
-  quantity: integer("quantity").notNull(),
-  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
-  description: text("description"),
-  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
-});
-
 export const payments = pgTable("payments", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   invoiceId: integer("invoice_id").notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   paymentDate: timestamp("payment_date").notNull(),
@@ -209,6 +151,98 @@ export const payments = pgTable("payments", {
   status: text("status").default("pending"),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Schema Definitions
+export const insertCustomerSchema = createInsertSchema(customers);
+export const selectCustomerSchema = createSelectSchema(customers);
+export const customerSchema = selectCustomerSchema;
+
+export const insertProductSchema = createInsertSchema(products);
+export const selectProductSchema = createSelectSchema(products);
+export const productSchema = selectProductSchema;
+
+export const insertOpportunitySchema = createInsertSchema(opportunities);
+export const selectOpportunitySchema = createSelectSchema(opportunities);
+export const opportunitySchema = selectOpportunitySchema;
+
+export const insertActivitySchema = createInsertSchema(activities);
+export const selectActivitySchema = createSelectSchema(activities);
+export const activitySchema = selectActivitySchema;
+
+export const insertMaintenanceSchema = createInsertSchema(maintenanceRecords);
+export const selectMaintenanceSchema = createSelectSchema(maintenanceRecords);
+export const maintenanceSchema = selectMaintenanceSchema;
+
+export const insertInventorySchema = createInsertSchema(inventory);
+export const selectInventorySchema = createSelectSchema(inventory);
+export const inventorySchema = selectInventorySchema;
+
+export const insertSupplierSchema = createInsertSchema(suppliers);
+export const selectSupplierSchema = createSelectSchema(suppliers);
+export const supplierSchema = selectSupplierSchema;
+
+export const insertPurchaseOrderSchema = createInsertSchema(purchase_orders);
+export const selectPurchaseOrderSchema = createSelectSchema(purchase_orders);
+export const purchaseOrderSchema = selectPurchaseOrderSchema;
+
+export const insertInvoiceSchema = createInsertSchema(invoices);
+export const selectInvoiceSchema = createSelectSchema(invoices);
+export const invoiceSchema = selectInvoiceSchema;
+
+export const insertPaymentSchema = createInsertSchema(payments);
+export const selectPaymentSchema = createSelectSchema(payments);
+export const paymentSchema = selectPaymentSchema;
+
+// Type Exports
+export type Customer = z.infer<typeof selectCustomerSchema>;
+export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
+
+export type Product = z.infer<typeof selectProductSchema>;
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+
+export type Opportunity = z.infer<typeof selectOpportunitySchema>;
+export type InsertOpportunity = z.infer<typeof insertOpportunitySchema>;
+
+export type Activity = z.infer<typeof selectActivitySchema>;
+export type InsertActivity = z.infer<typeof insertActivitySchema>;
+
+export type Maintenance = z.infer<typeof selectMaintenanceSchema>;
+export type InsertMaintenance = z.infer<typeof insertMaintenanceSchema>;
+
+export type Inventory = z.infer<typeof selectInventorySchema>;
+export type InsertInventory = z.infer<typeof insertInventorySchema>;
+
+export type Supplier = z.infer<typeof selectSupplierSchema>;
+export type InsertSupplier = z.infer<typeof insertSupplierSchema>;
+
+export type PurchaseOrder = z.infer<typeof selectPurchaseOrderSchema>;
+export type InsertPurchaseOrder = z.infer<typeof insertPurchaseOrderSchema>;
+
+export type Invoice = z.infer<typeof selectInvoiceSchema>;
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+
+export type Payment = z.infer<typeof selectPaymentSchema>;
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+
+export const purchase_order_items = pgTable("purchase_order_items", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  purchaseOrderId: integer("purchase_order_id").notNull(),
+  productId: integer("product_id").notNull(),
+  quantity: integer("quantity").notNull(),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  receivedQuantity: integer("received_quantity").default(0),
+  status: text("status").default("pending"),
+});
+
+export const invoice_items = pgTable("invoice_items", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  invoiceId: integer("invoice_id").notNull(),
+  productId: integer("product_id").notNull(),
+  quantity: integer("quantity").notNull(),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  description: text("description"),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
 });
 
 export const stock_movements = pgTable("stock_movements", {
@@ -224,32 +258,6 @@ export const stock_movements = pgTable("stock_movements", {
   createdAt: timestamp("created_at").defaultNow(),
   createdBy: text("created_by").notNull(),
 });
-
-// Zod Schemas for ERP tables
-export const insertInventorySchema = createInsertSchema(inventory);
-export const selectInventorySchema = createSelectSchema(inventory);
-export type InsertInventory = z.infer<typeof insertInventorySchema>;
-export type Inventory = z.infer<typeof selectInventorySchema>;
-
-export const insertSupplierSchema = createInsertSchema(suppliers);
-export const selectSupplierSchema = createSelectSchema(suppliers);
-export type InsertSupplier = z.infer<typeof insertSupplierSchema>;
-export type Supplier = z.infer<typeof selectSupplierSchema>;
-
-export const insertPurchaseOrderSchema = createInsertSchema(purchase_orders);
-export const selectPurchaseOrderSchema = createSelectSchema(purchase_orders);
-export type InsertPurchaseOrder = z.infer<typeof insertPurchaseOrderSchema>;
-export type PurchaseOrder = z.infer<typeof selectPurchaseOrderSchema>;
-
-export const insertInvoiceSchema = createInsertSchema(invoices);
-export const selectInvoiceSchema = createSelectSchema(invoices);
-export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
-export type Invoice = z.infer<typeof selectInvoiceSchema>;
-
-export const insertPaymentSchema = createInsertSchema(payments);
-export const selectPaymentSchema = createSelectSchema(payments);
-export type InsertPayment = z.infer<typeof insertPaymentSchema>;
-export type Payment = z.infer<typeof selectPaymentSchema>;
 
 export const insertStockMovementSchema = createInsertSchema(stock_movements);
 export const selectStockMovementSchema = createSelectSchema(stock_movements);

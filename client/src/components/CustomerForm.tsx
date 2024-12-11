@@ -38,7 +38,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
   };
 
   // Ensure machineTypes is included in the schema
-  const extendedCustomerSchema = insertCustomerSchema.extend({
+  const extendedCustomerSchema = customerSchema.extend({
     machineTypes: z.record(z.object({
       selected: z.boolean(),
       quantity: z.number()
