@@ -5,38 +5,28 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
+    "allowJs": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "composite": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@db/schema": ["../db/schema.ts"],
       "@db/*": ["./src/types/*"],
+      "@db/schema": ["./src/types/db.js"],
       "@/components/*": ["./src/components/*"],
       "@/components/ui": ["./src/components/ui"],
       "@/components/ui/*": ["./src/components/ui/*"],
       "@/lib/*": ["./src/lib/*"],
       "@/hooks/*": ["./src/hooks/*"]
     },
-    "rootDirs": [".", ".."],
-    "types": ["vite/client"]
+    "rootDirs": [".", ".."]
   },
   "include": [
-    "src/**/*",
-    "../db/**/*"
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "../db/**/*.js"
   ],
-  "exclude": ["node_modules"],
-  "references": [
-    { "path": "../db" }
-  ]
+  "exclude": ["node_modules"]
 }

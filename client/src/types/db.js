@@ -1,6 +1,6 @@
-// This file is deprecated. Please use db.ts instead.
-// Keeping this file temporarily for backwards compatibility
-export * from './db';
+import { z } from 'zod';
+
+export const opportunitySchema = z.object({
   id: z.number(),
   customerId: z.number(),
   productId: z.number(),
@@ -42,11 +42,6 @@ export const productSchema = z.object({
   updatedAt: z.date().optional()
 });
 
-// Add type exports for TypeScript compatibility
-export const type Customer = z.infer<typeof customerSchema>;
-export const type Product = z.infer<typeof productSchema>;
-export const type Opportunity = z.infer<typeof opportunitySchema>;
-
 export const maintenanceSchema = z.object({
   id: z.number(),
   customerId: z.number(),
@@ -63,3 +58,9 @@ export const maintenanceSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date().optional()
 });
+
+// Export schema types for JavaScript usage
+export const Customer = customerSchema;
+export const Product = productSchema;
+export const Opportunity = opportunitySchema;
+export const Maintenance = maintenanceSchema;

@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import {
   Document,
   Page,
@@ -80,6 +81,13 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * PDF Document component for generating quotes
+ * @param {Object} props - Component props
+ * @param {Object} props.opportunity - Opportunity details
+ * @param {Object} props.customer - Customer details
+ * @param {Object} props.product - Product details
+ */
 const QuoteDocument = ({ opportunity, customer, product }) => (
   <Document>
     <Page size="A4" style={styles.page}>
@@ -91,7 +99,7 @@ const QuoteDocument = ({ opportunity, customer, product }) => (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Customer Details</Text>
         <Text style={styles.text}>Company: {customer?.company || "N/A"}</Text>
-        <Text style={styles.text}>Name: {customer?.name || "N/A"}</Text>
+        <Text style={styles.text}>Contact: {customer?.contact || "N/A"}</Text>
         <Text style={styles.text}>Email: {customer?.email || "N/A"}</Text>
       </View>
       <View style={styles.section}>
@@ -102,13 +110,20 @@ const QuoteDocument = ({ opportunity, customer, product }) => (
       </View>
       <View style={styles.section}>
         <Text style={styles.total}>
-          Total Amount: ${Number(opportunity?.value).toLocaleString()}
+          Total Amount: ${Number(opportunity?.value || 0).toLocaleString()}
         </Text>
       </View>
     </Page>
   </Document>
 );
 
+/**
+ * Quote Generator component for creating and displaying PDF quotes
+ * @param {Object} props - Component props
+ * @param {Object} props.opportunity - Opportunity object containing deal details
+ * @param {boolean} props.open - Dialog open state
+ * @param {Function} props.onOpenChange - Dialog state change handler
+ */
 export function QuoteGenerator({ opportunity, open, onOpenChange }) {
   const { data: customer } = useQuery({
     queryKey: ["customers", opportunity.customerId],
@@ -175,3 +190,31 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }) {
     </Dialog>
   );
 }
+
+// PropTypes validation for QuoteDocument component
+QuoteDocument.propTypes = {
+  opportunity: PropTypes.shape({
+    value: PropTypes.number.isRequired,
+  }).isRequired,
+  customer: PropTypes.shape({
+    company: PropTypes.string,
+    contact: PropTypes.string,
+    email: PropTypes.string,
+  }),
+  product: PropTypes.shape({
+    name: PropTypes.string,
+    description: PropTypes.string,
+    specs: PropTypes.string,
+  }),
+};
+
+// PropTypes validation for QuoteGenerator component
+QuoteGenerator.propTypes = {
+  opportunity: PropTypes.shape({
+    customerId: PropTypes.number.isRequired,
+    productId: PropTypes.number.isRequired,
+    value: PropTypes.number.isRequired,
+  }).isRequired,
+  open: PropTypes.bool.isRequired,
+  onOpenChange: PropTypes.func.isRequired,
+};
