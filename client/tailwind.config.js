@@ -2,8 +2,8 @@
 module.exports = {
   darkMode: ["class"],
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    './src/**/*.{ts,tsx,js,jsx}',
+    './index.html',
   ],
   theme: {
     container: {
@@ -60,7 +60,4 @@ module.exports = {
     require("tailwindcss-animate"),
     require("@tailwindcss/typography"),
   ],
-  future: {
-    hoverOnlyWhenSupported: true,
-  },
 }

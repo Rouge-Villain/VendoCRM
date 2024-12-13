@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { Customer, Opportunity } from "@db/schema";
+import type { Customer, Opportunity } from "../../types/schema";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,10 +14,14 @@ import {
   Filler,
 } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "@/components/ui/button";
 import { FileDown as FileDownIcon } from "lucide-react";
-import { exportAnalyticsData } from "@/lib/exportData";
+import { exportAnalyticsData } from "../../lib/exportData";
+
+interface MachineDistribution {
+  [type: string]: number;
+}
 
 ChartJS.register(
   CategoryScale,
@@ -36,8 +40,42 @@ interface AcquisitionTrends {
   [key: string]: number;
 }
 
-interface MachineDistribution {
-  [key: string]: number;
+interface ChartDataset {
+  type: 'line';
+  label: string;
+  data: number[];
+  borderColor: string;
+  backgroundColor: string;
+  tension: number;
+  fill: boolean;
+  pointBackgroundColor: string;
+  pointBorderColor: string;
+  pointBorderWidth: number;
+  pointRadius: number;
+  pointHoverRadius: number;
+}
+
+interface ChartData {
+  labels: string[];
+  datasets: ChartDataset[];
+}
+
+interface ChartOptions {
+  responsive: boolean;
+  maintainAspectRatio: boolean;
+  plugins: {
+    legend: {
+      position: 'top' | 'bottom' | 'left' | 'right';
+    };
+  };
+  scales: {
+    y: {
+      beginAtZero: boolean;
+      grid: {
+        color: string;
+      };
+    };
+  };
 }
 
 export function CustomerAnalytics(): JSX.Element {
@@ -84,11 +122,11 @@ export function CustomerAnalytics(): JSX.Element {
     return acc;
   }, {});
 
-  const acquisitionChartData = {
+  const acquisitionChartData: ChartData = {
     labels: Object.keys(acquisitionTrends || {}),
     datasets: [
       {
-        type: 'line' as const,
+        type: 'line',
         label: 'New Customers',
         data: Object.values(acquisitionTrends || {}),
         borderColor: 'rgb(99, 102, 241)',
@@ -102,6 +140,24 @@ export function CustomerAnalytics(): JSX.Element {
         pointHoverRadius: 6,
       },
     ],
+  };
+
+  const chartOptions: ChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(148, 163, 184, 0.1)',
+        },
+      },
+    },
   };
 
   const machineChartData = {
@@ -145,23 +201,7 @@ export function CustomerAnalytics(): JSX.Element {
           <div className="h-[300px]">
             <Line
               data={acquisitionChartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: 'top' as const,
-                  },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    grid: {
-                      color: 'rgba(148, 163, 184, 0.1)',
-                    },
-                  },
-                },
-              }}
+              options={chartOptions}
             />
           </div>
         </CardContent>
