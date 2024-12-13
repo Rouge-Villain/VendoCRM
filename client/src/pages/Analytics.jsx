@@ -8,7 +8,7 @@ export default function Analytics() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Analytics & Reporting</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Analytics & Reporting</h1>
       </div>
 
       <Tabs defaultValue="advanced" className="space-y-6">

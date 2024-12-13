@@ -13,7 +13,7 @@ import {
   ArcElement,
   Filler,
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { FileDown as FileDownIcon } from "lucide-react";
@@ -65,7 +65,6 @@ export function CustomerAnalytics() {
     return acc;
   }, {});
 
-
   const acquisitionChartData = {
     labels: Object.keys(acquisitionTrends || {}),
     datasets: [
@@ -84,6 +83,24 @@ export function CustomerAnalytics() {
         pointHoverRadius: 6,
       },
     ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(148, 163, 184, 0.1)',
+        },
+      },
+    },
   };
 
   return (
@@ -107,23 +124,7 @@ export function CustomerAnalytics() {
           <div className="h-[300px]">
             <Line
               data={acquisitionChartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: 'top',
-                  },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    grid: {
-                      color: 'rgba(148, 163, 184, 0.1)',
-                    },
-                  },
-                },
-              }}
+              options={chartOptions}
             />
           </div>
         </CardContent>
