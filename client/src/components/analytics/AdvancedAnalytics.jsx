@@ -12,8 +12,8 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { exportToCSV, prepareAnalyticsData } from '../../lib/utils';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { exportToCSV, prepareAnalyticsData } from '@/lib/exportData';
 
 ChartJS.register(
   CategoryScale,
@@ -91,7 +91,6 @@ export function AdvancedAnalytics() {
         conversion: currentMetrics.conversion
       };
 
-      // Calculate conversion rate
       if (opportunities) {
         const quarterlyOpps = opportunities.filter(o => {
           if (!o.createdAt) return false;
