@@ -1,7 +1,7 @@
 import React from 'react';
 import { SalesAnalytics } from "../components/analytics/SalesAnalytics";
-import { CustomerAnalytics } from "../components/analytics/CustomerAnalytics.jsx";
-import { AdvancedAnalytics } from "../components/analytics/AdvancedAnalytics.jsx";
+import { CustomerAnalytics } from "../components/analytics/CustomerAnalytics";
+import { AdvancedAnalytics } from "../components/analytics/AdvancedAnalytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 
 export default function Analytics() {

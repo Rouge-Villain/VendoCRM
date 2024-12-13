@@ -1,6 +1,6 @@
-import React, { ComponentPropsWithoutRef } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { Customer, Opportunity } from "@db/schema";
+import type { Customer, Opportunity } from "../../types/schema";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,24 +14,77 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { exportToCSV, prepareAnalyticsData } from '@/lib/exportData';
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { exportToCSV, prepareAnalyticsData } from '../../lib/exportData';
+
+type TerritoryMetrics = {
+  customers: number;
+  machines: number;
+  revenue: number;
+};
+
+type QuarterlyMetrics = {
+  revenue: number;
+  count: number;
+  conversion: number;
+};
 
 interface TerritoryCoverage {
-  [key: string]: {
-    customers: number;
-    machines: number;
-    revenue: number;
-  };
+  [territory: string]: TerritoryMetrics;
 }
 
 interface QuarterlyPerformance {
-  [key: string]: {
-    revenue: number;
-    count: number;
-    conversion: number;
-  };
+  [quarter: string]: QuarterlyMetrics;
 }
+
+type ChartOptions = {
+  responsive: boolean;
+  maintainAspectRatio: boolean;
+  plugins: {
+    legend: {
+      position: 'top' | 'bottom' | 'left' | 'right';
+    };
+    title?: {
+      display: boolean;
+      text: string;
+    };
+  };
+  scales: {
+    y?: {
+      beginAtZero?: boolean;
+      type: 'linear';
+      display?: boolean;
+      position?: 'left' | 'right';
+      grid?: {
+        color?: string;
+        drawOnChartArea?: boolean;
+      };
+      title?: {
+        display: boolean;
+        text: string;
+      };
+      border?: {
+        display: boolean;
+      };
+    };
+    y1?: {
+      type: 'linear';
+      display: boolean;
+      position: 'right';
+      grid?: {
+        drawOnChartArea: boolean;
+      };
+      title?: {
+        display: boolean;
+        text: string;
+      };
+    };
+  };
+  interaction?: {
+    mode: 'index';
+    intersect: boolean;
+  };
+};
 
 ChartJS.register(
   CategoryScale,

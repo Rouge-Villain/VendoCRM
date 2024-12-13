@@ -3,9 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    @apply border-border;
-  }
   :root {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
@@ -50,17 +47,12 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
   }
-}
 
-@layer components {
-  .border-border {
-    border-color: hsl(var(--border));
+  * {
+    @apply border-border;
   }
-}
 
-@layer base {
   body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-background text-foreground antialiased;
   }
 }

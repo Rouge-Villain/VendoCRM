@@ -1,5 +1,5 @@
+import React from 'react';
 import { useQuery } from "@tanstack/react-query";
-import type { Customer, Opportunity } from "@db/schema";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,9 +13,7 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { exportToCSV, prepareAnalyticsData } from '@/lib/exportData';
-// Component uses runtime type checking via prop-types if needed
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 ChartJS.register(
   CategoryScale,
@@ -52,14 +50,14 @@ export function AdvancedAnalytics() {
     },
   });
 
-  // Calculate service territory coverage
+  // Territory coverage calculation
   const territoryCoverage = customers?.reduce((acc, customer) => {
     const territory = customer.serviceTerritory;
     if (typeof territory === 'string') {
       const currentTerritory = acc[territory] || { customers: 0, machines: 0, revenue: 0 };
       const customerOpportunities = opportunities?.filter(opp => opp.customerId === customer.id) || [];
       const opportunityRevenue = customerOpportunities.reduce((sum, opp) => 
-        sum + Number(opp.value?.toString() || '0'), 0);
+        sum + Number(opp.value || 0), 0);
       
       const machineCount = Array.isArray(customer.machineTypes)
         ? customer.machineTypes.reduce((count, machine) => {
@@ -75,37 +73,6 @@ export function AdvancedAnalytics() {
         machines: currentTerritory.machines + machineCount,
         revenue: currentTerritory.revenue + opportunityRevenue
       };
-    }
-    return acc;
-  }, {});
-
-  // Calculate sales performance by quarter
-  const quarterlyPerformance = opportunities?.reduce((acc, opp) => {
-    const createdAt = opp.createdAt;
-    if (createdAt) {
-      const date = new Date(createdAt);
-      const quarter = `Q${Math.floor((date.getMonth() + 3) / 3)} ${date.getFullYear()}`;
-      const currentMetrics = acc[quarter] || { revenue: 0, count: 0, conversion: 0 };
-      
-      acc[quarter] = {
-        revenue: currentMetrics.revenue + Number(opp.value || 0),
-        count: currentMetrics.count + 1,
-        conversion: currentMetrics.conversion
-      };
-
-      if (opportunities) {
-        const quarterlyOpps = opportunities.filter(o => {
-          if (!o.createdAt) return false;
-          const oppDate = new Date(o.createdAt);
-          return oppDate.getFullYear() === date.getFullYear() && 
-                 Math.floor(oppDate.getMonth() / 3) === Math.floor(date.getMonth() / 3);
-        });
-
-        const closedOpps = quarterlyOpps.filter(o => o.status === 'closed');
-        acc[quarter].conversion = quarterlyOpps.length > 0 
-          ? (closedOpps.length / quarterlyOpps.length) * 100 
-          : 0;
-      }
     }
     return acc;
   }, {});
@@ -126,28 +93,6 @@ export function AdvancedAnalytics() {
         data: Object.values(territoryCoverage || {}).map(t => t.machines),
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
         borderWidth: 1,
-      },
-    ],
-  };
-
-  const performanceData = {
-    labels: Object.keys(quarterlyPerformance || {}),
-    datasets: [
-      {
-        type: 'line',
-        label: 'Revenue',
-        data: Object.values(quarterlyPerformance || {}).map(q => q.revenue),
-        borderColor: 'rgb(75, 192, 192)',
-        yAxisID: 'y',
-        tension: 0.4,
-      },
-      {
-        type: 'line',
-        label: 'Conversion Rate (%)',
-        data: Object.values(quarterlyPerformance || {}).map(q => q.conversion),
-        borderColor: 'rgb(255, 99, 132)',
-        yAxisID: 'y1',
-        tension: 0.4,
       },
     ],
   };
@@ -178,23 +123,8 @@ export function AdvancedAnalytics() {
     );
   }
 
-  const handleExportData = () => {
-    if (!customers || !opportunities) return;
-    const analyticsData = prepareAnalyticsData(customers, opportunities, 'territory');
-    exportToCSV(analyticsData, 'territory-performance-analysis');
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Advanced Analytics Dashboard</h2>
-        <button
-          onClick={handleExportData}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-        >
-          Export Data
-        </button>
-      </div>
       <Card>
         <CardHeader>
           <CardTitle>Territory Performance Analysis</CardTitle>
@@ -217,7 +147,6 @@ export function AdvancedAnalytics() {
                 },
                 scales: {
                   y: {
-                    type: 'linear',
                     beginAtZero: true,
                     grid: {
                       color: 'rgba(148, 163, 184, 0.1)',
@@ -225,59 +154,6 @@ export function AdvancedAnalytics() {
                     },
                     border: {
                       display: false
-                    },
-                  },
-                },
-              }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Quarterly Performance Metrics</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[400px]">
-            <Line
-              data={performanceData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                  mode: 'index',
-                  intersect: false,
-                },
-                plugins: {
-                  legend: {
-                    position: 'top',
-                  },
-                  title: {
-                    display: true,
-                    text: 'Revenue and Conversion Rate Trends'
-                  },
-                },
-                scales: {
-                  y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: {
-                      display: true,
-                      text: 'Revenue ($)'
-                    }
-                  },
-                  y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: {
-                      display: true,
-                      text: 'Conversion Rate (%)'
-                    },
-                    grid: {
-                      drawOnChartArea: false,
                     },
                   },
                 },

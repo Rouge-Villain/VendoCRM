@@ -1,3 +1,4 @@
+import React from 'react';
 import { useQuery } from "@tanstack/react-query";
 import {
   Chart as ChartJS,
@@ -12,13 +13,11 @@ import {
   ArcElement,
   Filler,
 } from 'chart.js';
-import { Line, Pie } from 'react-chartjs-2';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Line } from 'react-chartjs-2';
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
 import { FileDown as FileDownIcon } from "lucide-react";
-import { exportAnalyticsData } from "@/lib/exportData";
-// Using JSDoc for type documentation
-// Customer and Opportunity types are handled through PropTypes if needed
+import { exportAnalyticsData } from "../../lib/exportData";
 
 ChartJS.register(
   CategoryScale,
@@ -66,16 +65,6 @@ export function CustomerAnalytics() {
     return acc;
   }, {});
 
-  // Calculate machine type distribution
-  const machineDistribution = customers?.reduce((acc, customer) => {
-    if (Array.isArray(customer.machineTypes)) {
-      customer.machineTypes.forEach(machine => {
-        const type = typeof machine === 'string' ? machine : machine.type;
-        acc[type] = (acc[type] || 0) + 1;
-      });
-    }
-    return acc;
-  }, {});
 
   const acquisitionChartData = {
     labels: Object.keys(acquisitionTrends || {}),
@@ -93,26 +82,6 @@ export function CustomerAnalytics() {
         pointBorderWidth: 2,
         pointRadius: 4,
         pointHoverRadius: 6,
-      },
-    ],
-  };
-
-  const machineChartData = {
-    labels: Object.keys(machineDistribution || {}),
-    datasets: [
-      {
-        type: 'pie',
-        label: 'Machine Distribution',
-        data: Object.values(machineDistribution || {}),
-        backgroundColor: [
-          'rgba(99, 102, 241, 0.7)',
-          'rgba(14, 165, 233, 0.7)',
-          'rgba(34, 197, 94, 0.7)',
-          'rgba(234, 179, 8, 0.7)',
-          'rgba(249, 115, 22, 0.7)',
-          'rgba(147, 51, 234, 0.7)',
-        ],
-        hoverOffset: 15,
       },
     ],
   };
@@ -152,39 +121,6 @@ export function CustomerAnalytics() {
                     grid: {
                       color: 'rgba(148, 163, 184, 0.1)',
                     },
-                  },
-                },
-              }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Machine Type Distribution</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-              onClick={() => exportAnalyticsData(customers || [], opportunities || [], 'distribution')}
-            >
-              <FileDownIcon className="h-4 w-4" />
-              Export Data
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <Pie
-              data={machineChartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: 'right',
                   },
                 },
               }}
