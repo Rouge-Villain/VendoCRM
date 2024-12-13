@@ -16,7 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./client/src/*"],
-      "@db/*": ["./client/src/types/*"]
+      "@db/*": ["./client/src/types/db/*"]
     }
   },
   "include": ["client/src/**/*.ts", "client/src/**/*.tsx"],

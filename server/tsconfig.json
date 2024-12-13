@@ -9,7 +9,8 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@db/*": ["../client/src/types/db/*"]
+      "@db/*": ["../client/src/types/db/*"],
+      "@/*": ["../client/src/*"]
     },
     "outDir": "dist"
   },
