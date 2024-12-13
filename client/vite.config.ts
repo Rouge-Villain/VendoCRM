@@ -8,12 +8,15 @@ export default defineConfig({
     react(),
     checker({
       typescript: true,
+      eslint: {
+        lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
+      },
     }),
   ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@db': path.resolve(__dirname, './src/types'),
+      '@db': path.resolve(__dirname, './src/db'),
     },
   },
   server: {

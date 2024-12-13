@@ -12,11 +12,13 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
-    "types": ["vite/client", "react", "react-dom"],
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthrough": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@db/*": ["./src/types/*"]
+      "@db/*": ["./src/db/*"]
     }
   },
   "include": ["src"],
