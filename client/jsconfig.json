@@ -3,20 +3,14 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@db/*": ["./src/types/*"],
-      "@db/schema": ["./src/types/db.ts"],
-      "../../db/schema": ["./src/types/db.ts"]
+      "@db/*": ["./src/types/*"]
     },
     "jsx": "react",
     "target": "ES6",
     "module": "ESNext",
     "moduleResolution": "node",
     "allowJs": true,
-    "esModuleInterop": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "isolatedModules": true,
-    "resolveJsonModule": true
+    "esModuleInterop": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

@@ -1,20 +1,18 @@
-import { type ClassValue, clsx } from "clsx";
+import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-// Remove unused interfaces and type as they are now moved to exportData.ts
-
-export function cn(...inputs: ClassValue[]) {
+export function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(value: number): string {
+export function formatCurrency(value) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
   }).format(value);
 }
 
-export function formatDate(date: Date | string): string {
+export function formatDate(date) {
   return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -22,7 +20,7 @@ export function formatDate(date: Date | string): string {
   });
 }
 
-export function formatPhoneNumber(phoneNumber: string): string {
+export function formatPhoneNumber(phoneNumber) {
   const cleaned = phoneNumber.replace(/\D/g, '');
   const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
   if (match) {
@@ -31,7 +29,7 @@ export function formatPhoneNumber(phoneNumber: string): string {
   return phoneNumber;
 }
 
-export function exportToCSV(data: any[], filename: string): void {
+export function exportToCSV(data, filename) {
   if (!data.length) return;
   
   const headers = Object.keys(data[0]);
@@ -57,5 +55,3 @@ export function exportToCSV(data: any[], filename: string): void {
   link.click();
   document.body.removeChild(link);
 }
-
-// Remove analytics-related functions as they are now in exportData.ts

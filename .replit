@@ -62,7 +62,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev"
+args = "node server/index.js"
 waitForPort = 5001
 
 [[workflows.workflow]]
