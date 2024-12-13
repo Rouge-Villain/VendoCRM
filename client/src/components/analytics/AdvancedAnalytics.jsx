@@ -14,6 +14,7 @@ import {
 import { Line, Bar } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { exportToCSV, prepareAnalyticsData } from '@/lib/exportData';
+// Component uses runtime type checking via prop-types if needed
 
 ChartJS.register(
   CategoryScale,

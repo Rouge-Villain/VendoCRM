@@ -17,6 +17,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileDown as FileDownIcon } from "lucide-react";
 import { exportAnalyticsData } from "@/lib/exportData";
+// Using JSDoc for type documentation
+// Customer and Opportunity types are handled through PropTypes if needed
 
 ChartJS.register(
   CategoryScale,
