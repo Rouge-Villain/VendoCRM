@@ -14,4 +14,5 @@ export const db = drizzle({
   ws: ws,
 });
 
+// Re-export all types from schema
 export * from './schema.js';
