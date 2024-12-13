@@ -14,10 +14,10 @@ export default defineConfig({
     }),
   ],
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@db': path.resolve(__dirname, './src/db'),
-    },
+    alias: [
+      { find: '@', replacement: path.resolve(__dirname, './src') },
+      { find: '@db', replacement: path.resolve(__dirname, './src/types') }
+    ],
   },
   server: {
     host: '0.0.0.0',

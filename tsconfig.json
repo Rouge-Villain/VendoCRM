@@ -8,12 +8,17 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./client/src/*"],
-      "@db/*": ["./client/src/db/*"]
+      "@db/*": ["./client/src/types/*"]
     }
   },
   "include": ["client/src/**/*.ts", "client/src/**/*.tsx"],
-  "references": [{ "path": "./client/tsconfig.json" }]
+  "exclude": ["node_modules", "dist"]
 }
