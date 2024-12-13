@@ -1,6 +1,5 @@
 import { pgTable, text, integer, timestamp, decimal, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
 
 // Table Definitions
 export const maintenanceRecords = pgTable("maintenance_records", {
@@ -36,7 +35,7 @@ export const customers = pgTable("customers", {
   machineTypes: jsonb("machine_types").default([]),
   state: text("state"),
   city: text("city"),
-  business_locations: text("business_locations"),
+  businessLocations: text("business_locations"),
   serviceTerritory: text("service_territory"),
   serviceHours: text("service_hours"),
   contractTerms: text("contract_terms"),
@@ -45,7 +44,102 @@ export const customers = pgTable("customers", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// ... (remaining table definitions remain the same, just removing TypeScript types)
+export const products = pgTable("products", {
+  id: integer("id").primaryKey().notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  category: text("category").notNull(),
+  sku: text("sku").notNull(),
+  inStock: integer("in_stock").default(0),
+  reorderPoint: integer("reorder_point").default(10),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const opportunities = pgTable("opportunities", {
+  id: integer("id").primaryKey().notNull(),
+  customerId: integer("customer_id").notNull(),
+  productId: integer("product_id").notNull(),
+  stage: text("stage").notNull(),
+  status: text("status").notNull(),
+  value: decimal("value", { precision: 10, scale: 2 }).notNull(),
+  closeDate: timestamp("close_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const activities = pgTable("activities", {
+  id: integer("id").primaryKey().notNull(),
+  type: text("type").notNull(),
+  description: text("description").notNull(),
+  customerId: integer("customer_id").notNull(),
+  opportunityId: integer("opportunity_id"),
+  dueDate: timestamp("due_date"),
+  completed: text("completed").default("false"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const inventory = pgTable("inventory", {
+  id: integer("id").primaryKey().notNull(),
+  productId: integer("product_id").notNull(),
+  quantity: integer("quantity").notNull(),
+  location: text("location").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const suppliers = pgTable("suppliers", {
+  id: integer("id").primaryKey().notNull(),
+  name: text("name").notNull(),
+  contact: text("contact").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  address: text("address").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const purchase_orders = pgTable("purchase_orders", {
+  id: integer("id").primaryKey().notNull(),
+  supplierId: integer("supplier_id").notNull(),
+  status: text("status").notNull(),
+  orderDate: timestamp("order_date").notNull(),
+  deliveryDate: timestamp("delivery_date"),
+  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const invoices = pgTable("invoices", {
+  id: integer("id").primaryKey().notNull(),
+  customerId: integer("customer_id").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const payments = pgTable("payments", {
+  id: integer("id").primaryKey().notNull(),
+  invoiceId: integer("invoice_id").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentDate: timestamp("payment_date").notNull(),
+  paymentMethod: text("payment_method").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const stock_movements = pgTable("stock_movements", {
+  id: integer("id").primaryKey().notNull(),
+  productId: integer("product_id").notNull(),
+  quantity: integer("quantity").notNull(),
+  type: text("type").notNull(),
+  reference: text("reference"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
 // Schema Definitions
 export const insertCustomerSchema = createInsertSchema(customers);
@@ -87,18 +181,3 @@ export const invoiceSchema = selectInvoiceSchema;
 export const insertPaymentSchema = createInsertSchema(payments);
 export const selectPaymentSchema = createSelectSchema(payments);
 export const paymentSchema = selectPaymentSchema;
-
-// Export schemas directly
-export { 
-  customers,
-  products,
-  opportunities,
-  activities,
-  maintenanceRecords,
-  inventory,
-  suppliers,
-  purchase_orders,
-  invoices,
-  payments,
-  stock_movements
-};

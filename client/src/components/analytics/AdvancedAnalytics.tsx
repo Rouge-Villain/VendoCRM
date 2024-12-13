@@ -1,3 +1,4 @@
+import React, { ComponentPropsWithoutRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Customer, Opportunity } from "@db/schema";
 import {
@@ -15,7 +16,22 @@ import {
 import { Line, Bar } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { exportToCSV, prepareAnalyticsData } from '@/lib/exportData';
-// Component uses runtime type checking via prop-types if needed
+
+interface TerritoryCoverage {
+  [key: string]: {
+    customers: number;
+    machines: number;
+    revenue: number;
+  };
+}
+
+interface QuarterlyPerformance {
+  [key: string]: {
+    revenue: number;
+    count: number;
+    conversion: number;
+  };
+}
 
 ChartJS.register(
   CategoryScale,
@@ -29,8 +45,8 @@ ChartJS.register(
   ArcElement
 );
 
-export function AdvancedAnalytics() {
-  const { data: customers, isError: isCustomersError, error: customersError } = useQuery({
+export function AdvancedAnalytics(): JSX.Element {
+  const { data: customers, isError: isCustomersError, error: customersError } = useQuery<Customer[]>({
     queryKey: ["customers"],
     queryFn: async () => {
       const response = await fetch("/api/customers");
@@ -41,7 +57,7 @@ export function AdvancedAnalytics() {
     },
   });
 
-  const { data: opportunities, isError: isOpportunitiesError, error: opportunitiesError } = useQuery({
+  const { data: opportunities, isError: isOpportunitiesError, error: opportunitiesError } = useQuery<Opportunity[]>({
     queryKey: ["opportunities"],
     queryFn: async () => {
       const response = await fetch("/api/opportunities");
@@ -53,7 +69,7 @@ export function AdvancedAnalytics() {
   });
 
   // Calculate service territory coverage
-  const territoryCoverage = customers?.reduce((acc, customer) => {
+  const territoryCoverage = customers?.reduce<TerritoryCoverage>((acc, customer) => {
     const territory = customer.serviceTerritory;
     if (typeof territory === 'string') {
       const currentTerritory = acc[territory] || { customers: 0, machines: 0, revenue: 0 };
@@ -80,7 +96,7 @@ export function AdvancedAnalytics() {
   }, {});
 
   // Calculate sales performance by quarter
-  const quarterlyPerformance = opportunities?.reduce((acc, opp) => {
+  const quarterlyPerformance = opportunities?.reduce<QuarterlyPerformance>((acc, opp) => {
     const createdAt = opp.createdAt;
     if (createdAt) {
       const date = new Date(createdAt);
@@ -114,14 +130,14 @@ export function AdvancedAnalytics() {
     labels: Object.keys(territoryCoverage || {}),
     datasets: [
       {
-        type: 'bar',
+        type: 'bar' as const,
         label: 'Customers',
         data: Object.values(territoryCoverage || {}).map(t => t.customers),
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
         borderWidth: 1,
       },
       {
-        type: 'bar',
+        type: 'bar' as const,
         label: 'Machines',
         data: Object.values(territoryCoverage || {}).map(t => t.machines),
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
@@ -134,7 +150,7 @@ export function AdvancedAnalytics() {
     labels: Object.keys(quarterlyPerformance || {}),
     datasets: [
       {
-        type: 'line',
+        type: 'line' as const,
         label: 'Revenue',
         data: Object.values(quarterlyPerformance || {}).map(q => q.revenue),
         borderColor: 'rgb(75, 192, 192)',
@@ -142,7 +158,7 @@ export function AdvancedAnalytics() {
         tension: 0.4,
       },
       {
-        type: 'line',
+        type: 'line' as const,
         label: 'Conversion Rate (%)',
         data: Object.values(quarterlyPerformance || {}).map(q => q.conversion),
         borderColor: 'rgb(255, 99, 132)',
@@ -208,7 +224,7 @@ export function AdvancedAnalytics() {
                 maintainAspectRatio: false,
                 plugins: {
                   legend: {
-                    position: 'top',
+                    position: 'top' as const,
                   },
                   title: {
                     display: true,
@@ -217,7 +233,7 @@ export function AdvancedAnalytics() {
                 },
                 scales: {
                   y: {
-                    type: 'linear',
+                    type: 'linear' as const,
                     beginAtZero: true,
                     grid: {
                       color: 'rgba(148, 163, 184, 0.1)',
@@ -246,12 +262,12 @@ export function AdvancedAnalytics() {
                 responsive: true,
                 maintainAspectRatio: false,
                 interaction: {
-                  mode: 'index',
+                  mode: 'index' as const,
                   intersect: false,
                 },
                 plugins: {
                   legend: {
-                    position: 'top',
+                    position: 'top' as const,
                   },
                   title: {
                     display: true,
@@ -260,18 +276,18 @@ export function AdvancedAnalytics() {
                 },
                 scales: {
                   y: {
-                    type: 'linear',
+                    type: 'linear' as const,
                     display: true,
-                    position: 'left',
+                    position: 'left' as const,
                     title: {
                       display: true,
                       text: 'Revenue ($)'
                     }
                   },
                   y1: {
-                    type: 'linear',
+                    type: 'linear' as const,
                     display: true,
-                    position: 'right',
+                    position: 'right' as const,
                     title: {
                       display: true,
                       text: 'Conversion Rate (%)'

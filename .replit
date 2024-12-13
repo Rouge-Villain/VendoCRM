@@ -62,7 +62,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node server/index.js"
+args = "NODE_OPTIONS='--experimental-specifier-resolution=node' node server/index.js"
 waitForPort = 5001
 
 [[workflows.workflow]]
@@ -106,5 +106,5 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd client && vite --port 5173"
+args = "cd client && NODE_ENV=development vite --port 5173"
 waitForPort = 5173
