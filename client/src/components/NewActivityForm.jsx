@@ -22,19 +22,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { type InsertActivity, insertActivitySchema } from "@db/schema";
+import { z } from "zod";
 
-interface NewActivityFormProps {
-  customerId: number;
-  onSuccess: () => void;
-}
+const activitySchema = z.object({
+  customerId: z.number(),
+  type: z.string().min(1, "Type is required"),
+  description: z.string(),
+  outcome: z.string(),
+  nextSteps: z.string(),
+  contactMethod: z.string(),
+  contactedBy: z.string(),
+  followUpDate: z.date().optional(),
+});
 
-export function NewActivityForm({ customerId, onSuccess }: NewActivityFormProps) {
+export function NewActivityForm({ customerId, onSuccess }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<InsertActivity>({
-    resolver: zodResolver(insertActivitySchema),
+  const form = useForm({
+    resolver: zodResolver(activitySchema),
     defaultValues: {
       customerId,
       type: "",
@@ -48,7 +54,7 @@ export function NewActivityForm({ customerId, onSuccess }: NewActivityFormProps)
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: InsertActivity) => {
+    mutationFn: async (data) => {
       const response = await fetch("/api/activities", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,13 +65,13 @@ export function NewActivityForm({ customerId, onSuccess }: NewActivityFormProps)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["activities"] });
-      toast({ title: "Interaction added successfully" });
+      toast({ title: "Activity added successfully" });
       form.reset();
       onSuccess();
     },
     onError: () => {
       toast({
-        title: "Failed to add interaction",
+        title: "Failed to add activity",
         variant: "destructive",
       });
     },
@@ -89,7 +95,7 @@ export function NewActivityForm({ customerId, onSuccess }: NewActivityFormProps)
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select interaction type" />
+                    <SelectValue placeholder="Select activity type" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -182,7 +188,7 @@ export function NewActivityForm({ customerId, onSuccess }: NewActivityFormProps)
                       className={`w-full pl-3 text-left font-normal ${!field.value && "text-muted-foreground"}`}
                     >
                       {field.value ? (
-                        format(new Date(field.value), "PPP")
+                        format(field.value, "PPP")
                       ) : (
                         <span>Pick a date</span>
                       )}
@@ -193,7 +199,7 @@ export function NewActivityForm({ customerId, onSuccess }: NewActivityFormProps)
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={field.value ? new Date(field.value) : undefined}
+                    selected={field.value}
                     onSelect={field.onChange}
                     disabled={(date) => date < new Date()}
                     initialFocus
@@ -222,7 +228,7 @@ export function NewActivityForm({ customerId, onSuccess }: NewActivityFormProps)
           className="w-full"
           disabled={mutation.isPending}
         >
-          {mutation.isPending ? "Adding..." : "Add Interaction"}
+          {mutation.isPending ? "Adding..." : "Add Activity"}
         </Button>
       </form>
     </Form>
