@@ -7,6 +7,7 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: false,
+      staleTime: 5000,
     },
   },
 });
@@ -14,7 +15,7 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-white text-slate-900">
+      <div className="min-h-screen bg-background text-foreground">
         <main className="container mx-auto p-8">
           <Analytics />
         </main>
