@@ -1,24 +1,26 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import errorModal from '@replit/vite-plugin-runtime-error-modal';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), errorModal()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@db': path.resolve(__dirname, './src/types'),
+      '@db': path.resolve(__dirname, './src/types')
     },
     extensions: ['.js', '.jsx', '.json']
   },
   server: {
-    port: 3000,
     host: '0.0.0.0',
+    port: 5173,
     strictPort: true,
-    hmr: { port: 3000 }
-  },
-  build: {
-    outDir: 'dist',
-    sourcemap: true
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+      },
+    },
   }
 });

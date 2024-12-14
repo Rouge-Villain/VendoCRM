@@ -6,8 +6,11 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      retry: false,
+      retry: 1,
       staleTime: 5000,
+      onError: (error) => {
+        console.error('Query error:', error);
+      }
     },
   },
 });

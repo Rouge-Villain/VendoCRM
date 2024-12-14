@@ -12,8 +12,8 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card.jsx";
+import { Line, Bar } from 'react-chartjs-2';
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 ChartJS.register(
   CategoryScale,
@@ -27,6 +27,30 @@ ChartJS.register(
   ArcElement
 );
 
+interface Territory {
+  customers: number;
+  machines: number;
+  revenue: number;
+}
+
+interface MachineType {
+  type: string;
+  quantity?: number;
+}
+
+interface Customer {
+  id: number;
+  serviceTerritory?: string;
+  machineTypes?: MachineType[];
+}
+
+interface Opportunity {
+  id: number;
+  customerId: number;
+  value: number;
+  status?: string;
+}
+
 export function AdvancedAnalytics() {
   const { data: customers, isError: isCustomersError, error: customersError } = useQuery({
     queryKey: ["customers"],
@@ -35,7 +59,7 @@ export function AdvancedAnalytics() {
       if (!response.ok) {
         throw new Error(`Error fetching customers: ${response.statusText}`);
       }
-      return response.json();
+      return response.json() as Promise<Customer[]>;
     },
   });
 
@@ -46,11 +70,12 @@ export function AdvancedAnalytics() {
       if (!response.ok) {
         throw new Error(`Error fetching opportunities: ${response.statusText}`);
       }
-      return response.json();
+      return response.json() as Promise<Opportunity[]>;
     },
   });
 
-  const territoryCoverage = customers?.reduce((acc, customer) => {
+  // Territory coverage calculation
+  const territoryCoverage = customers?.reduce<Record<string, Territory>>((acc, customer) => {
     const territory = customer.serviceTerritory || 'Unassigned';
     if (!acc[territory]) {
       acc[territory] = {
@@ -84,12 +109,14 @@ export function AdvancedAnalytics() {
     labels: Object.keys(territoryCoverage || {}),
     datasets: [
       {
+        type: 'bar',
         label: 'Customers',
         data: Object.values(territoryCoverage || {}).map(t => t.customers),
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
         borderWidth: 1,
       },
       {
+        type: 'bar',
         label: 'Machines',
         data: Object.values(territoryCoverage || {}).map(t => t.machines),
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
@@ -101,8 +128,8 @@ export function AdvancedAnalytics() {
   if (isCustomersError || isOpportunitiesError) {
     return (
       <div className="p-4 text-red-500">
-        {isCustomersError && `Error loading customers: ${customersError?.message || 'Unknown error'}`}
-        {isOpportunitiesError && `Error loading opportunities: ${opportunitiesError?.message || 'Unknown error'}`}
+        {isCustomersError && `Error loading customers: ${customersError instanceof Error ? customersError.message : 'Unknown error'}`}
+        {isOpportunitiesError && `Error loading opportunities: ${opportunitiesError instanceof Error ? opportunitiesError.message : 'Unknown error'}`}
       </div>
     );
   }
