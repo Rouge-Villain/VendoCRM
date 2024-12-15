@@ -15,7 +15,7 @@ import {
 } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import Button from "../ui/button.tsx";
+import Button from "../ui/button.jsx";
 import { FileDown as FileDownIcon } from "lucide-react";
 import { exportAnalyticsData } from "../../lib/exportData";
 

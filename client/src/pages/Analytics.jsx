@@ -1,10 +1,30 @@
 import React from 'react';
 import { SalesAnalytics } from "../components/analytics/SalesAnalytics.jsx";
 import { CustomerAnalytics } from "../components/analytics/CustomerAnalytics.jsx";
-import { AdvancedAnalytics } from "../components/analytics/AdvancedAnalytics";
+import AdvancedAnalytics from "../components/analytics/AdvancedAnalytics.jsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs.jsx";
 
 export default function Analytics() {
+  const [error, setError] = React.useState(null);
+
+  React.useEffect(() => {
+    const handleError = (event) => {
+      console.error('Analytics Error:', event.error);
+      setError(event.error?.message || 'An unexpected error occurred');
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  if (error) {
+    return (
+      <div className="p-4 text-red-500">
+        Error: {error}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
