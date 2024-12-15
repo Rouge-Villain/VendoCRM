@@ -1,6 +1,6 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import Analytics from './pages/Analytics';
+import Analytics from './pages/Analytics.jsx';
 
 const queryClient = new QueryClient({
   defaultOptions: {
