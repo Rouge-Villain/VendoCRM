@@ -3,6 +3,27 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Table Definitions
+/**
+ * @typedef {object} MaintenanceRecord
+ * @property {number} id
+ * @property {number} customerId
+ * @property {string} machineId
+ * @property {string} serialNumber
+ * @property {string} machineType
+ * @property {string} maintenanceType
+ * @property {string} description
+ * @property {string} status
+ * @property {string} technicianNotes
+ * @property {Array<object>} partsUsed
+ * @property {number} cost
+ * @property {number} laborCost
+ * @property {number} partsCost
+ * @property {Date} scheduledDate
+ * @property {Date} completedDate
+ * @property {Date} nextMaintenanceDate
+ * @property {Date} createdAt
+ * @property {Date} updatedAt
+ */
 export const maintenanceRecords = pgTable("maintenance_records", {
   id: integer("id").primaryKey().notNull(),
   customerId: integer("customer_id").notNull(),
@@ -24,6 +45,27 @@ export const maintenanceRecords = pgTable("maintenance_records", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+/**
+ * @typedef {object} Customer
+ * @property {number} id
+ * @property {string} name
+ * @property {string} company
+ * @property {string} email
+ * @property {string} phone
+ * @property {string} address
+ * @property {string} website
+ * @property {string} notes
+ * @property {Array<object>} machineTypes
+ * @property {string} state
+ * @property {string} city
+ * @property {string} businessLocations
+ * @property {string} serviceTerritory
+ * @property {string} serviceHours
+ * @property {string} contractTerms
+ * @property {string} maintenanceHistory
+ * @property {Date} createdAt
+ * @property {Date} updatedAt
+ */
 export const customers = pgTable("customers", {
   id: integer("id").primaryKey().notNull(),
   name: text("name").notNull(),
@@ -45,6 +87,19 @@ export const customers = pgTable("customers", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+/**
+ * @typedef {object} Product
+ * @property {number} id
+ * @property {string} name
+ * @property {string} description
+ * @property {number} price
+ * @property {string} category
+ * @property {string} sku
+ * @property {number} inStock
+ * @property {number} reorderPoint
+ * @property {Date} createdAt
+ * @property {Date} updatedAt
+ */
 export const products = pgTable("products", {
   id: integer("id").primaryKey().notNull(),
   name: text("name").notNull(),
@@ -58,6 +113,18 @@ export const products = pgTable("products", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+/**
+ * @typedef {object} Opportunity
+ * @property {number} id
+ * @property {number} customerId
+ * @property {number} productId
+ * @property {string} stage
+ * @property {string} status
+ * @property {number} value
+ * @property {Date} closeDate
+ * @property {Date} createdAt
+ * @property {Date} updatedAt
+ */
 export const opportunities = pgTable("opportunities", {
   id: integer("id").primaryKey().notNull(),
   customerId: integer("customer_id").notNull(),
@@ -70,6 +137,18 @@ export const opportunities = pgTable("opportunities", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+/**
+ * @typedef {object} Activity
+ * @property {number} id
+ * @property {string} type
+ * @property {string} description
+ * @property {number} customerId
+ * @property {number} opportunityId
+ * @property {Date} dueDate
+ * @property {string} completed
+ * @property {Date} createdAt
+ * @property {Date} updatedAt
+ */
 export const activities = pgTable("activities", {
   id: integer("id").primaryKey().notNull(),
   type: text("type").notNull(),
@@ -82,6 +161,15 @@ export const activities = pgTable("activities", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+/**
+ * @typedef {object} InventoryItem
+ * @property {number} id
+ * @property {number} productId
+ * @property {number} quantity
+ * @property {string} location
+ * @property {Date} createdAt
+ * @property {Date} updatedAt
+ */
 export const inventory = pgTable("inventory", {
   id: integer("id").primaryKey().notNull(),
   productId: integer("product_id").notNull(),
@@ -91,6 +179,17 @@ export const inventory = pgTable("inventory", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+/**
+ * @typedef {object} Supplier
+ * @property {number} id
+ * @property {string} name
+ * @property {string} contact
+ * @property {string} email
+ * @property {string} phone
+ * @property {string} address
+ * @property {Date} createdAt
+ * @property {Date} updatedAt
+ */
 export const suppliers = pgTable("suppliers", {
   id: integer("id").primaryKey().notNull(),
   name: text("name").notNull(),
@@ -102,6 +201,17 @@ export const suppliers = pgTable("suppliers", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+/**
+ * @typedef {object} PurchaseOrder
+ * @property {number} id
+ * @property {number} supplierId
+ * @property {string} status
+ * @property {Date} orderDate
+ * @property {Date} deliveryDate
+ * @property {number} total
+ * @property {Date} createdAt
+ * @property {Date} updatedAt
+ */
 export const purchase_orders = pgTable("purchase_orders", {
   id: integer("id").primaryKey().notNull(),
   supplierId: integer("supplier_id").notNull(),
@@ -113,6 +223,16 @@ export const purchase_orders = pgTable("purchase_orders", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+/**
+ * @typedef {object} Invoice
+ * @property {number} id
+ * @property {number} customerId
+ * @property {number} amount
+ * @property {string} status
+ * @property {Date} dueDate
+ * @property {Date} createdAt
+ * @property {Date} updatedAt
+ */
 export const invoices = pgTable("invoices", {
   id: integer("id").primaryKey().notNull(),
   customerId: integer("customer_id").notNull(),
@@ -123,6 +243,16 @@ export const invoices = pgTable("invoices", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+/**
+ * @typedef {object} Payment
+ * @property {number} id
+ * @property {number} invoiceId
+ * @property {number} amount
+ * @property {Date} paymentDate
+ * @property {string} paymentMethod
+ * @property {Date} createdAt
+ * @property {Date} updatedAt
+ */
 export const payments = pgTable("payments", {
   id: integer("id").primaryKey().notNull(),
   invoiceId: integer("invoice_id").notNull(),
@@ -133,6 +263,15 @@ export const payments = pgTable("payments", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+/**
+ * @typedef {object} StockMovement
+ * @property {number} id
+ * @property {number} productId
+ * @property {number} quantity
+ * @property {string} type
+ * @property {string} reference
+ * @property {Date} createdAt
+ */
 export const stock_movements = pgTable("stock_movements", {
   id: integer("id").primaryKey().notNull(),
   productId: integer("product_id").notNull(),

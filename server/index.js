@@ -2,11 +2,6 @@ import express from "express";
 import { registerRoutes } from "./routes.js";
 import { setupVite, serveStaticFiles } from "./vite.js";
 import { createServer } from "http";
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 function log(message) {
   const formattedTime = new Date().toLocaleTimeString("en-US", {

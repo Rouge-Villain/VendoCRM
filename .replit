@@ -36,33 +36,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Backend Server"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Database Migration"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Vending CRM"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "Frontend"
 
-[[workflows.workflow]]
-name = "Backend Server"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
 [[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node server/index.js"
+task = "workflow.run"
+args = "Backend Server"
 
 [[workflows.workflow]]
 name = "Database Migration"
@@ -79,21 +61,6 @@ task = "shell.exec"
 args = "npm run db:push"
 
 [[workflows.workflow]]
-name = "Vending CRM"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5001
-
-[[workflows.workflow]]
 name = "Frontend"
 author = "agent"
 
@@ -107,3 +74,18 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "cd client && vite"
 waitForPort = 5173
+
+[[workflows.workflow]]
+name = "Backend Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node server/index.js"
+waitForPort = 5001

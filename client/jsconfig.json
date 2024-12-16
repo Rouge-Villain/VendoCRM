@@ -4,7 +4,12 @@
     "jsx": "react",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "target": "ES6",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "esModuleInterop": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
