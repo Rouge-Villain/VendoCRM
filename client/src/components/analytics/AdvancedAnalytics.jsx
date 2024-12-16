@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { useQuery } from "@tanstack/react-query";
 import {
   Chart as ChartJS,
@@ -37,6 +38,7 @@ function AdvancedAnalytics() {
       }
       return response.json();
     },
+    retry: 1
   });
 
   const { data: opportunities = [], isLoading: opportunitiesLoading, error: opportunitiesError } = useQuery({
@@ -47,7 +49,7 @@ function AdvancedAnalytics() {
         throw new Error(`Error fetching opportunities: ${response.statusText}`);
       }
       return response.json();
-    },
+    }
   });
 
   if (customersLoading || opportunitiesLoading) {
@@ -72,21 +74,6 @@ function AdvancedAnalytics() {
       <div className="p-4 text-red-500">
         {customersError && `Error loading customers: ${customersError.message}`}
         {opportunitiesError && `Error loading opportunities: ${opportunitiesError.message}`}
-      </div>
-    );
-  }
-
-  if (!customers.length || !opportunities.length) {
-    return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>No data available</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">No customer revenue data available to display.</p>
-          </CardContent>
-        </Card>
       </div>
     );
   }

@@ -2,6 +2,7 @@ import React from 'react';
 import { SalesAnalytics } from "../components/analytics/SalesAnalytics.jsx";
 import { CustomerAnalytics } from "../components/analytics/CustomerAnalytics.jsx";
 import { WinLossAnalytics } from "../components/analytics/WinLossAnalytics.jsx";
+import AdvancedAnalytics from "../components/analytics/AdvancedAnalytics.jsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs.jsx";
 
 export default function Analytics() {
@@ -36,10 +37,11 @@ export default function Analytics() {
           <TabsTrigger value="advanced">Advanced Analytics</TabsTrigger>
           <TabsTrigger value="sales">Sales Performance</TabsTrigger>
           <TabsTrigger value="customers">Customer Analytics</TabsTrigger>
+          <TabsTrigger value="winloss">Win/Loss Analysis</TabsTrigger>
         </TabsList>
         
         <TabsContent value="advanced" className="space-y-6">
-          <WinLossAnalytics />
+          <AdvancedAnalytics />
         </TabsContent>
 
         <TabsContent value="sales" className="space-y-6">
@@ -48,6 +50,10 @@ export default function Analytics() {
         
         <TabsContent value="customers" className="space-y-6">
           <CustomerAnalytics />
+        </TabsContent>
+
+        <TabsContent value="winloss" className="space-y-6">
+          <WinLossAnalytics />
         </TabsContent>
       </Tabs>
     </div>

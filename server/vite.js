@@ -3,12 +3,15 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
+import viteConfig from "../vite.config.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import { Server } from "http";
 
 export async function setupVite(app, server) {
   const vite = await createViteServer({
+    ...viteConfig,
+    configFile: false,
     server: {
       middlewareMode: true,
       hmr: { server },
