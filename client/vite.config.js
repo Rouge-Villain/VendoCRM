@@ -5,17 +5,14 @@ import errorModal from '@replit/vite-plugin-runtime-error-modal';
 
 export default defineConfig({
   plugins: [
-    react({
-      include: "**/*.{jsx,js}",
-    }),
+    react(),
     errorModal()
   ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@db': path.resolve(__dirname, './src/types')
-    },
-    extensions: ['.js', '.jsx', '.json']
+    }
   },
   server: {
     host: '0.0.0.0',
@@ -26,8 +23,5 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-  },
-  optimizeDeps: {
-    include: ['react', 'react-dom']
   }
 });

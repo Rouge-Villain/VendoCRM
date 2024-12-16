@@ -1,7 +1,7 @@
 import React from 'react';
 import { SalesAnalytics } from "../components/analytics/SalesAnalytics.jsx";
 import { CustomerAnalytics } from "../components/analytics/CustomerAnalytics.jsx";
-import AdvancedAnalytics from "../components/analytics/AdvancedAnalytics.jsx";
+import { WinLossAnalytics } from "../components/analytics/WinLossAnalytics.jsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs.jsx";
 
 export default function Analytics() {
@@ -39,7 +39,7 @@ export default function Analytics() {
         </TabsList>
         
         <TabsContent value="advanced" className="space-y-6">
-          <AdvancedAnalytics />
+          <WinLossAnalytics />
         </TabsContent>
 
         <TabsContent value="sales" className="space-y-6">
