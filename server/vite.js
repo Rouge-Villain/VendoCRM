@@ -1,12 +1,12 @@
 import express from "express";
 import fs from "fs";
-import path from "path";
+import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../vite.config.js";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 export async function setupVite(app, server) {
   const vite = await createViteServer({
@@ -24,14 +24,13 @@ export async function setupVite(app, server) {
     const url = req.originalUrl;
 
     try {
-      const clientTemplate = path.resolve(
+      const clientTemplate = resolve(
         __dirname,
         "..",
         "client",
         "index.html"
       );
 
-      // always reload the index.html file from disk incase it changes
       const template = await fs.promises.readFile(clientTemplate, "utf-8");
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
@@ -42,19 +41,15 @@ export async function setupVite(app, server) {
   });
 }
 
-export function serveStatic(app) {
-  const distPath = path.resolve(__dirname, "public");
+export function serveStaticFiles(app) {
+  const distPath = resolve(__dirname, "../dist/public");
 
   if (!fs.existsSync(distPath)) {
-    throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`
-    );
+    console.warn(`Build directory not found: ${distPath}. Please build the client first.`);
   }
 
   app.use(express.static(distPath));
-
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+  app.get("*", (_req, res) => {
+    res.sendFile(resolve(distPath, "index.html"));
   });
 }

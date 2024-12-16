@@ -1,5 +1,6 @@
 import { pgTable, text, integer, timestamp, decimal, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 // Table Definitions
 export const maintenanceRecords = pgTable("maintenance_records", {

@@ -1,6 +1,6 @@
 import express from "express";
 import { registerRoutes } from "./routes.js";
-import { setupVite, serveStatic } from "./vite.js";
+import { setupVite, serveStaticFiles } from "./vite.js";
 import { createServer } from "http";
 
 function log(message) {
@@ -63,7 +63,7 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    serveStaticFiles(app);
   }
 
   const PORT = process.env.PORT || 5001;

@@ -1,4 +1,5 @@
 import { db } from "../db/index.js";
+import { opportunities, products, customers } from "../db/schema.js";
 
 export function registerRoutes(app) {
   // API Routes
