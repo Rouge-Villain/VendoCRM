@@ -21,7 +21,6 @@ export function registerRoutes(app) {
     }
   });
 
-  // Add more routes as needed
   app.get("/api/customers", async (req, res) => {
     try {
       const customers = await db.query.customers.findMany();

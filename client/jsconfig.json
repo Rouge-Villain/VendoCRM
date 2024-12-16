@@ -2,14 +2,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "jsx": "react",
-    "target": "ES6",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "allowJs": true,
-    "esModuleInterop": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@db/*": ["./src/types/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"],

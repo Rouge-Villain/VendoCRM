@@ -12,10 +12,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@db': path.resolve(__dirname, './src/types')
+      '@': path.resolve(__dirname, 'src'),
     },
-    extensions: ['.js', '.jsx', '.json']
   },
   server: {
     host: '0.0.0.0',
