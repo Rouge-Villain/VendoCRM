@@ -2,22 +2,27 @@ import express from "express";
 import fs from "fs";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
-import { createServer as createViteServer } from "vite";
-import viteConfig from "../vite.config.js";
+import { createServer as createViteServer, loadConfigFromFile, mergeConfig } from "vite";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export async function setupVite(app, server) {
-  const vite = await createViteServer({
-    ...viteConfig,
+  const configPath = resolve(__dirname, '../vite.config.js');
+  const { config: userConfig } = await loadConfigFromFile({}, configPath);
+  
+  const vite = await createViteServer(mergeConfig(userConfig, {
     configFile: false,
+    root: resolve(__dirname, '../client'),
     server: {
       middlewareMode: true,
       hmr: { server },
     },
     appType: "custom",
-  });
+    optimizeDeps: {
+      force: true
+    }
+  }));
 
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {

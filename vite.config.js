@@ -9,25 +9,23 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [
     react({
-      jsxRuntime: 'classic',
       babel: {
         plugins: [
-          ['@babel/plugin-transform-react-jsx', { runtime: 'classic' }]
+          ['@babel/plugin-transform-react-jsx']
         ]
       }
     }),
-    errorModal()
+    errorModal(),
   ],
   root: 'client',
   build: {
-    outDir: 'dist',
+    outDir: '../dist/public',
     emptyOutDir: true
   },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'client/src')
-    },
-    extensions: ['.js', '.jsx']
+    }
   },
   server: {
     host: '0.0.0.0',
@@ -46,6 +44,7 @@ export default defineConfig({
       '@tanstack/react-query',
       'chart.js',
       'react-chartjs-2'
-    ]
+    ],
+    force: true
   }
 });
