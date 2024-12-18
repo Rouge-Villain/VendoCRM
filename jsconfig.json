@@ -2,15 +2,13 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./client/src/*"],
-      "@db/*": ["./db/*"]
+      "@/*": ["./client/src/*"]
     },
     "target": "ES6",
     "module": "ESNext",
     "moduleResolution": "node",
     "allowJs": true,
-    "jsx": "react",
-    "esModuleInterop": true
+    "jsx": "react"
   },
   "include": ["**/*.js", "**/*.jsx"],
   "exclude": ["node_modules"]

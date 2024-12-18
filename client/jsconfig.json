@@ -8,8 +8,7 @@
     "target": "ES6",
     "module": "ESNext",
     "moduleResolution": "node",
-    "allowJs": true,
-    "esModuleInterop": true
+    "allowJs": true
   },
   "include": ["src/**/*.js", "src/**/*.jsx"],
   "exclude": ["node_modules"]

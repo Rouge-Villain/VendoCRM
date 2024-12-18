@@ -4,8 +4,7 @@ import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import errorModal from '@replit/vite-plugin-runtime-error-modal';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [
@@ -14,8 +13,8 @@ export default defineConfig({
   ],
   root: './client',
   build: {
-    outDir: 'dist',
-    sourcemap: true
+    outDir: '../dist/public',
+    emptyOutDir: true
   },
   resolve: {
     alias: {
@@ -32,8 +31,5 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-  },
-  optimizeDeps: {
-    include: ['react', 'react-dom']
   }
 });
