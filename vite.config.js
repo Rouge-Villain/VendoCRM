@@ -9,7 +9,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [
     react({
-      jsxRuntime: 'classic',
+      include: "**/*.{jsx,tsx}",
+      babel: {
+        plugins: [
+          ["@babel/plugin-transform-react-jsx", { runtime: "automatic" }]
+        ]
+      }
     }),
     errorModal()
   ],
@@ -23,7 +28,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'client/src')
     },
-    extensions: ['.js', '.jsx', '.json']
+    extensions: ['.js', '.jsx']
   },
   server: {
     host: '0.0.0.0',
@@ -36,6 +41,12 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    include: ['react', 'react-dom']
+    include: [
+      'react',
+      'react-dom',
+      '@tanstack/react-query',
+      'chart.js',
+      'react-chartjs-2'
+    ]
   }
 });

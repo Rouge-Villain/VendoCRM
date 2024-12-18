@@ -150,4 +150,6 @@ function AdvancedAnalytics() {
   );
 }
 
+AdvancedAnalytics.propTypes = {};
+
 export default AdvancedAnalytics;
