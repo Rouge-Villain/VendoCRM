@@ -2,14 +2,13 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./client/src/*"]
+      "@/*": ["client/src/*"]
     },
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "node",
     "allowJs": true,
-    "jsx": "react-jsx",
-    "esModuleInterop": true
+    "jsx": "react-jsx"
   },
   "include": ["**/*.js", "**/*.jsx"],
   "exclude": ["node_modules", "dist"]

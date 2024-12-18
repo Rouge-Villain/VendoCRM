@@ -58,7 +58,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run db:push"
+args = "npx drizzle-kit push:pg"
 
 [[workflows.workflow]]
 name = "Frontend"

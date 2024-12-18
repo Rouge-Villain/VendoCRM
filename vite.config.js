@@ -8,17 +8,20 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'classic',
+    }),
     errorModal()
   ],
-  root: './client',
+  root: 'client',
   build: {
-    outDir: '../dist/public',
-    emptyOutDir: true
+    outDir: 'dist',
+    emptyOutDir: true,
+    sourcemap: true
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './client/src'),
+      '@': resolve(__dirname, 'client/src')
     },
     extensions: ['.js', '.jsx']
   },
@@ -28,8 +31,11 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:5001',
-        changeOrigin: true,
-      },
-    },
+        changeOrigin: true
+      }
+    }
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom']
   }
 });
