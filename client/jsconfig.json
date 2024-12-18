@@ -4,12 +4,13 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "jsx": "react",
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "node",
-    "allowJs": true
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": false
   },
   "include": ["src/**/*.js", "src/**/*.jsx"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"]
 }

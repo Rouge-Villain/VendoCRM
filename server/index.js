@@ -18,6 +18,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Logger middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -48,26 +49,32 @@ app.use((req, res, next) => {
   next();
 });
 
+// Error handler middleware
+app.use((err, _req, res, _next) => {
+  console.error('Error:', err);
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+  res.status(status).json({ message });
+});
+
+// Initialize server
 (async () => {
-  registerRoutes(app);
-  const server = createServer(app);
+  try {
+    registerRoutes(app);
+    const server = createServer(app);
 
-  app.use((err, _req, res, _next) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    if (process.env.NODE_ENV !== 'production') {
+      await setupVite(app, server);
+    } else {
+      serveStaticFiles(app);
+    }
 
-    res.status(status).json({ message });
-    throw err;
-  });
-
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStaticFiles(app);
+    const PORT = process.env.PORT || 5001;
+    server.listen(PORT, "0.0.0.0", () => {
+      log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
   }
-
-  const PORT = process.env.PORT || 5001;
-  server.listen(PORT, "0.0.0.0", () => {
-    log(`serving on port ${PORT}`);
-  });
 })();

@@ -23,7 +23,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'client/src')
     },
-    extensions: ['.js', '.jsx']
+    extensions: ['.js', '.jsx', '.json']
   },
   server: {
     host: '0.0.0.0',

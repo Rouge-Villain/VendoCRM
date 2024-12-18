@@ -8,7 +8,7 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "allowJs": true,
-    "jsx": "react-jsx"
+    "jsx": "react"
   },
   "include": ["**/*.js", "**/*.jsx"],
   "exclude": ["node_modules", "dist"]
