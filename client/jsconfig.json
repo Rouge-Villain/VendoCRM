@@ -1,17 +1,16 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "jsx": "react",
     "paths": {
       "@/*": ["./src/*"]
     },
+    "jsx": "react",
     "target": "ES6",
     "module": "ESNext",
     "moduleResolution": "node",
     "allowJs": true,
-    "esModuleInterop": true,
-    "checkJs": false
+    "esModuleInterop": true
   },
   "include": ["src/**/*.js", "src/**/*.jsx"],
-  "exclude": ["node_modules", "**/*.ts", "**/*.tsx"]
+  "exclude": ["node_modules"]
 }

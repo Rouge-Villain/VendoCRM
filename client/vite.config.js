@@ -8,17 +8,15 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [
-    react({
-      jsxRuntime: 'classic'
-    }),
+    react(),
     errorModal()
   ],
   root: '.',
-  base: '/',
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
     },
+    extensions: ['.js', '.jsx']
   },
   server: {
     host: '0.0.0.0',
@@ -29,10 +27,6 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-  },
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
   },
   optimizeDeps: {
     include: ['react', 'react-dom']

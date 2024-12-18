@@ -9,15 +9,19 @@ const __dirname = dirname(__filename);
 
 export default defineConfig({
   plugins: [
-    react({
-      jsxRuntime: 'classic'
-    }),
+    react(),
     errorModal()
   ],
+  root: './client',
+  build: {
+    outDir: 'dist',
+    sourcemap: true
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'client/src'),
     },
+    extensions: ['.js', '.jsx']
   },
   server: {
     host: '0.0.0.0',
