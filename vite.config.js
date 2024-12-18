@@ -9,10 +9,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [
     react({
-      include: "**/*.{jsx,tsx}",
+      jsxRuntime: 'classic',
       babel: {
         plugins: [
-          ["@babel/plugin-transform-react-jsx", { runtime: "automatic" }]
+          ['@babel/plugin-transform-react-jsx', { runtime: 'classic' }]
         ]
       }
     }),
@@ -21,8 +21,7 @@ export default defineConfig({
   root: 'client',
   build: {
     outDir: 'dist',
-    emptyOutDir: true,
-    sourcemap: true
+    emptyOutDir: true
   },
   resolve: {
     alias: {
