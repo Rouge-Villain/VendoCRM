@@ -5,16 +5,11 @@ import { dirname, resolve } from 'path';
 import errorModal from '@replit/vite-plugin-runtime-error-modal';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const postcssConfigPath = resolve(__dirname, 'client/postcss.config.cjs');
 
 export default defineConfig({
   plugins: [
-    react({
-      babel: {
-        plugins: [
-          ['@babel/plugin-transform-react-jsx']
-        ]
-      }
-    }),
+    react(),
     errorModal(),
   ],
   root: 'client',
@@ -35,6 +30,11 @@ export default defineConfig({
         target: 'http://localhost:5001',
         changeOrigin: true
       }
+    }
+  },
+  css: {
+    postcss: {
+      config: postcssConfigPath
     }
   },
   optimizeDeps: {
