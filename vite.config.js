@@ -18,7 +18,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'client/src'),
+      '@': resolve(__dirname, './client/src'),
     },
     extensions: ['.js', '.jsx']
   },

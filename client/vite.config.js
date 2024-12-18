@@ -11,10 +11,14 @@ export default defineConfig({
     react(),
     errorModal()
   ],
-  root: '.',
+  root: './client',
+  build: {
+    outDir: '../dist/public',
+    emptyOutDir: true
+  },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
+      '@': resolve(__dirname, 'client/src'),
     },
     extensions: ['.js', '.jsx']
   },
