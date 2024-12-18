@@ -72,7 +72,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd client && vite"
+args = "cd client && npx vite"
 waitForPort = 5173
 
 [[workflows.workflow]]
