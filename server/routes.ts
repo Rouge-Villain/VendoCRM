@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { db } from "db";
-import { customers, products, opportunities, activities, maintenanceRecords } from "@db/schema";
-import { eq } from "drizzle-orm";
+import { customers, products, opportunities, activities, maintenanceRecords, loyaltyRewards } from "@db/schema";
+import { eq, sql } from "drizzle-orm";
 
 export function registerRoutes(app: Express) {
   // Customers
@@ -50,7 +50,7 @@ export function registerRoutes(app: Express) {
   // Products
   app.get("/api/products", async (req, res) => {
     const result = await db.select().from(products);
-    
+
     // If no products exist, populate with standard vending machine products
     if (result.length === 0) {
       const standardProducts = [
@@ -167,7 +167,7 @@ export function registerRoutes(app: Express) {
   app.get("/api/activities", async (req, res) => {
     try {
       const customerId = req.query.customerId;
-      const query = customerId 
+      const query = customerId
         ? db.select().from(activities).where(eq(activities.customerId, Number(customerId)))
         : db.select().from(activities);
 
@@ -238,10 +238,10 @@ export function registerRoutes(app: Express) {
   // Maintenance Records
   app.get("/api/maintenance", async (req, res) => {
     const customerId = req.query.customerId;
-    const query = customerId 
+    const query = customerId
       ? db.select().from(maintenanceRecords).where(eq(maintenanceRecords.customerId, Number(customerId)))
       : db.select().from(maintenanceRecords);
-    
+
     const result = await query;
     res.json(result);
   });
@@ -258,9 +258,9 @@ export function registerRoutes(app: Express) {
     } catch (error: unknown) {
       console.error("Maintenance creation error:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      res.status(400).json({ 
-        error: "Invalid maintenance record data", 
-        details: errorMessage 
+      res.status(400).json({
+        error: "Invalid maintenance record data",
+        details: errorMessage
       });
     }
   });
@@ -270,9 +270,9 @@ export function registerRoutes(app: Express) {
     try {
       const { stage } = req.body;
       const id = parseInt(req.params.id);
-      
+
       console.log(`Updating opportunity ${id} stage to: ${stage}`);
-      
+
       // Validate the stage value
       if (!stage) {
         return res.status(400).json({ error: "Stage is required" });
@@ -291,7 +291,7 @@ export function registerRoutes(app: Express) {
 
       const result = await db
         .update(opportunities)
-        .set({ 
+        .set({
           stage,
           updatedAt: new Date()
         })
@@ -313,10 +313,10 @@ export function registerRoutes(app: Express) {
     try {
       const { status } = req.body;
       const id = parseInt(req.params.id);
-      
+
       const result = await db
         .update(maintenanceRecords)
-        .set({ 
+        .set({
           status,
           completedDate: status === "done" ? new Date() : null,
           updatedAt: new Date()
@@ -339,4 +339,128 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // Loyalty Points Routes
+  app.get("/api/customers/:id/loyalty", async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const customer = await db
+        .select({
+          loyaltyPoints: customers.loyaltyPoints,
+          loyaltyTier: customers.loyaltyTier,
+          lastPointsEarned: customers.lastPointsEarned
+        })
+        .from(customers)
+        .where(eq(customers.id, customerId));
+
+      if (customer.length === 0) {
+        return res.status(404).json({ error: "Customer not found" });
+      }
+
+      const rewardHistory = await db
+        .select()
+        .from(loyaltyRewards)
+        .where(eq(loyaltyRewards.customerId, customerId))
+        .orderBy(loyaltyRewards.transactionDate);
+
+      res.json({
+        loyalty: customer[0],
+        history: rewardHistory
+      });
+    } catch (error) {
+      console.error('Error fetching loyalty data:', error);
+      res.status(500).json({ error: "Failed to fetch loyalty data" });
+    }
+  });
+
+  app.post("/api/customers/:id/loyalty/earn", async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const { points, source, description } = req.body;
+
+      // Add points to customer's balance
+      const updatedCustomer = await db
+        .update(customers)
+        .set({
+          loyaltyPoints: sql`${customers.loyaltyPoints} + ${points}`,
+          lastPointsEarned: new Date(),
+          // Update tier based on total points
+          loyaltyTier: sql`CASE 
+            WHEN loyalty_points + ${points} >= 1000 THEN 'platinum'
+            WHEN loyalty_points + ${points} >= 500 THEN 'gold'
+            WHEN loyalty_points + ${points} >= 200 THEN 'silver'
+            ELSE 'standard'
+          END`
+        })
+        .where(eq(customers.id, customerId))
+        .returning();
+
+      // Record the transaction
+      const rewardRecord = await db.insert(loyaltyRewards).values({
+        customerId,
+        points,
+        type: 'earned',
+        source,
+        description,
+        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // Points expire in 1 year
+      }).returning();
+
+      res.json({
+        customer: updatedCustomer[0],
+        reward: rewardRecord[0]
+      });
+    } catch (error) {
+      console.error('Error adding loyalty points:', error);
+      res.status(500).json({ error: "Failed to add loyalty points" });
+    }
+  });
+
+  app.post("/api/customers/:id/loyalty/redeem", async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const { points, description } = req.body;
+
+      // Check if customer has enough points
+      const customer = await db
+        .select()
+        .from(customers)
+        .where(eq(customers.id, customerId));
+
+      if (customer[0].loyaltyPoints < points) {
+        return res.status(400).json({ error: "Insufficient points" });
+      }
+
+      // Deduct points from balance
+      const updatedCustomer = await db
+        .update(customers)
+        .set({
+          loyaltyPoints: sql`${customers.loyaltyPoints} - ${points}`,
+          // Update tier based on remaining points
+          loyaltyTier: sql`CASE 
+            WHEN loyalty_points - ${points} >= 1000 THEN 'platinum'
+            WHEN loyalty_points - ${points} >= 500 THEN 'gold'
+            WHEN loyalty_points - ${points} >= 200 THEN 'silver'
+            ELSE 'standard'
+          END`
+        })
+        .where(eq(customers.id, customerId))
+        .returning();
+
+      // Record the redemption
+      const rewardRecord = await db.insert(loyaltyRewards).values({
+        customerId,
+        points: -points,
+        type: 'redeemed',
+        source: 'redemption',
+        description,
+      }).returning();
+
+      res.json({
+        customer: updatedCustomer[0],
+        reward: rewardRecord[0]
+      });
+    } catch (error) {
+      console.error('Error redeeming loyalty points:', error);
+      res.status(500).json({ error: "Failed to redeem loyalty points" });
+    }
+  });
 }

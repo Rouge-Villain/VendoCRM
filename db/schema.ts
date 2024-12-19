@@ -35,17 +35,32 @@ export const customers = pgTable("customers", {
   serviceTerritory: text("service_territory"),
   serviceHours: text("service_hours"),
   contractTerms: text("contract_terms"),
-  maintenanceHistory: text("maintenance_history"), // JSON array as text
+  maintenanceHistory: text("maintenance_history"),
+  loyaltyPoints: integer("loyalty_points").default(0),
+  loyaltyTier: text("loyalty_tier").default("standard"),
+  lastPointsEarned: timestamp("last_points_earned"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const loyaltyRewards = pgTable("loyalty_rewards", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  customerId: integer("customer_id").notNull(),
+  points: integer("points").notNull(),
+  type: text("type").notNull(), // 'earned' or 'redeemed'
+  source: text("source").notNull(), // e.g., 'purchase', 'maintenance', 'referral'
+  description: text("description").notNull(),
+  transactionDate: timestamp("transaction_date").defaultNow(),
+  expiryDate: timestamp("expiry_date"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const products = pgTable("products", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: text("name").notNull(),
-  category: text("category").notNull(), // machine, cooler, part, etc.
+  category: text("category").notNull(),
   description: text("description").notNull(),
-  specs: text("specs").notNull(), // JSON string of technical specs
+  specs: text("specs").notNull(),
   price: decimal("price").notNull(),
   imageUrl: text("image_url"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -55,8 +70,8 @@ export const opportunities = pgTable("opportunities", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   customerId: integer("customer_id").notNull(),
   productId: integer("product_id").notNull(),
-  stage: text("stage").notNull().default("prospecting"), // Current pipeline stage
-  status: text("status").notNull().default("open"), // open, won, lost
+  stage: text("stage").notNull().default("prospecting"),
+  status: text("status").notNull().default("open"),
   value: decimal("value", { precision: 10, scale: 2 }).notNull(),
   probability: integer("probability").default(0),
   expectedCloseDate: timestamp("expected_close_date"),
@@ -72,7 +87,7 @@ export const opportunities = pgTable("opportunities", {
 export const activities = pgTable("activities", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   customerId: integer("customer_id").notNull(),
-  type: text("type").notNull(), // call, email, meeting, etc.
+  type: text("type").notNull(),
   description: text("description").notNull(),
   outcome: text("outcome"),
   nextSteps: text("next_steps"),
@@ -107,3 +122,8 @@ export const insertMaintenanceSchema = createInsertSchema(maintenanceRecords);
 export const selectMaintenanceSchema = createSelectSchema(maintenanceRecords);
 export type InsertMaintenance = z.infer<typeof insertMaintenanceSchema>;
 export type Maintenance = z.infer<typeof selectMaintenanceSchema>;
+
+export const insertLoyaltyRewardSchema = createInsertSchema(loyaltyRewards);
+export const selectLoyaltyRewardSchema = createSelectSchema(loyaltyRewards);
+export type InsertLoyaltyReward = z.infer<typeof insertLoyaltyRewardSchema>;
+export type LoyaltyReward = z.infer<typeof selectLoyaltyRewardSchema>;

@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { type Customer } from "@db/schema";
 import { format } from "date-fns";
+import { LoyaltyCard } from "./LoyaltyCard";
 
 interface QuickActionProps {
   icon: React.ElementType;
@@ -201,6 +202,9 @@ export function CustomerDetails({ customerId, onBack }: CustomerDetailsProps) {
           </div>
         </div>
       </Card>
+
+      {/* Add the Loyalty Card component */}
+      <LoyaltyCard customerId={customerId} />
     </div>
   );
 }
