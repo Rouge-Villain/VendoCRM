@@ -10,6 +10,23 @@ export function registerRoutes(app: Express) {
     res.json(result);
   });
 
+  app.get("/api/customers/:id", async (req, res) => {
+    try {
+      const result = await db
+        .select()
+        .from(customers)
+        .where(eq(customers.id, parseInt(req.params.id)));
+
+      if (result.length === 0) {
+        res.status(404).json({ error: "Customer not found" });
+      } else {
+        res.json(result[0]);
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch customer details" });
+    }
+  });
+
   app.post("/api/customers", async (req, res) => {
     try {
       const result = await db.insert(customers).values(req.body).returning();
