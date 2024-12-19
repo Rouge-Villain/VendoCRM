@@ -10,7 +10,7 @@ const postcssConfigPath = resolve(__dirname, 'client/postcss.config.cjs');
 export default defineConfig({
   plugins: [
     react({
-      include: "**/*.jsx",
+      include: "**/*.{js,jsx}",
       babel: {
         plugins: [
           ["@babel/plugin-transform-react-jsx"]
@@ -54,5 +54,9 @@ export default defineConfig({
       'react-chartjs-2'
     ],
     force: true
+  },
+  esbuild: {
+    jsxFactory: 'React.createElement',
+    jsxFragment: 'React.Fragment'
   }
 });

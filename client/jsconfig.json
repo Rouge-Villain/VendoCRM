@@ -6,10 +6,10 @@
     },
     "target": "ES2020",
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "jsx": "react-jsx",
     "allowJs": true,
-    "checkJs": false
+    "checkJs": true
   },
   "include": ["src/**/*.js", "src/**/*.jsx"],
   "exclude": ["node_modules", "dist"]

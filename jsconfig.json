@@ -7,9 +7,9 @@
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "node",
-    "jsx": "react",
+    "jsx": "react-jsx",
     "allowJs": true,
-    "checkJs": false
+    "checkJs": true
   },
   "include": ["**/*.js", "**/*.jsx"],
   "exclude": ["node_modules", "dist"]
