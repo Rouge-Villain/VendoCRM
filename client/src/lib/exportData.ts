@@ -1,4 +1,6 @@
-export function exportToCSV(data, filename) {
+import { type Customer, type Opportunity } from "@db/schema";
+
+export function exportToCSV(data: any[], filename: string) {
   if (!data.length) return;
   
   const headers = Object.keys(data[0]);
@@ -26,7 +28,7 @@ export function exportToCSV(data, filename) {
   document.body.removeChild(link);
 }
 
-export function prepareAnalyticsData(customers, opportunities) {
+export function prepareAnalyticsData(customers: Customer[], opportunities: Opportunity[]) {
   const territoryData = customers.reduce((acc, customer) => {
     const territory = customer.serviceTerritory || 'Unassigned';
     if (!acc[territory]) {
@@ -39,7 +41,7 @@ export function prepareAnalyticsData(customers, opportunities) {
     }
     
     acc[territory].customerCount++;
-    acc[territory].machineCount += (Array.isArray(customer.machineTypes) ? customer.machineTypes.length : 0);
+    acc[territory].machineCount += (Array.isArray(customer.machineTypes) ? (customer.machineTypes as any[]).length : 0);
     
     // Calculate revenue for this customer
     const customerRevenue = opportunities
@@ -49,7 +51,7 @@ export function prepareAnalyticsData(customers, opportunities) {
     acc[territory].totalRevenue += customerRevenue;
     
     return acc;
-  }, {});
+  }, {} as Record<string, any>);
 
   return Object.values(territoryData);
 }

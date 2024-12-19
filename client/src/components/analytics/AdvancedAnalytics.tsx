@@ -1,5 +1,3 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import { useQuery } from "@tanstack/react-query";
 import { exportToCSV, prepareAnalyticsData } from '@/lib/exportData';
 import {
@@ -14,8 +12,9 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
-import { Line, Bar } from 'react-chartjs-2';
+import { Line, Bar, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { type Customer, type Opportunity } from "@db/schema";
 
 ChartJS.register(
   CategoryScale,
@@ -37,7 +36,7 @@ export function AdvancedAnalytics() {
       if (!response.ok) {
         throw new Error(`Error fetching customers: ${response.statusText}`);
       }
-      return response.json();
+      return response.json() as Promise<Customer[]>;
     },
   });
 
@@ -48,7 +47,7 @@ export function AdvancedAnalytics() {
       if (!response.ok) {
         throw new Error(`Error fetching opportunities: ${response.statusText}`);
       }
-      return response.json();
+      return response.json() as Promise<Opportunity[]>;
     },
   });
 
@@ -64,7 +63,7 @@ export function AdvancedAnalytics() {
       };
     }
     return acc;
-  }, {});
+  }, {} as Record<string, { customers: number; machines: number; revenue: number }>);
 
   // Calculate sales performance by quarter
   const quarterlyPerformance = opportunities?.reduce((acc, opp) => {
@@ -78,14 +77,14 @@ export function AdvancedAnalytics() {
       };
       // Calculate conversion rate
       const quarterlyOpps = opportunities.filter(o => {
-        const oppDate = new Date(o.createdAt);
+        const oppDate = new Date(o.createdAt!);
         return oppDate.getFullYear() === date.getFullYear() && 
                Math.floor(oppDate.getMonth() / 3) === Math.floor(date.getMonth() / 3);
       });
       acc[quarter].conversion = (quarterlyOpps.filter(o => o.status === 'closed').length / quarterlyOpps.length) * 100;
     }
     return acc;
-  }, {});
+  }, {} as Record<string, { revenue: number; count: number; conversion: number }>);
 
   const territoryData = {
     labels: Object.keys(territoryCoverage || {}),
@@ -107,14 +106,14 @@ export function AdvancedAnalytics() {
     labels: Object.keys(quarterlyPerformance || {}),
     datasets: [
       {
-        type: 'line',
+        type: 'line' as const,
         label: 'Revenue',
         data: Object.values(quarterlyPerformance || {}).map(q => q.revenue),
         borderColor: 'rgb(75, 192, 192)',
         yAxisID: 'y',
       },
       {
-        type: 'line',
+        type: 'line' as const,
         label: 'Conversion Rate (%)',
         data: Object.values(quarterlyPerformance || {}).map(q => q.conversion),
         borderColor: 'rgb(255, 99, 132)',
@@ -179,7 +178,7 @@ export function AdvancedAnalytics() {
                 maintainAspectRatio: false,
                 plugins: {
                   legend: {
-                    position: 'top',
+                    position: 'top' as const,
                   },
                   title: {
                     display: true,
@@ -209,12 +208,12 @@ export function AdvancedAnalytics() {
                 responsive: true,
                 maintainAspectRatio: false,
                 interaction: {
-                  mode: 'index',
+                  mode: 'index' as const,
                   intersect: false,
                 },
                 plugins: {
                   legend: {
-                    position: 'top',
+                    position: 'top' as const,
                   },
                   title: {
                     display: true,
@@ -223,18 +222,18 @@ export function AdvancedAnalytics() {
                 },
                 scales: {
                   y: {
-                    type: 'linear',
+                    type: 'linear' as const,
                     display: true,
-                    position: 'left',
+                    position: 'left' as const,
                     title: {
                       display: true,
                       text: 'Revenue ($)'
                     }
                   },
                   y1: {
-                    type: 'linear',
+                    type: 'linear' as const,
                     display: true,
-                    position: 'right',
+                    position: 'right' as const,
                     title: {
                       display: true,
                       text: 'Conversion Rate (%)'
