@@ -5,15 +5,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { type Customer } from "@db/schema";
 import { useToast } from "@/hooks/use-toast";
 import { UserPlus } from "lucide-react";
-import { CustomerCard } from "../components/CustomerCard";
 import { CustomerForm } from "../components/CustomerForm";
 import { CustomerHistory } from "../components/CustomerHistory";
+import { CustomerDetails } from "../components/CustomerDetails";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function Customers() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<{ id: number; name: string } | null>(null);
+  const [viewingCustomerId, setViewingCustomerId] = useState<number | null>(null);
 
   const { data: customers, isLoading } = useQuery({
     queryKey: ["customers"],
@@ -52,12 +55,21 @@ export default function Customers() {
     return (
       <div className="space-y-8 p-6">
         <div className="h-16 w-full bg-gradient-to-r from-background to-muted rounded-lg animate-pulse" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-[300px] bg-muted rounded-lg animate-pulse" />
+        <div className="space-y-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-20 bg-muted rounded-lg animate-pulse" />
           ))}
         </div>
       </div>
+    );
+  }
+
+  if (viewingCustomerId) {
+    return (
+      <CustomerDetails 
+        customerId={viewingCustomerId} 
+        onBack={() => setViewingCustomerId(null)} 
+      />
     );
   }
 
@@ -67,8 +79,8 @@ export default function Customers() {
         <div className="bg-card shadow-sm rounded-lg">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-primary">Customer Management</h1>
-              <p className="text-muted-foreground mt-1">Manage and monitor your customer relationships</p>
+              <h1 className="text-3xl font-bold tracking-tight text-primary">Customers</h1>
+              <p className="text-muted-foreground mt-1">Manage your customer relationships</p>
             </div>
             <Button 
               onClick={() => setIsOpen(true)}
@@ -82,18 +94,31 @@ export default function Customers() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="space-y-4">
         {customers?.map((customer) => (
-          <CustomerCard
+          <Card 
             key={customer.id}
-            customer={customer}
-            onEdit={() => setSelectedCustomer({ id: customer.id, name: customer.name })}
-            onDelete={() => {
-              if (window.confirm(`Are you sure you want to delete ${customer.name}?`)) {
-                deleteMutation.mutate(customer.id);
-              }
-            }}
-          />
+            className="p-4 hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => setViewingCustomerId(customer.id)}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Avatar>
+                  <AvatarFallback>
+                    {customer.name.split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="font-medium">{customer.name}</h3>
+                  <p className="text-sm text-muted-foreground">{customer.company}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div>{customer.email}</div>
+                {customer.phone && <div>• {customer.phone}</div>}
+              </div>
+            </div>
+          </Card>
         ))}
       </div>
 
