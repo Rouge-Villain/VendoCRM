@@ -5,21 +5,30 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { type Customer } from "@db/schema";
 
+interface QuickActionProps {
+  icon: React.ElementType;
+  label: string;
+  onClick: () => void;
+}
+
 interface CustomerDetailsProps {
   customerId: number;
   onBack: () => void;
 }
 
 export function CustomerDetails({ customerId, onBack }: CustomerDetailsProps) {
-  const { data: customer, isLoading } = useQuery({
+  const { data: customer, isLoading, isError, error } = useQuery({
     queryKey: ["customers", customerId],
     queryFn: async () => {
       const response = await fetch(`/api/customers/${customerId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch customer details');
+      }
       return response.json() as Promise<Customer>;
     },
   });
 
-  const QuickAction = ({ icon: Icon, label, onClick }) => (
+  const QuickAction = ({ icon: Icon, label, onClick }: QuickActionProps) => (
     <Button 
       variant="outline" 
       className="flex flex-col items-center p-3 h-auto gap-1 flex-1"
@@ -30,8 +39,53 @@ export function CustomerDetails({ customerId, onBack }: CustomerDetailsProps) {
     </Button>
   );
 
-  if (isLoading || !customer) {
-    return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Button variant="outline" onClick={onBack} className="mb-4">
+          ← Back to Customers
+        </Button>
+        <Card className="p-6">
+          <div className="flex items-start space-x-4">
+            <div className="h-16 w-16 rounded-full bg-muted animate-pulse" />
+            <div className="space-y-2 flex-1">
+              <div className="h-6 w-1/3 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-1/4 bg-muted animate-pulse rounded" />
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <Button variant="outline" onClick={onBack} className="mb-4">
+          ← Back to Customers
+        </Button>
+        <Card className="p-6">
+          <div className="text-red-500">
+            Error loading customer details: {(error as Error).message}
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!customer) {
+    return (
+      <div className="space-y-6">
+        <Button variant="outline" onClick={onBack} className="mb-4">
+          ← Back to Customers
+        </Button>
+        <Card className="p-6">
+          <div className="text-muted-foreground">
+            No customer found
+          </div>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -81,24 +135,14 @@ export function CustomerDetails({ customerId, onBack }: CustomerDetailsProps) {
             <QuickAction icon={Plus} label="Create Lead" onClick={() => {}} />
           </div>
 
-          {customer.relatedLeads?.length > 0 && (
-            <div className="mt-6">
-              <h4 className="text-sm font-medium mb-2">Related Leads</h4>
-              <div className="space-y-2">
-                {customer.relatedLeads.map((lead) => (
-                  <div 
-                    key={lead.id}
-                    className="flex items-center justify-between p-2 bg-muted rounded-lg"
-                  >
-                    <span className="text-sm">{lead.name}</span>
-                    <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">
-                      {lead.status}
-                    </span>
-                  </div>
-                ))}
+          <div className="mt-6">
+            <h4 className="text-sm font-medium mb-2">Activity History</h4>
+            <div className="space-y-2">
+              <div className="text-sm text-muted-foreground">
+                No recent activities
               </div>
             </div>
-          )}
+          </div>
         </div>
       </Card>
     </div>
