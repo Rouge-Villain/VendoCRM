@@ -36,35 +36,49 @@ export function RealTimeInteractions() {
   });
 
   useEffect(() => {
-    setConnectionStatus('connecting');
-    const websocket = new WebSocket(`ws://${window.location.hostname}:5000/ws`);
+    let websocket: WebSocket | null = null;
 
-    websocket.onopen = () => {
-      console.log("Connected to activity stream");
-      setConnectionStatus('connected');
+    const connectWebSocket = () => {
+      setConnectionStatus('connecting');
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+      console.log('Connecting to WebSocket:', wsUrl);
+      websocket = new WebSocket(wsUrl);
+
+      websocket.onopen = () => {
+        console.log("Connected to activity stream");
+        setConnectionStatus('connected');
+      };
+
+      websocket.onmessage = (event) => {
+        try {
+          const activity = JSON.parse(event.data);
+          setRealtimeActivities((prev) => [activity, ...prev].slice(0, 50));
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
+
+      websocket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        setConnectionStatus('disconnected');
+      };
+
+      websocket.onclose = () => {
+        console.log("WebSocket connection closed");
+        setConnectionStatus('disconnected');
+        // Try to reconnect after 5 seconds
+        setTimeout(connectWebSocket, 5000);
+      };
     };
 
-    websocket.onmessage = (event) => {
-      try {
-        const activity = JSON.parse(event.data);
-        setRealtimeActivities((prev) => [activity, ...prev].slice(0, 50));
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
-    };
-
-    websocket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-      setConnectionStatus('disconnected');
-    };
-
-    websocket.onclose = () => {
-      console.log("WebSocket connection closed");
-      setConnectionStatus('disconnected');
-    };
+    connectWebSocket();
 
     return () => {
-      websocket.close();
+      if (websocket) {
+        websocket.close();
+      }
     };
   }, []);
 

@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { LayoutDashboard, Users, Package, TrendingUp, BarChart, History, Wrench, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { RealTimeInteractions } from "@/components/RealTimeInteractions";
 
 interface LayoutProps {
   children: ReactNode;
@@ -97,7 +98,10 @@ export default function Layout({ children }: LayoutProps) {
         </div>
         <div className="pl-64 flex-1 min-h-screen bg-gray-50/50 overflow-x-auto">
           <main className="py-8 px-8 min-w-[1024px]">
-            {children}
+            <div className="grid grid-cols-1 gap-6">
+              {children}
+              <RealTimeInteractions />
+            </div>
           </main>
         </div>
       </div>
