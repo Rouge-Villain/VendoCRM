@@ -165,45 +165,65 @@ export function registerRoutes(app: Express) {
 
   // Activities
   app.get("/api/activities", async (req, res) => {
-    const customerId = req.query.customerId;
-    const query = customerId 
-      ? db.select().from(activities).where(eq(activities.customerId, Number(customerId)))
-      : db.select().from(activities);
+    try {
+      const customerId = req.query.customerId;
+      const query = customerId 
+        ? db.select().from(activities).where(eq(activities.customerId, Number(customerId)))
+        : db.select().from(activities);
 
-    let result = await query;
+      let result = await query;
 
-    // If no activities exist and a customerId is provided, return dummy data
-    if (result.length === 0 && customerId) {
-      const dummyActivities = [
-        {
-          id: Date.now(),
-          customerId: Number(customerId),
-          type: "call",
-          description: "Discussed new vending machine placement options",
-          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-        },
-        {
-          id: Date.now() + 1,
-          customerId: Number(customerId),
-          type: "email",
-          description: "Sent quote for new beverage machines",
-          createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-        },
-        {
-          id: Date.now() + 2,
-          customerId: Number(customerId),
-          type: "meeting",
-          description: "Site survey for machine installation",
-          createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
-        }
-      ];
+      // If no activities exist and a customerId is provided, create dummy data
+      if (result.length === 0 && customerId) {
+        const now = new Date();
+        const dummyActivities = [
+          {
+            customerId: Number(customerId),
+            type: "call",
+            description: "Discussed new vending machine placement options",
+            createdAt: new Date(now.getTime() - 24 * 60 * 60 * 1000),
+            contactMethod: "phone",
+            contactedBy: "Sales Rep",
+            outcome: "Positive",
+            nextSteps: "Send follow-up email",
+            followUpDate: new Date(now.getTime() + 24 * 60 * 60 * 1000)
+          },
+          {
+            customerId: Number(customerId),
+            type: "email",
+            description: "Sent quote for new beverage machines",
+            createdAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
+            contactMethod: "email",
+            contactedBy: "Sales Rep",
+            outcome: "Pending",
+            nextSteps: "Follow up next week",
+            followUpDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+          },
+          {
+            customerId: Number(customerId),
+            type: "meeting",
+            description: "Site survey for machine installation",
+            createdAt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+            contactMethod: "in-person",
+            contactedBy: "Technical Team",
+            outcome: "Completed",
+            nextSteps: "Schedule installation",
+            followUpDate: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
+          }
+        ];
 
-      // Insert dummy activities
-      await db.insert(activities).values(dummyActivities);
-      result = dummyActivities;
+        // Insert dummy activities
+        await db.insert(activities).values(dummyActivities);
+
+        // Fetch the inserted activities
+        result = await query;
+      }
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error handling activities:', error);
+      res.status(500).json({ error: "Failed to handle activities" });
     }
-
-    res.json(result);
   });
 
   app.post("/api/activities", async (req, res) => {
