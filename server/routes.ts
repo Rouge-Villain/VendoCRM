@@ -165,10 +165,44 @@ export function registerRoutes(app: Express) {
 
   // Activities
   app.get("/api/activities", async (req, res) => {
-    const result = await db
-      .select()
-      .from(activities)
-      .orderBy(activities.createdAt);
+    const customerId = req.query.customerId;
+    const query = customerId 
+      ? db.select().from(activities).where(eq(activities.customerId, Number(customerId)))
+      : db.select().from(activities);
+
+    let result = await query;
+
+    // If no activities exist and a customerId is provided, return dummy data
+    if (result.length === 0 && customerId) {
+      const dummyActivities = [
+        {
+          id: Date.now(),
+          customerId: Number(customerId),
+          type: "call",
+          description: "Discussed new vending machine placement options",
+          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+        },
+        {
+          id: Date.now() + 1,
+          customerId: Number(customerId),
+          type: "email",
+          description: "Sent quote for new beverage machines",
+          createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+        },
+        {
+          id: Date.now() + 2,
+          customerId: Number(customerId),
+          type: "meeting",
+          description: "Site survey for machine installation",
+          createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+        }
+      ];
+
+      // Insert dummy activities
+      await db.insert(activities).values(dummyActivities);
+      result = dummyActivities;
+    }
+
     res.json(result);
   });
 

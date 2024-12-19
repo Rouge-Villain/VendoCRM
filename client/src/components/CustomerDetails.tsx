@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { type Customer } from "@db/schema";
+import { format } from "date-fns";
 
 interface QuickActionProps {
   icon: React.ElementType;
@@ -27,6 +28,44 @@ export function CustomerDetails({ customerId, onBack }: CustomerDetailsProps) {
       return response.json() as Promise<Customer>;
     },
   });
+
+  const { data: activities } = useQuery({
+    queryKey: ["activities", customerId],
+    queryFn: async () => {
+      const response = await fetch(`/api/activities?customerId=${customerId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch activities');
+      }
+      return response.json();
+    },
+  });
+
+  const handleCall = () => {
+    if (customer?.phone) {
+      window.location.href = `tel:${customer.phone}`;
+    }
+  };
+
+  const handleEmail = () => {
+    if (customer?.email) {
+      window.location.href = `mailto:${customer.email}`;
+    }
+  };
+
+  const handleAddNote = () => {
+    // This would typically open a modal to add a note
+    alert("Add note functionality coming soon!");
+  };
+
+  const handleSchedule = () => {
+    // This would typically open a calendar modal
+    alert("Schedule meeting functionality coming soon!");
+  };
+
+  const handleCreateLead = () => {
+    // This would typically navigate to the new lead form
+    alert("Create lead functionality coming soon!");
+  };
 
   const QuickAction = ({ icon: Icon, label, onClick }: QuickActionProps) => (
     <Button 
@@ -128,19 +167,36 @@ export function CustomerDetails({ customerId, onBack }: CustomerDetailsProps) {
           </div>
 
           <div className="grid grid-cols-5 gap-2">
-            <QuickAction icon={Phone} label="Call" onClick={() => {}} />
-            <QuickAction icon={Mail} label="Email" onClick={() => {}} />
-            <QuickAction icon={FileText} label="Add Note" onClick={() => {}} />
-            <QuickAction icon={Calendar} label="Schedule" onClick={() => {}} />
-            <QuickAction icon={Plus} label="Create Lead" onClick={() => {}} />
+            <QuickAction icon={Phone} label="Call" onClick={handleCall} />
+            <QuickAction icon={Mail} label="Email" onClick={handleEmail} />
+            <QuickAction icon={FileText} label="Add Note" onClick={handleAddNote} />
+            <QuickAction icon={Calendar} label="Schedule" onClick={handleSchedule} />
+            <QuickAction icon={Plus} label="Create Lead" onClick={handleCreateLead} />
           </div>
 
           <div className="mt-6">
-            <h4 className="text-sm font-medium mb-2">Activity History</h4>
-            <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">
-                No recent activities
-              </div>
+            <h4 className="text-sm font-medium mb-4">Activity History</h4>
+            <div className="space-y-3">
+              {activities && activities.length > 0 ? (
+                activities.map((activity: any) => (
+                  <div 
+                    key={activity.id}
+                    className="flex items-start justify-between p-3 bg-muted/50 rounded-lg"
+                  >
+                    <div>
+                      <p className="text-sm font-medium capitalize">{activity.type}</p>
+                      <p className="text-sm text-muted-foreground">{activity.description}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(activity.createdAt), 'MMM d, yyyy')}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-muted-foreground">
+                  No recent activities
+                </div>
+              )}
             </div>
           </div>
         </div>
