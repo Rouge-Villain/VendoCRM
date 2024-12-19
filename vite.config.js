@@ -9,7 +9,14 @@ const postcssConfigPath = resolve(__dirname, 'client/postcss.config.cjs');
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      include: "**/*.jsx",
+      babel: {
+        plugins: [
+          ["@babel/plugin-transform-react-jsx"]
+        ]
+      }
+    }),
     errorModal(),
   ],
   root: 'client',
@@ -20,7 +27,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'client/src')
-    }
+    },
+    extensions: ['.js', '.jsx', '.json']
   },
   server: {
     host: '0.0.0.0',
