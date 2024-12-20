@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -34,6 +34,15 @@ interface Activity {
 
 type TimeFrame = 'daily' | 'weekly' | 'monthly';
 
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+
+const getDayLabel = (index: number): string => {
+  if (index < 0 || index >= DAYS.length) {
+    return DAYS[0];
+  }
+  return DAYS[index];
+};
+
 export function ActivityHeatMap() {
   const [timeFrame, setTimeFrame] = useState<TimeFrame>('daily');
 
@@ -46,38 +55,60 @@ export function ActivityHeatMap() {
     },
   });
 
-  const processData = (rawData: Activity[] | undefined, frame: TimeFrame) => {
+  interface ChartData {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+      borderColor: string;
+      backgroundColor: string;
+      fill: boolean;
+      tension: number;
+    }>;
+  }
+
+  const processData = (rawData: Activity[] | undefined, frame: TimeFrame): ChartData => {
     if (!rawData) return { labels: [], datasets: [] };
 
-    const activityCounts: Record<string, number> = {};
-    const now = new Date();
+    const activityCounts = new Map<string, number>();
     const timeLabels: string[] = [];
 
     // Generate time labels based on selected frame
-    for (let i = 0; i < (frame === 'daily' ? 24 : frame === 'weekly' ? 7 : 30); i++) {
-      const label = frame === 'daily' 
+    const maxCount = frame === 'daily' ? 24 : frame === 'weekly' ? 7 : 30;
+    for (let i = 0; i < maxCount; i++) {
+      const label = frame === 'daily'
         ? `${i}:00`
         : frame === 'weekly'
-          ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i]
+          ? getDayLabel(i)
           : `Day ${i + 1}`;
+
       timeLabels.push(label);
-      activityCounts[label] = 0;
+      activityCounts.set(label, 0);
     }
 
     // Count activities
     rawData.forEach(activity => {
+      if (!activity.createdAt) return;
+      
       const date = new Date(activity.createdAt);
-      let label: string;
+      const getLabel = (): string => {
+        const hour = date.getHours();
+        const dayIndex = date.getDay();
+        const dayOfMonth = date.getDate();
 
-      if (frame === 'daily') {
-        label = `${date.getHours()}:00`;
-      } else if (frame === 'weekly') {
-        label = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
-      } else {
-        label = `Day ${date.getDate()}`;
+        if (frame === 'daily') {
+          return `${hour}:00`;
+        }
+        if (frame === 'weekly') {
+          return getDayLabel(dayIndex);
+        }
+        return `Day ${dayOfMonth}`;
+      };
+
+      const label = getLabel();
+      if (activityCounts.has(label)) {
+        activityCounts.set(label, (activityCounts.get(label) ?? 0) + 1);
       }
-
-      activityCounts[label] = (activityCounts[label] || 0) + 1;
     });
 
     return {
@@ -85,7 +116,7 @@ export function ActivityHeatMap() {
       datasets: [
         {
           label: 'Activity Count',
-          data: timeLabels.map(label => activityCounts[label]),
+          data: timeLabels.map(label => activityCounts.get(label) ?? 0),
           borderColor: 'rgb(75, 192, 192)',
           backgroundColor: 'rgba(75, 192, 192, 0.5)',
           fill: true,

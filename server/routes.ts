@@ -313,7 +313,7 @@ export function registerRoutes(app: Express) {
       return;
     }
   });
-  app.patch("/api/maintenance/:id/status", async (req, res): Promise<void> => {
+  app.patch("/api/maintenance/:id/status", async (req, res) => {
     try {
       const { status } = req.body;
       const id = parseInt(req.params.id);
@@ -344,7 +344,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Loyalty Points Routes
-  app.get("/api/customers/:id/loyalty", async (req, res): Promise<void> => {
+  app.get("/api/customers/:id/loyalty", async (req, res) => {
     try {
       const customerId = parseInt(req.params.id);
       const customer = await db
@@ -418,7 +418,7 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  app.post("/api/customers/:id/loyalty/redeem", async (req, res): Promise<void> => {
+  app.post("/api/customers/:id/loyalty/redeem", async (req, res) => {
     try {
       const customerId = parseInt(req.params.id);
       const { points, description } = req.body;

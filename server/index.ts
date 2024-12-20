@@ -87,7 +87,7 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     startActivityMonitoring();
 
     // Setup development or production mode
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env['NODE_ENV'] === 'development') {
       log('Setting up Vite development server...', 'debug');
       await setupVite(app, server);
     } else {
@@ -96,7 +96,7 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     }
 
     // Start the server
-    const PORT = Number(process.env.PORT) || 3001;
+    const PORT = Number(process.env['PORT']) || 3001;
     let currentPort = PORT;
     const MAX_RETRIES = 10;
 
@@ -117,7 +117,7 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
           });
           
           // If we get here, the server started successfully
-          process.env.PORT = String(currentPort);
+          process.env['PORT'] = String(currentPort);
           log(`Server started successfully on port ${currentPort}`, 'info');
           return true;
         } catch (error) {
