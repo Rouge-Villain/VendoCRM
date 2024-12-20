@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { 
   Page, 
@@ -6,8 +5,7 @@ import {
   View, 
   Document, 
   StyleSheet,
-  BlobProvider,
-  type Font
+  BlobProvider
 } from "@react-pdf/renderer";
 import { format, addDays } from "date-fns";
 import type { ReactElement } from 'react';

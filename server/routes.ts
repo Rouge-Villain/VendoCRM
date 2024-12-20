@@ -149,7 +149,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Opportunities
-  app.get("/api/opportunities", async (req, res) => {
+  app.get("/api/opportunities", async (_req, res) => {
     const result = await db.select().from(opportunities);
     res.json(result);
   });
@@ -332,11 +332,11 @@ export function registerRoutes(app: Express) {
         return res.status(404).json({ error: "Maintenance record not found" });
       }
 
-      res.json(result[0]);
+      return res.json(result[0]);
     } catch (error: unknown) {
       console.error("Status update error:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      res.status(400).json({
+      return res.status(400).json({
         error: "Failed to update status",
         details: errorMessage
       });
@@ -366,13 +366,13 @@ export function registerRoutes(app: Express) {
         .where(eq(loyaltyRewards.customerId, customerId))
         .orderBy(loyaltyRewards.transactionDate);
 
-      res.json({
+      return res.json({
         loyalty: customer[0],
         history: rewardHistory
       });
     } catch (error) {
       console.error('Error fetching loyalty data:', error);
-      res.status(500).json({ error: "Failed to fetch loyalty data" });
+      return res.status(500).json({ error: "Failed to fetch loyalty data" });
     }
   });
 
@@ -462,13 +462,13 @@ export function registerRoutes(app: Express) {
         description,
       }).returning();
 
-      res.json({
+      return res.json({
         customer: updatedCustomer[0],
         reward: rewardRecord[0]
       });
     } catch (error) {
       console.error('Error redeeming loyalty points:', error);
-      res.status(500).json({ error: "Failed to redeem loyalty points" });
+      return res.status(500).json({ error: "Failed to redeem loyalty points" });
     }
   });
 }

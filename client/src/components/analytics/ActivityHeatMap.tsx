@@ -35,12 +35,12 @@ interface Activity {
 type TimeFrame = 'daily' | 'weekly' | 'monthly';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+type DayIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 const getDayLabel = (index: number): string => {
-  if (index < 0 || index >= DAYS.length) {
-    return DAYS[0];
-  }
-  return DAYS[index];
+  // Ensure index is within bounds and convert to valid day index
+  const safeIndex = ((index % 7) + 7) % 7 as DayIndex;
+  return DAYS[safeIndex];
 };
 
 export function ActivityHeatMap() {

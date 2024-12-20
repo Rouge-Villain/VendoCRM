@@ -75,8 +75,4 @@ interface SlotProps {
   isActive: boolean;
 }
 
-type InputOTPContext = {
-  slots: Array<SlotProps | undefined>;
-};
-
 export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator }

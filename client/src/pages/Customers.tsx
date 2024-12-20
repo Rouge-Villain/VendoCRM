@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { type Customer } from "@db/schema";
-import { useToast } from "@/hooks/use-toast";
 import { UserPlus } from "lucide-react";
 import { CustomerForm } from "../components/CustomerForm";
 import { CustomerHistory } from "../components/CustomerHistory";
@@ -12,7 +11,6 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function Customers() {
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<{ id: number; name: string } | null>(null);
