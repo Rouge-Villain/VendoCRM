@@ -50,6 +50,18 @@ args = "Build client"
 task = "workflow.run"
 args = "Type Check"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Build and Start"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Dev Server"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start server"
+
 [[workflows.workflow]]
 name = "Server"
 author = "agent"
@@ -107,3 +119,48 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd client && npx tsc --noEmit"
+
+[[workflows.workflow]]
+name = "Build and Start"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run build && npm run dev"
+waitForPort = 3001
+
+[[workflows.workflow]]
+name = "Dev Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run build && NODE_ENV=development npm run dev"
+waitForPort = 3001
+
+[[workflows.workflow]]
+name = "Start server"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "NODE_ENV=development npm run dev"
+waitForPort = 3001

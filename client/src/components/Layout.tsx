@@ -1,4 +1,5 @@
-import { ReactNode, useEffect, useState } from "react";
+import { type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { LayoutDashboard, Users, Package, TrendingUp, BarChart, History, Wrench, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
