@@ -34,29 +34,19 @@ name = "Project"
 mode = "parallel"
 author = "agent"
 
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
 [[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Server"
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run build && npm run dev"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "Start application"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Build client"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Type Check"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Build and Start"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Dev Server"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
@@ -163,4 +153,19 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "NODE_ENV=development npm run dev"
+waitForPort = 3001
+
+[[workflows.workflow]]
+name = "Build and Dev Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
 waitForPort = 3001

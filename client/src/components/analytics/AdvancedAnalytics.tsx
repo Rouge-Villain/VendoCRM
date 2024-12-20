@@ -228,37 +228,53 @@ export function AdvancedAnalytics(): JSX.Element {
       
       // Show loading state
       loadingToast = document.createElement('div');
-      loadingToast.className = 'fixed top-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded shadow';
+      loadingToast.className = 'fixed top-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded shadow z-50';
       loadingToast.textContent = 'Generating PDF...';
       document.body.appendChild(loadingToast);
       
-      // Capture territory chart
-      const territoryChartElement = document.querySelector('.territory-chart');
-      if (!territoryChartElement || !(territoryChartElement instanceof HTMLElement)) {
-        throw new Error('Territory chart element not found');
-      }
-      
-      const territoryChartImage = await html2canvas(territoryChartElement, {
-        scale: 2,
-        logging: false,
-        useCORS: true
-      });
-      const territoryChartDataUrl = territoryChartImage.toDataURL('image/png');
+      // Helper function to capture chart with improved timing
+      const captureChart = async (selector: string, name: string): Promise<string> => {
+        const element = document.querySelector(selector);
+        if (!element || !(element instanceof HTMLElement)) {
+          throw new Error(`${name} chart element not found`);
+        }
+        
+        // Give charts more time to fully render and stabilize
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Ensure the chart is visible in the viewport
+        element.scrollIntoView({ behavior: 'auto', block: 'center' });
+        
+        // Wait for any potential scroll animations
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const canvas = await html2canvas(element, {
+          scale: 2.5, // Higher quality for better resolution
+          logging: false,
+          useCORS: true,
+          backgroundColor: '#ffffff', // Ensure white background
+          windowWidth: element.scrollWidth,
+          windowHeight: element.scrollHeight,
+          onclone: (clonedDoc) => {
+            // Ensure the cloned element has proper dimensions
+            const clonedElement = clonedDoc.querySelector(selector);
+            if (clonedElement instanceof HTMLElement) {
+              clonedElement.style.width = '100%';
+              clonedElement.style.height = '400px';
+            }
+          }
+        });
+        
+        return canvas.toDataURL('image/png');
+      };
 
-      // Capture performance chart
-      const performanceChartElement = document.querySelector('.performance-chart');
-      if (!performanceChartElement || !(performanceChartElement instanceof HTMLElement)) {
-        throw new Error('Performance chart element not found');
-      }
-      
-      const performanceChartImage = await html2canvas(performanceChartElement, {
-        scale: 2,
-        logging: false,
-        useCORS: true
-      });
-      const performanceChartDataUrl = performanceChartImage.toDataURL('image/png');
+      // Capture both charts
+      const [territoryChartDataUrl, performanceChartDataUrl] = await Promise.all([
+        captureChart('.territory-chart', 'Territory'),
+        captureChart('.performance-chart', 'Performance')
+      ]);
 
-      // Create and download PDF
+      // Create and download PDF with enhanced styling
       const content = `
         <!DOCTYPE html>
         <html>
@@ -266,43 +282,146 @@ export function AdvancedAnalytics(): JSX.Element {
             <meta charset="UTF-8">
             <title>Territory Performance Analysis</title>
             <style>
-              body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
-              .chart-container { margin: 20px 0; page-break-inside: avoid; }
-              h1 { color: #1a56db; font-size: 24px; margin-bottom: 20px; }
-              h2 { color: #1a56db; font-size: 20px; margin-top: 30px; margin-bottom: 15px; }
-              h3 { color: #374151; font-size: 16px; margin-top: 20px; }
-              .territory-data { margin: 20px 0; background: #f9fafb; padding: 15px; border-radius: 8px; }
-              .chart-image { width: 100%; max-width: 800px; margin: 20px auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-              .data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-              .metric { font-size: 14px; color: #4b5563; }
+              body {
+                font-family: Arial, sans-serif;
+                padding: 40px;
+                line-height: 1.6;
+                max-width: 1200px;
+                margin: 0 auto;
+                background-color: #ffffff;
+              }
+              .chart-container {
+                margin: 30px 0;
+                page-break-inside: avoid;
+                text-align: center;
+                background: #ffffff;
+                padding: 20px;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+              }
+              h1 {
+                color: #1a56db;
+                font-size: 28px;
+                margin-bottom: 30px;
+                text-align: center;
+                border-bottom: 2px solid #e5e7eb;
+                padding-bottom: 10px;
+              }
+              h2 {
+                color: #1a56db;
+                font-size: 22px;
+                margin-top: 40px;
+                margin-bottom: 20px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #e5e7eb;
+              }
+              h3 {
+                color: #374151;
+                font-size: 18px;
+                margin-top: 25px;
+                font-weight: 600;
+              }
+              .territory-data {
+                margin: 25px 0;
+                background: #f9fafb;
+                padding: 20px;
+                border-radius: 8px;
+                border: 1px solid #e5e7eb;
+              }
+              .chart-image {
+                width: 100%;
+                max-width: 1000px;
+                margin: 20px auto;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                border-radius: 4px;
+              }
+              .data-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+                padding: 10px;
+              }
+              .metric {
+                font-size: 14px;
+                color: #4b5563;
+                padding: 8px;
+                background: #ffffff;
+                border-radius: 4px;
+                border: 1px solid #e5e7eb;
+              }
+              .footer {
+                margin-top: 40px;
+                padding-top: 20px;
+                border-top: 1px solid #e5e7eb;
+                font-size: 12px;
+                color: #6b7280;
+                text-align: center;
+              }
+              .metadata {
+                font-size: 12px;
+                color: #6b7280;
+                text-align: right;
+                margin-bottom: 20px;
+              }
+              @media print {
+                .chart-image { max-width: 100%; margin: 15px 0; }
+                body { padding: 20px; margin: 0; }
+                .territory-data { break-inside: avoid; }
+                .chart-container { break-inside: avoid; }
+              }
             </style>
           </head>
           <body>
+            <div class="metadata">
+              Report generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
+            </div>
+            
             <h1>Territory Performance Analysis</h1>
             
             <h2>Territory Distribution Analysis</h2>
+            <p>Analysis of customer and machine distribution across different service territories</p>
             <div class="chart-container">
               <img src="${territoryChartDataUrl}" alt="Territory Distribution Chart" class="chart-image" />
+              <p style="font-size: 14px; color: #6b7280; margin-top: 10px;">
+                Chart shows the distribution of customers and machines across different territories
+              </p>
             </div>
             
             <div class="territory-data">
               ${Object.entries(territoryCoverage).map(([territory, data]) => `
                 <h3>${territory}</h3>
                 <div class="data-grid">
-                  <div class="metric">Customers: ${data.customers}</div>
-                  <div class="metric">Machines: ${data.machines}</div>
-                  <div class="metric">Revenue: $${data.revenue.toLocaleString()}</div>
+                  <div class="metric">
+                    <strong>Customers:</strong><br/>
+                    ${data.customers}
+                  </div>
+                  <div class="metric">
+                    <strong>Machines:</strong><br/>
+                    ${data.machines}
+                  </div>
+                  <div class="metric">
+                    <strong>Revenue:</strong><br/>
+                    $${data.revenue.toLocaleString()}
+                  </div>
                 </div>
               `).join('')}
             </div>
 
             <h2>Quarterly Performance Metrics</h2>
+            <p>Quarterly analysis of revenue and conversion rate trends</p>
             <div class="chart-container">
               <img src="${performanceChartDataUrl}" alt="Quarterly Performance Chart" class="chart-image" />
+              <p style="font-size: 14px; color: #6b7280; margin-top: 10px;">
+                Chart displays revenue trends and conversion rates across quarters
+              </p>
             </div>
             
-            <div style="margin-top: 30px; font-size: 12px; color: #6b7280; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 20px;">
-              Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
+            <div class="footer">
+              <p><strong>Report Summary</strong></p>
+              <p>This report provides a comprehensive analysis of territory performance and quarterly metrics.
+                 It includes customer distribution, machine deployment, revenue analysis, and conversion rate trends.</p>
+              <p>Generated by Vending CRM Analytics Dashboard on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
             </div>
           </body>
         </html>
@@ -326,7 +445,7 @@ export function AdvancedAnalytics(): JSX.Element {
       console.error('Error generating PDF:', error);
       // Show error message to user
       const errorToast = document.createElement('div');
-      errorToast.className = 'fixed top-4 right-4 bg-destructive text-destructive-foreground px-4 py-2 rounded shadow';
+      errorToast.className = 'fixed top-4 right-4 bg-destructive text-destructive-foreground px-4 py-2 rounded shadow z-50';
       errorToast.textContent = 'Error generating PDF. Please try again.';
       document.body.appendChild(errorToast);
       setTimeout(() => document.body.removeChild(errorToast), 3000);
