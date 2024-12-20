@@ -1,6 +1,17 @@
 import { type Customer, type Opportunity } from "@db/schema";
 
-export function exportToCSV(data: any[], filename: string) {
+interface TerritoryAnalytics extends RowData {
+  territory: string;
+  customerCount: number;
+  machineCount: number;
+  totalRevenue: number;
+}
+
+interface RowData extends Record<string, unknown> {
+  [key: string]: string | number | boolean | null | undefined | Array<unknown> | Record<string, unknown>;
+}
+
+export function exportToCSV(data: RowData[], filename: string): void {
   if (!data.length) return;
   
   const headers = Object.keys(data[0]);
@@ -14,7 +25,7 @@ export function exportToCSV(data: any[], filename: string) {
         if (cell === null || cell === undefined) return '';
         if (typeof cell === 'object') return `"${JSON.stringify(cell)}"`;
         if (typeof cell === 'string' && cell.includes(',')) return `"${cell}"`;
-        return cell;
+        return String(cell);
       }).join(',')
     )
   ].join('\n');
@@ -28,8 +39,8 @@ export function exportToCSV(data: any[], filename: string) {
   document.body.removeChild(link);
 }
 
-export function prepareAnalyticsData(customers: Customer[], opportunities: Opportunity[]) {
-  const territoryData = customers.reduce((acc, customer) => {
+export function prepareAnalyticsData(customers: Customer[], opportunities: Opportunity[]): TerritoryAnalytics[] {
+  const territoryData = customers.reduce<Record<string, TerritoryAnalytics>>((acc, customer) => {
     const territory = customer.serviceTerritory || 'Unassigned';
     if (!acc[territory]) {
       acc[territory] = {
@@ -41,17 +52,17 @@ export function prepareAnalyticsData(customers: Customer[], opportunities: Oppor
     }
     
     acc[territory].customerCount++;
-    acc[territory].machineCount += (Array.isArray(customer.machineTypes) ? (customer.machineTypes as any[]).length : 0);
+    acc[territory].machineCount += (Array.isArray(customer.machineTypes) ? customer.machineTypes.length : 0);
     
     // Calculate revenue for this customer
     const customerRevenue = opportunities
       .filter(opp => opp.customerId === customer.id)
-      .reduce((sum, opp) => sum + Number(opp.value), 0);
+      .reduce((sum, opp) => sum + Number(opp.value || 0), 0);
     
     acc[territory].totalRevenue += customerRevenue;
     
     return acc;
-  }, {} as Record<string, any>);
+  }, {});
 
   return Object.values(territoryData);
 }

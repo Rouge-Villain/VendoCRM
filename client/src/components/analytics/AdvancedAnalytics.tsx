@@ -33,7 +33,7 @@ ChartJS.register(
   ArcElement
 );
 
-export function AdvancedAnalytics() {
+export function AdvancedAnalytics(): JSX.Element {
   const { data: customers, isError: isCustomersError, error: customersError } = useQuery({
     queryKey: ["customers"],
     queryFn: async () => {
@@ -41,7 +41,8 @@ export function AdvancedAnalytics() {
       if (!response.ok) {
         throw new Error(`Error fetching customers: ${response.statusText}`);
       }
-      return response.json() as Promise<Customer[]>;
+      const data = await response.json();
+    return data as Customer[];
     },
   });
 
@@ -52,7 +53,8 @@ export function AdvancedAnalytics() {
       if (!response.ok) {
         throw new Error(`Error fetching opportunities: ${response.statusText}`);
       }
-      return response.json() as Promise<Opportunity[]>;
+      const data = await response.json();
+    return data as Opportunity[];
     },
   });
 
