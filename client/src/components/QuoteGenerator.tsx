@@ -1,15 +1,26 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
+import { 
+  Page, 
+  Text, 
+  View, 
+  Document, 
+  StyleSheet,
+  BlobProvider,
+  type Font
+} from "@react-pdf/renderer";
 import { format, addDays } from "date-fns";
-import dynamic from 'next/dynamic';
-
-const PDFDownloadLink = dynamic(() => import('@react-pdf/renderer').then(mod => mod.PDFDownloadLink), {
-  ssr: false
-});
+import type { ReactElement } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { type Opportunity, type Customer, type Product } from "@db/schema";
+
+interface BlobProviderRenderProps {
+  blob: Blob | null;
+  url: string | null;
+  loading: boolean;
+  error: Error | null;
+}
 
 const styles = StyleSheet.create({
   page: {
@@ -134,7 +145,7 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
     },
   });
 
-  const QuoteDocument = () => (
+  const QuoteDocument = (): ReactElement => (
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.companyInfo}>
@@ -233,22 +244,34 @@ export function QuoteGenerator({ opportunity, open, onOpenChange }: QuoteGenerat
           <DialogDescription>Generate a detailed quote for this opportunity</DialogDescription>
         </DialogHeader>
         <div className="p-4">
-          <PDFDownloadLink
-            document={<QuoteDocument />}
-            fileName={`quote-${opportunity.id}.pdf`}
-            className="w-full"
-            style={{ width: '100%', textDecoration: 'none' }}
-          >
-            {({ loading }: { loading: boolean }) => {
-              return (
-                <Button asChild className="w-full" disabled={loading}>
-                  <div className="w-full text-center">
-                    {loading ? 'Generating PDF...' : 'Download Quote PDF'}
-                  </div>
-                </Button>
-              );
-            }}
-          </PDFDownloadLink>
+          <BlobProvider document={<QuoteDocument />}>
+              {({ loading, url, error }: BlobProviderRenderProps) => {
+                if (error) {
+                  return (
+                    <div className="text-destructive text-sm text-center p-2">
+                      Failed to generate PDF. Please try again.
+                    </div>
+                  );
+                }
+
+                return (
+                  <Button
+                    asChild
+                    className="w-full"
+                    disabled={loading || !url}
+                  >
+                    <a
+                      href={url || '#'}
+                      download={`quote-${opportunity.id}.pdf`}
+                      className="w-full text-center"
+                      style={{ textDecoration: 'none' }}
+                    >
+                      {loading ? 'Generating PDF...' : 'Download Quote PDF'}
+                    </a>
+                  </Button>
+                );
+              }}
+            </BlobProvider>
           <div className="mt-4 p-4 border rounded-lg bg-muted">
             <p className="text-center text-sm text-muted-foreground">
               Click the button above to download the quote as a PDF
