@@ -73,10 +73,12 @@ export default function Layout({ children }: LayoutProps) {
               </SheetTrigger>
               <SheetContent 
                 side="left" 
-                className="w-64 fixed inset-y-0 left-0 z-[70] bg-white shadow-xl border-r touch-none"
+                className="w-64 fixed inset-y-0 left-0 z-[70] bg-white shadow-xl border-r touch-none select-none"
                 onOpenAutoFocus={(e) => e.preventDefault()}
                 onInteractOutside={(e) => e.preventDefault()}
                 onPointerDownOutside={(e) => e.preventDefault()}
+                onTouchStart={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
               >
                 <div className="flex h-16 items-center px-4 border-b">
                   <img src="/AVS.png" alt="AVS Companies" className="h-8 w-auto" />
@@ -86,21 +88,36 @@ export default function Layout({ children }: LayoutProps) {
                 </div>
               </SheetContent>
               <div 
-                className="fixed inset-0 z-[65] bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 touch-none"
+                className="fixed inset-0 z-[65] bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 touch-none select-none"
                 data-state="open"
                 style={{ 
-                  pointerEvents: 'none',
+                  pointerEvents: 'auto',
                   touchAction: 'none'
                 }}
-                onClick={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.querySelector('[data-state="open"]')?.setAttribute('data-state', 'closed');
+                }}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onTouchMove={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
               />
             </Sheet>
           </div>
         </div>
-        <main 
-          className="relative min-h-screen bg-gray-50"
-        >
-          <div className="h-full">
+        <main className="relative min-h-screen bg-gray-50">
+          <div 
+            className={`h-full transition-all duration-200`}
+            style={{
+              pointerEvents: 'auto',
+              touchAction: document.querySelector('[data-state="open"]') ? 'none' : 'auto',
+            }}
+          >
             {children}
           </div>
         </main>

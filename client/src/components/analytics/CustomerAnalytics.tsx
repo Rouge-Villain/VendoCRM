@@ -10,10 +10,15 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  ChartData,
+  ChartOptions
 } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type Customer } from "@db/schema";
+
+type MachineDistribution = Record<string, number>;
+type AcquisitionTrends = Record<string, number>;
 
 ChartJS.register(
   CategoryScale,
@@ -56,7 +61,7 @@ export function CustomerAnalytics() {
     return acc;
   }, {} as Record<string, number>);
 
-  const acquisitionChartData = {
+  const acquisitionChartData: ChartData<'line'> = {
     labels: Object.keys(acquisitionTrends || {}),
     datasets: [
       {
@@ -68,7 +73,7 @@ export function CustomerAnalytics() {
     ],
   };
 
-  const machineChartData = {
+  const machineChartData: ChartData<'pie'> = {
     labels: Object.keys(machineDistribution || {}),
     datasets: [
       {
@@ -102,7 +107,7 @@ export function CustomerAnalytics() {
                     position: 'top' as const,
                   },
                 },
-              }}
+              } as ChartOptions<'line'>}
             />
           </div>
         </CardContent>
@@ -124,7 +129,7 @@ export function CustomerAnalytics() {
                     position: 'right' as const,
                   },
                 },
-              }}
+              } as ChartOptions<'pie'>}
             />
           </div>
         </CardContent>

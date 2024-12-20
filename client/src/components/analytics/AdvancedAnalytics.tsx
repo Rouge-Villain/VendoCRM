@@ -1,5 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { exportToCSV, prepareAnalyticsData } from '@/lib/exportData';
+import type {
+  ChartData,
+  ChartOptions,
+} from 'chart.js';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -52,7 +56,13 @@ export function AdvancedAnalytics() {
   });
 
   // Calculate service territory coverage
-  const territoryCoverage = customers?.reduce((acc, customer) => {
+  interface TerritoryCoverage {
+  customers: number;
+  machines: number;
+  revenue: number;
+}
+
+const territoryCoverage = customers?.reduce((acc, customer) => {
     if (customer.serviceTerritory) {
       acc[customer.serviceTerritory] = {
         customers: (acc[customer.serviceTerritory]?.customers || 0) + 1,
@@ -63,9 +73,23 @@ export function AdvancedAnalytics() {
       };
     }
     return acc;
-  }, {} as Record<string, { customers: number; machines: number; revenue: number }>);
+  }, {} as Record<string, TerritoryCoverage>);
 
   // Calculate sales performance by quarter
+  interface QuarterlyPerformance {
+    revenue: number;
+    count: number;
+    conversion: number;
+  }
+
+  const calculateQuarterlyOpportunities = (opportunities: Opportunity[], date: Date): Opportunity[] => {
+    return opportunities.filter(o => {
+      const oppDate = new Date(o.createdAt!);
+      return oppDate.getFullYear() === date.getFullYear() && 
+             Math.floor(oppDate.getMonth() / 3) === Math.floor(date.getMonth() / 3);
+    });
+  };
+
   const quarterlyPerformance = opportunities?.reduce((acc, opp) => {
     if (opp.createdAt) {
       const date = new Date(opp.createdAt);
@@ -76,15 +100,11 @@ export function AdvancedAnalytics() {
         conversion: acc[quarter]?.conversion || 0
       };
       // Calculate conversion rate
-      const quarterlyOpps = opportunities.filter(o => {
-        const oppDate = new Date(o.createdAt!);
-        return oppDate.getFullYear() === date.getFullYear() && 
-               Math.floor(oppDate.getMonth() / 3) === Math.floor(date.getMonth() / 3);
-      });
+      const quarterlyOpps = calculateQuarterlyOpportunities(opportunities, date);
       acc[quarter].conversion = (quarterlyOpps.filter(o => o.status === 'closed').length / quarterlyOpps.length) * 100;
     }
     return acc;
-  }, {} as Record<string, { revenue: number; count: number; conversion: number }>);
+  }, {} as Record<string, QuarterlyPerformance>);
 
   const territoryData = {
     labels: Object.keys(territoryCoverage || {}),
@@ -102,24 +122,32 @@ export function AdvancedAnalytics() {
     ],
   };
 
-  const performanceData = {
+  type ChartDataset = {
+    type: 'line';
+    label: string;
+    data: number[];
+    borderColor: string;
+    yAxisID: string;
+  };
+
+  const performanceData: ChartData<'line'> = {
     labels: Object.keys(quarterlyPerformance || {}),
     datasets: [
       {
-        type: 'line' as const,
+        type: 'line',
         label: 'Revenue',
         data: Object.values(quarterlyPerformance || {}).map(q => q.revenue),
         borderColor: 'rgb(75, 192, 192)',
         yAxisID: 'y',
       },
       {
-        type: 'line' as const,
+        type: 'line',
         label: 'Conversion Rate (%)',
         data: Object.values(quarterlyPerformance || {}).map(q => q.conversion),
         borderColor: 'rgb(255, 99, 132)',
         yAxisID: 'y1',
       },
-    ],
+    ] as ChartDataset[],
   };
 
   if (isCustomersError || isOpportunitiesError) {
@@ -190,7 +218,7 @@ export function AdvancedAnalytics() {
                     beginAtZero: true,
                   },
                 },
-              }}
+              } as ChartOptions<'bar'>}
             />
           </div>
         </CardContent>
@@ -243,7 +271,7 @@ export function AdvancedAnalytics() {
                     },
                   },
                 },
-              }}
+              } as ChartOptions<'line'>}
             />
           </div>
         </CardContent>
