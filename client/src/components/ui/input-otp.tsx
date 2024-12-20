@@ -69,10 +69,12 @@ const InputOTPSeparator = React.forwardRef<
 ))
 InputOTPSeparator.displayName = "InputOTPSeparator"
 
-interface SlotProps {
+// Used internally by InputOTPSlot
+interface SlotProps extends React.HTMLAttributes<HTMLDivElement> {
   char: string;
   hasFakeCaret: boolean;
   isActive: boolean;
 }
 
 export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator }
+export type { SlotProps }
