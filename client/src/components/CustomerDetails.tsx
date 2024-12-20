@@ -1,4 +1,4 @@
-import { Phone, Mail, Plus, Calendar, FileText } from "lucide-react";
+import { Phone, Mail, Calendar, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -6,12 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { type Customer } from "@db/schema";
 import { format } from "date-fns";
 import { LoyaltyCard } from "./LoyaltyCard";
-
-interface QuickActionProps {
-  icon: React.ElementType;
-  label: string;
-  onClick: () => void;
-}
 
 interface CustomerDetailsProps {
   customerId: number;
@@ -62,22 +56,6 @@ export function CustomerDetails({ customerId, onBack }: CustomerDetailsProps) {
     // This would typically open a calendar modal
     alert("Schedule meeting functionality coming soon!");
   };
-
-  const handleCreateLead = () => {
-    // This would typically navigate to the new lead form
-    alert("Create lead functionality coming soon!");
-  };
-
-  const QuickAction = ({ icon: Icon, label, onClick }: QuickActionProps) => (
-    <Button 
-      variant="outline" 
-      className="flex flex-col items-center p-3 h-auto gap-1 flex-1"
-      onClick={onClick}
-    >
-      <Icon className="h-4 w-4" />
-      <span className="text-xs">{label}</span>
-    </Button>
-  );
 
   if (isLoading) {
     return (

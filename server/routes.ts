@@ -5,7 +5,7 @@ import { eq, sql } from "drizzle-orm";
 
 export function registerRoutes(app: Express) {
   // Customers
-  app.get("/api/customers", async (req, res) => {
+  app.get("/api/customers", async (_req, res): Promise<void> => {
     const result = await db.select().from(customers);
     res.json(result);
   });
@@ -48,7 +48,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Products
-  app.get("/api/products", async (req, res) => {
+  app.get("/api/products", async (_req, res): Promise<void> => {
     const result = await db.select().from(products);
 
     // If no products exist, populate with standard vending machine products
@@ -164,9 +164,9 @@ export function registerRoutes(app: Express) {
   });
 
   // Activities
-  app.get("/api/activities", async (req, res) => {
+  app.get("/api/activities", async (req, res): Promise<void> => {
     try {
-      const customerId = req.query.customerId;
+      const customerId = req.query['customerId'];
       const query = customerId
         ? db.select().from(activities).where(eq(activities.customerId, Number(customerId)))
         : db.select().from(activities);
@@ -236,8 +236,8 @@ export function registerRoutes(app: Express) {
   });
 
   // Maintenance Records
-  app.get("/api/maintenance", async (req, res) => {
-    const customerId = req.query.customerId;
+  app.get("/api/maintenance", async (req, res): Promise<void> => {
+    const customerId = req.query['customerId'];
     const query = customerId
       ? db.select().from(maintenanceRecords).where(eq(maintenanceRecords.customerId, Number(customerId)))
       : db.select().from(maintenanceRecords);
@@ -266,7 +266,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Deal Pipeline Routes
-  app.patch("/api/opportunities/:id/stage", async (req, res) => {
+  app.patch("/api/opportunities/:id/stage", async (req, res): Promise<void> => {
     try {
       const { stage } = req.body;
       const id = parseInt(req.params.id);
@@ -275,7 +275,8 @@ export function registerRoutes(app: Express) {
 
       // Validate the stage value
       if (!stage) {
-        return res.status(400).json({ error: "Stage is required" });
+        res.status(400).json({ error: "Stage is required" });
+        return;
       }
 
       // Check if opportunity exists before updating
@@ -286,7 +287,8 @@ export function registerRoutes(app: Express) {
 
       if (existing.length === 0) {
         console.error(`Opportunity ${id} not found`);
-        return res.status(404).json({ error: "Opportunity not found" });
+        res.status(404).json({ error: "Opportunity not found" });
+        return;
       }
 
       const result = await db
@@ -300,6 +302,7 @@ export function registerRoutes(app: Express) {
 
       console.log(`Successfully updated opportunity ${id} stage to ${stage}`);
       res.json(result[0]);
+      return;
     } catch (error) {
       console.error("Stage update error:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
@@ -307,9 +310,10 @@ export function registerRoutes(app: Express) {
         error: "Failed to update stage",
         details: errorMessage
       });
+      return;
     }
   });
-  app.patch("/api/maintenance/:id/status", async (req, res) => {
+  app.patch("/api/maintenance/:id/status", async (req, res): Promise<void> => {
     try {
       const { status } = req.body;
       const id = parseInt(req.params.id);
@@ -340,7 +344,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Loyalty Points Routes
-  app.get("/api/customers/:id/loyalty", async (req, res) => {
+  app.get("/api/customers/:id/loyalty", async (req, res): Promise<void> => {
     try {
       const customerId = parseInt(req.params.id);
       const customer = await db
@@ -414,7 +418,7 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  app.post("/api/customers/:id/loyalty/redeem", async (req, res) => {
+  app.post("/api/customers/:id/loyalty/redeem", async (req, res): Promise<void> => {
     try {
       const customerId = parseInt(req.params.id);
       const { points, description } = req.body;

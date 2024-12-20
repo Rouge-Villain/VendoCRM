@@ -31,11 +31,13 @@ const stages = [
 
 type Stage = typeof stages[number]['id'];
 
-function DraggableDealCard({ opportunity, customers, products }: { 
-  opportunity: Opportunity; 
-  customers?: Customer[];
-  products?: Product[];
-}) {
+interface DraggableDealCardProps {
+  opportunity: Opportunity;
+  customers: Customer[];
+  products: Product[];
+}
+
+function DraggableDealCard({ opportunity, customers, products }: DraggableDealCardProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: opportunity.id.toString(),
   });
@@ -166,8 +168,8 @@ function DroppableStage({
             <DraggableDealCard
               key={opp.id}
               opportunity={opp}
-              customers={customers}
-              products={products}
+              customers={customers ?? []}
+              products={products ?? []}
             />
           ))}
         </div>
@@ -303,7 +305,14 @@ export function DealPipeline() {
     );
   }
 
-  const stageMetrics = stages.reduce((acc, stage) => {
+  const defaultMetrics = {
+    count: 0,
+    totalValue: 0,
+    weightedValue: 0,
+    avgProbability: 0
+  };
+
+  const stageMetrics: Record<Stage, typeof defaultMetrics> = stages.reduce((acc, stage) => {
     const stageOpportunities = opportunities.filter(opp => opp.stage === stage.id);
     const totalValue = stageOpportunities.reduce((sum, opp) => sum + parseFloat(opp.value.toString()), 0);
     const avgProbability = stageOpportunities.length > 0
@@ -317,7 +326,7 @@ export function DealPipeline() {
       avgProbability
     };
     return acc;
-  }, {} as Record<string, { count: number; totalValue: number; weightedValue: number; avgProbability: number; }>);
+  }, Object.fromEntries(stages.map(stage => [stage.id, { ...defaultMetrics }])) as Record<Stage, typeof defaultMetrics>);
 
   return (
     <DndContext
@@ -396,7 +405,7 @@ export function DealPipeline() {
                 opportunities={opportunities}
                 customers={customers}
                 products={products}
-                metrics={stageMetrics[stage.id]}
+                metrics={stageMetrics[stage.id] || defaultMetrics}
               />
             ))}
           </div>

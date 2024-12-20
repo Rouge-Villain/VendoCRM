@@ -26,30 +26,7 @@ export default function Customers() {
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async (customerId: number) => {
-      const response = await fetch(`/api/customers/${customerId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to delete customer");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
-      toast({ title: "Customer deleted successfully" });
-    },
-    onError: (error) => {
-      console.error('Customer deletion error:', error);
-      toast({
-        title: "Failed to delete customer",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  // Mutation will be implemented when delete functionality is needed
 
   if (isLoading) {
     return (
