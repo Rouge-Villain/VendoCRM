@@ -1,5 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { exportToCSV, prepareAnalyticsData } from '@/lib/exportData';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import type {
   ChartData,
   ChartOptions,
@@ -19,6 +26,7 @@ import {
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { type Customer, type Opportunity } from "@db/schema";
 
 ChartJS.register(
@@ -212,16 +220,63 @@ export function AdvancedAnalytics(): JSX.Element {
     exportToCSV(analyticsData, 'territory-performance-analysis');
   };
 
+  const handleExportPDF = async () => {
+    if (!customers || !opportunities) return;
+    
+    // Create a new window/tab with a printable version of the analytics
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    // Add content to the new window
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Territory Performance Analysis</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .chart-container { margin: 20px 0; page-break-inside: avoid; }
+            h1, h2 { color: #1a56db; }
+            .territory-data { margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <h1>Territory Performance Analysis</h1>
+          <div class="territory-data">
+            ${Object.entries(territoryCoverage).map(([territory, data]) => `
+              <h2>${territory}</h2>
+              <p>Customers: ${data.customers}</p>
+              <p>Machines: ${data.machines}</p>
+              <p>Revenue: $${data.revenue.toLocaleString()}</p>
+            `).join('')}
+          </div>
+        </body>
+      </html>
+    `);
+
+    // Print the window as PDF
+    printWindow.document.close();
+    printWindow.print();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Advanced Analytics Dashboard</h2>
-        <button
-          onClick={handleExportData}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-        >
-          Export Data
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+              Export Data
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleExportData}>
+              <span className="mr-2">📊</span> Export as CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExportPDF()}>
+              <span className="mr-2">📄</span> Export as PDF
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <Card>
         <CardHeader>

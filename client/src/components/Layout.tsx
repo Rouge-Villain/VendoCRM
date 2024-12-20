@@ -111,9 +111,9 @@ export default function Layout({ children }: LayoutProps) {
             </Sheet>
           </div>
         </div>
-        <main className="relative min-h-screen bg-gray-50">
+        <main className="relative min-h-screen bg-gray-50 overflow-x-hidden">
           <div 
-            className={`h-full transition-all duration-200`}
+            className="h-full w-full transition-all duration-200 overflow-x-auto"
             style={{
               pointerEvents: 'auto',
               touchAction: document.querySelector('[data-state="open"]') ? 'none' : 'auto',
@@ -137,9 +137,9 @@ export default function Layout({ children }: LayoutProps) {
             <NavigationLinks />
           </div>
         </div>
-        <div className="pl-64 flex-1 min-h-screen bg-gray-50/50">
-          <main className="relative py-8 px-8 min-w-[1024px] overflow-x-auto">
-            <div className="grid grid-cols-1 gap-6">
+        <div className="pl-64 flex-1 min-h-screen bg-gray-50/50 overflow-hidden">
+          <main className="relative py-8 px-8 w-full overflow-x-auto">
+            <div className="grid grid-cols-1 gap-6 min-w-0">
               {children}
               <RealTimeInteractions />
             </div>
