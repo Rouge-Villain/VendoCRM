@@ -490,25 +490,43 @@ export function AdvancedAnalytics(): JSX.Element {
           <CardTitle>Territory Performance Analysis</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[400px] territory-chart">
+          <div className="h-[350px] w-full territory-chart">
             <Bar
               data={territoryData}
               options={{
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
+                aspectRatio: 1.75,
                 plugins: {
                   legend: {
                     position: 'top' as const,
+                    align: 'center' as const,
+                    labels: {
+                      boxWidth: 20,
+                      padding: 20
+                    }
                   },
                   title: {
                     display: true,
-                    text: 'Customer and Machine Distribution by Territory'
+                    text: 'Customer and Machine Distribution by Territory',
+                    padding: {
+                      top: 10,
+                      bottom: 20
+                    }
                   },
                 },
                 scales: {
                   y: {
                     beginAtZero: true,
+                    ticks: {
+                      padding: 10
+                    }
                   },
+                  x: {
+                    ticks: {
+                      padding: 10
+                    }
+                  }
                 },
               } satisfies ChartOptions<'bar'>}
             />
@@ -521,12 +539,13 @@ export function AdvancedAnalytics(): JSX.Element {
           <CardTitle>Quarterly Performance Metrics</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[400px] performance-chart">
+          <div className="h-[350px] w-full performance-chart">
             <Line
               data={performanceData}
               options={{
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
+                aspectRatio: 1.75,
                 interaction: {
                   mode: 'index' as const,
                   intersect: false,
@@ -534,10 +553,19 @@ export function AdvancedAnalytics(): JSX.Element {
                 plugins: {
                   legend: {
                     position: 'top' as const,
+                    align: 'center' as const,
+                    labels: {
+                      boxWidth: 20,
+                      padding: 20
+                    }
                   },
                   title: {
                     display: true,
-                    text: 'Revenue and Conversion Rate Trends'
+                    text: 'Revenue and Conversion Rate Trends',
+                    padding: {
+                      top: 10,
+                      bottom: 20
+                    }
                   },
                 },
                 scales: {
@@ -547,7 +575,11 @@ export function AdvancedAnalytics(): JSX.Element {
                     position: 'left' as const,
                     title: {
                       display: true,
-                      text: 'Revenue ($)'
+                      text: 'Revenue ($)',
+                      padding: { top: 10, bottom: 10 }
+                    },
+                    ticks: {
+                      padding: 10
                     }
                   },
                   y1: {
@@ -556,12 +588,21 @@ export function AdvancedAnalytics(): JSX.Element {
                     position: 'right' as const,
                     title: {
                       display: true,
-                      text: 'Conversion Rate (%)'
+                      text: 'Conversion Rate (%)',
+                      padding: { top: 10, bottom: 10 }
                     },
                     grid: {
                       drawOnChartArea: false,
                     },
+                    ticks: {
+                      padding: 10
+                    }
                   },
+                  x: {
+                    ticks: {
+                      padding: 10
+                    }
+                  }
                 },
               } satisfies ChartOptions<'line'>}
             />
