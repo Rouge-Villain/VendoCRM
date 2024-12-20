@@ -1,10 +1,10 @@
 import { SalesAnalytics } from "../components/analytics/SalesAnalytics";
 import { CustomerAnalytics } from "../components/analytics/CustomerAnalytics";
 import { AdvancedAnalytics } from "../components/analytics/AdvancedAnalytics";
-import { ActivityHeatMap } from "../components/analytics/ActivityHeatMap";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { type FC } from 'react';
 
-export default function Analytics() {
+const Analytics: FC = () => {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -17,20 +17,21 @@ export default function Analytics() {
           <TabsTrigger value="sales">Sales Performance</TabsTrigger>
           <TabsTrigger value="customers">Customer Analytics</TabsTrigger>
         </TabsList>
-
+        
         <TabsContent value="advanced" className="space-y-6">
-          <ActivityHeatMap />
           <AdvancedAnalytics />
         </TabsContent>
 
         <TabsContent value="sales" className="space-y-6">
           <SalesAnalytics />
         </TabsContent>
-
+        
         <TabsContent value="customers" className="space-y-6">
           <CustomerAnalytics />
         </TabsContent>
       </Tabs>
     </div>
   );
-}
+};
+
+export default Analytics;

@@ -42,26 +42,28 @@ export function CustomerAnalytics() {
   });
 
   // Calculate customer acquisition trends (monthly)
-  const acquisitionTrends = customers?.reduce((acc, customer) => {
+  const acquisitionTrends: AcquisitionTrends = customers?.reduce<Record<string, number>>((acc, customer) => {
     if (customer.createdAt) {
       const date = new Date(customer.createdAt);
       const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
       acc[monthYear] = (acc[monthYear] || 0) + 1;
     }
     return acc;
-  }, {} as Record<string, number>);
+  }, {}) ?? {};
 
   // Calculate machine type distribution
-  const machineDistribution = customers?.reduce((acc, customer) => {
+  const machineDistribution: MachineDistribution = customers?.reduce<Record<string, number>>((acc, customer) => {
     if (Array.isArray(customer.machineTypes)) {
-      (customer.machineTypes as string[]).forEach(type => {
-        acc[type] = (acc[type] || 0) + 1;
+      customer.machineTypes.forEach(type => {
+        if (typeof type === 'string') {
+          acc[type] = (acc[type] || 0) + 1;
+        }
       });
     }
     return acc;
-  }, {} as Record<string, number>);
+  }, {}) ?? {};
 
-  const acquisitionChartData: ChartData<'line'> = {
+  const acquisitionChartData: ChartData<'line', number[], string> = {
     labels: Object.keys(acquisitionTrends || {}),
     datasets: [
       {
@@ -73,7 +75,7 @@ export function CustomerAnalytics() {
     ],
   };
 
-  const machineChartData: ChartData<'pie'> = {
+  const machineChartData: ChartData<'pie', number[], string> = {
     labels: Object.keys(machineDistribution || {}),
     datasets: [
       {
@@ -106,7 +108,20 @@ export function CustomerAnalytics() {
                   legend: {
                     position: 'top' as const,
                   },
+                  tooltip: {
+                    mode: 'index' as const,
+                    intersect: false,
+                  },
                 },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    title: {
+                      display: true,
+                      text: 'Number of New Customers'
+                    }
+                  }
+                }
               } as ChartOptions<'line'>}
             />
           </div>

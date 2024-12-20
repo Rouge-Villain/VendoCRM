@@ -3,6 +3,7 @@ import { exportToCSV, prepareAnalyticsData } from '@/lib/exportData';
 import type {
   ChartData,
   ChartOptions,
+  ChartDataset,
 } from 'chart.js';
 import {
   Chart as ChartJS,
@@ -57,23 +58,30 @@ export function AdvancedAnalytics() {
 
   // Calculate service territory coverage
   interface TerritoryCoverage {
-  customers: number;
-  machines: number;
-  revenue: number;
-}
+    customers: number;
+    machines: number;
+    revenue: number;
+  }
 
-const territoryCoverage = customers?.reduce((acc, customer) => {
+  interface TerritoryCoverageMap {
+    [territory: string]: TerritoryCoverage;
+  }
+
+  const territoryCoverage = customers?.reduce<TerritoryCoverageMap>((acc, customer) => {
     if (customer.serviceTerritory) {
+      const territoryRevenue = opportunities?.reduce((sum, opp) => 
+        opp.customerId === customer.id ? sum + Number(opp.value) : sum
+      , 0) || 0;
+
       acc[customer.serviceTerritory] = {
         customers: (acc[customer.serviceTerritory]?.customers || 0) + 1,
-        machines: (acc[customer.serviceTerritory]?.machines || 0) + (Array.isArray(customer.machineTypes) ? customer.machineTypes.length : 0),
-        revenue: opportunities?.reduce((sum, opp) => 
-          opp.customerId === customer.id ? sum + Number(opp.value) : sum
-        , 0) || 0
+        machines: (acc[customer.serviceTerritory]?.machines || 0) + 
+          (Array.isArray(customer.machineTypes) ? customer.machineTypes.length : 0),
+        revenue: (acc[customer.serviceTerritory]?.revenue || 0) + territoryRevenue
       };
     }
     return acc;
-  }, {} as Record<string, TerritoryCoverage>);
+  }, {});
 
   // Calculate sales performance by quarter
   interface QuarterlyPerformance {
@@ -90,23 +98,28 @@ const territoryCoverage = customers?.reduce((acc, customer) => {
     });
   };
 
-  const quarterlyPerformance = opportunities?.reduce((acc, opp) => {
+  const quarterlyPerformance = opportunities?.reduce<Record<string, QuarterlyPerformance>>((acc, opp) => {
     if (opp.createdAt) {
       const date = new Date(opp.createdAt);
       const quarter = `Q${Math.floor((date.getMonth() + 3) / 3)} ${date.getFullYear()}`;
+      
+      // Get all opportunities for this quarter
+      const quarterlyOpps = calculateQuarterlyOpportunities(opportunities || [], date);
+      const closedOpps = quarterlyOpps.filter(o => o.status === 'closed');
+      const conversionRate = quarterlyOpps.length > 0 
+        ? (closedOpps.length / quarterlyOpps.length) * 100 
+        : 0;
+
       acc[quarter] = {
         revenue: (acc[quarter]?.revenue || 0) + Number(opp.value),
         count: (acc[quarter]?.count || 0) + 1,
-        conversion: acc[quarter]?.conversion || 0
+        conversion: conversionRate
       };
-      // Calculate conversion rate
-      const quarterlyOpps = calculateQuarterlyOpportunities(opportunities, date);
-      acc[quarter].conversion = (quarterlyOpps.filter(o => o.status === 'closed').length / quarterlyOpps.length) * 100;
     }
     return acc;
-  }, {} as Record<string, QuarterlyPerformance>);
+  }, {});
 
-  const territoryData = {
+  const territoryData: ChartData<'bar', number[], string> = {
     labels: Object.keys(territoryCoverage || {}),
     datasets: [
       {
@@ -122,13 +135,14 @@ const territoryCoverage = customers?.reduce((acc, customer) => {
     ],
   };
 
-  type ChartDataset = {
+  interface PerformanceChartDataset {
     type: 'line';
     label: string;
     data: number[];
     borderColor: string;
     yAxisID: string;
-  };
+    tension?: number;
+  }
 
   const performanceData: ChartData<'line'> = {
     labels: Object.keys(quarterlyPerformance || {}),
@@ -147,7 +161,7 @@ const territoryCoverage = customers?.reduce((acc, customer) => {
         borderColor: 'rgb(255, 99, 132)',
         yAxisID: 'y1',
       },
-    ] as ChartDataset[],
+    ] as ChartDataset<'line'>[],
   };
 
   if (isCustomersError || isOpportunitiesError) {

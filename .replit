@@ -46,6 +46,10 @@ args = "Start application"
 task = "workflow.run"
 args = "Build client"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Type Check"
+
 [[workflows.workflow]]
 name = "Server"
 author = "agent"
@@ -89,3 +93,17 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd client && npm run build"
+
+[[workflows.workflow]]
+name = "Type Check"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd client && npx tsc --noEmit"
