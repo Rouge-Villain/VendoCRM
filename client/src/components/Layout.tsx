@@ -61,8 +61,8 @@ export default function Layout({ children }: LayoutProps) {
 
   if (isMobile) {
     return (
-      <div className="relative min-h-screen bg-gray-50 overflow-hidden">
-        <div className="sticky top-0 z-40 bg-white border-b">
+      <div className="relative min-h-screen bg-gray-50">
+        <div className="sticky top-0 z-50 bg-white border-b">
           <div className="flex items-center justify-between p-4">
             <img src="/AVS.png" alt="AVS Companies" className="h-8 w-auto" />
             <Sheet>
@@ -73,32 +73,34 @@ export default function Layout({ children }: LayoutProps) {
               </SheetTrigger>
               <SheetContent 
                 side="left" 
-                className="w-64 z-[100] fixed touch-none select-none"
+                className="w-64 fixed inset-y-0 left-0 z-[70] bg-white shadow-xl border-r touch-none"
                 onOpenAutoFocus={(e) => e.preventDefault()}
-                onInteractOutside={(e) => {
-                  // Prevent interaction with main content when sheet is open
-                  e.preventDefault();
-                }}
+                onInteractOutside={(e) => e.preventDefault()}
+                onPointerDownOutside={(e) => e.preventDefault()}
               >
-                <div className="flex h-16 items-center px-4">
+                <div className="flex h-16 items-center px-4 border-b">
                   <img src="/AVS.png" alt="AVS Companies" className="h-8 w-auto" />
                 </div>
-                <div className="overflow-y-auto flex-1">
+                <div className="overflow-y-auto flex-1 touch-pan-y">
                   <NavigationLinks />
                 </div>
               </SheetContent>
+              <div 
+                className="fixed inset-0 z-[65] bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 touch-none"
+                data-state="open"
+                style={{ 
+                  pointerEvents: 'none',
+                  touchAction: 'none'
+                }}
+                onClick={(e) => e.preventDefault()}
+              />
             </Sheet>
           </div>
         </div>
         <main 
-          className="relative min-h-screen bg-gray-50 overflow-x-hidden"
-          style={{
-            // Prevent content from being affected by swipe gestures when menu is closed
-            touchAction: 'pan-y pinch-zoom',
-            WebkitOverflowScrolling: 'touch',
-          }}
+          className="relative min-h-screen bg-gray-50"
         >
-          <div className="h-full relative z-0">
+          <div className="h-full">
             {children}
           </div>
         </main>
