@@ -73,8 +73,25 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  const PORT = 3000;
-  server.listen(PORT, "0.0.0.0", () => {
-    log(`serving on port ${PORT}`);
-  });
+  const PORT = Number(process.env.PORT) || 3001;
+  
+  // Try to start the server, with retry logic
+  const startServer = (port: number) => {
+    server.on('error', (error: any) => {
+      if (error.code === 'EADDRINUSE') {
+        const nextPort = port + 1;
+        log(`Port ${port} is busy, retrying with port ${nextPort}`);
+        process.env.PORT = String(nextPort);
+        startServer(nextPort);
+      } else {
+        throw error;
+      }
+    });
+
+    server.listen(port, "0.0.0.0", () => {
+      log(`serving on port ${port}`);
+    });
+  };
+  
+  startServer(PORT);
 })();

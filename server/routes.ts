@@ -425,7 +425,11 @@ export function registerRoutes(app: Express) {
         .from(customers)
         .where(eq(customers.id, customerId));
 
-      if (customer[0].loyaltyPoints < points) {
+      if (!customer || customer.length === 0) {
+        return res.status(404).json({ error: "Customer not found" });
+      }
+
+      if ((customer[0]?.loyaltyPoints ?? 0) < points) {
         return res.status(400).json({ error: "Insufficient points" });
       }
 
