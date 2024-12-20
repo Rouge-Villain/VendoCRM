@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type {
+  DragEndEvent,
+  DragStartEvent,
+} from "@dnd-kit/core";
 import {
   DndContext,
-  DragEndEvent,
   DragOverlay,
   PointerSensor,
   useSensor,
   useSensors,
   closestCorners,
-  DragStartEvent,
   useDraggable,
   useDroppable,
 } from "@dnd-kit/core";

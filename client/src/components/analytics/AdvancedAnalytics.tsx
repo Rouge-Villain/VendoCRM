@@ -34,7 +34,7 @@ ChartJS.register(
 );
 
 export function AdvancedAnalytics(): JSX.Element {
-  const { data: customers, isError: isCustomersError, error: customersError } = useQuery({
+  const { data: customers, isError: isCustomersError, error: customersError } = useQuery<Customer[], Error>({
     queryKey: ["customers"],
     queryFn: async () => {
       const response = await fetch("/api/customers");
@@ -42,11 +42,11 @@ export function AdvancedAnalytics(): JSX.Element {
         throw new Error(`Error fetching customers: ${response.statusText}`);
       }
       const data = await response.json();
-    return data as Customer[];
+      return data;
     },
   });
 
-  const { data: opportunities, isError: isOpportunitiesError, error: opportunitiesError } = useQuery({
+  const { data: opportunities, isError: isOpportunitiesError, error: opportunitiesError } = useQuery<Opportunity[], Error>({
     queryKey: ["opportunities"],
     queryFn: async () => {
       const response = await fetch("/api/opportunities");
@@ -54,7 +54,7 @@ export function AdvancedAnalytics(): JSX.Element {
         throw new Error(`Error fetching opportunities: ${response.statusText}`);
       }
       const data = await response.json();
-    return data as Opportunity[];
+      return data;
     },
   });
 

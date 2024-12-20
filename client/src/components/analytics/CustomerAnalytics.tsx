@@ -12,6 +12,7 @@ import {
   ArcElement,
   type ChartData,
   type ChartOptions,
+  type ChartDataset,
 } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,14 +40,15 @@ interface MachineDistribution {
 }
 
 export function CustomerAnalytics(): JSX.Element {
-  const { data: customers, isLoading, error } = useQuery<Customer[]>({
+  const { data: customers, isLoading, error } = useQuery<Customer[], Error>({
     queryKey: ["customers"],
     queryFn: async () => {
       const response = await fetch("/api/customers");
       if (!response.ok) {
-        throw new Error('Failed to fetch customers');
+        throw new Error(`Failed to fetch customers: ${response.statusText}`);
       }
-      return response.json();
+      const data = await response.json();
+      return data;
     },
   });
 
@@ -62,10 +64,13 @@ export function CustomerAnalytics(): JSX.Element {
 
   // Calculate machine type distribution
   const machineDistribution: MachineDistribution = customers?.reduce<MachineDistribution>((acc, customer) => {
-    if (Array.isArray(customer.machineTypes)) {
-      customer.machineTypes.forEach((type: unknown) => {
+    const machineTypes = customer.machineTypes;
+    if (Array.isArray(machineTypes)) {
+      machineTypes.forEach((type) => {
         if (typeof type === 'string') {
           acc[type] = (acc[type] || 0) + 1;
+        } else {
+          console.warn('Invalid machine type found:', type);
         }
       });
     }
@@ -79,8 +84,10 @@ export function CustomerAnalytics(): JSX.Element {
         label: 'New Customers',
         data: Object.values(acquisitionTrends),
         borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
         tension: 0.1,
-      },
+        fill: false,
+      } as ChartDataset<'line'>,
     ],
   };
 
