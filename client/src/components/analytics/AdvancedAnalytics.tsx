@@ -249,18 +249,18 @@ export function AdvancedAnalytics(): JSX.Element {
         await new Promise(resolve => setTimeout(resolve, 500));
         
         const canvas = await html2canvas(element, {
-          scale: 2.5, // Higher quality for better resolution
+          scale: 1, // Reduced scale for better fit
           logging: false,
           useCORS: true,
-          backgroundColor: '#ffffff', // Ensure white background
-          windowWidth: element.scrollWidth,
-          windowHeight: element.scrollHeight,
+          backgroundColor: '#ffffff',
           onclone: (clonedDoc) => {
-            // Ensure the cloned element has proper dimensions
             const clonedElement = clonedDoc.querySelector(selector);
             if (clonedElement instanceof HTMLElement) {
+              // Preserve original dimensions
               clonedElement.style.width = '100%';
-              clonedElement.style.height = '400px';
+              clonedElement.style.maxWidth = '1000px';
+              clonedElement.style.height = 'auto';
+              clonedElement.style.minHeight = '400px';
             }
           }
         });
@@ -330,11 +330,13 @@ export function AdvancedAnalytics(): JSX.Element {
                 border: 1px solid #e5e7eb;
               }
               .chart-image {
-                width: 100%;
-                max-width: 1000px;
+                width: auto;
+                max-width: 800px;
+                height: auto;
                 margin: 20px auto;
                 box-shadow: 0 4px 6px rgba(0,0,0,0.1);
                 border-radius: 4px;
+                display: block;
               }
               .data-grid {
                 display: grid;
