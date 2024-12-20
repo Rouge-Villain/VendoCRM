@@ -12,7 +12,7 @@ interface RowData extends Record<string, unknown> {
 }
 
 export function exportToCSV(data: RowData[], filename: string): void {
-  if (!data.length) return;
+  if (!data.length || !data[0]) return;
   
   const headers = Object.keys(data[0]);
   const csvContent = [

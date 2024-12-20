@@ -11,7 +11,7 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
-import { Bar, Line, Pie } from 'react-chartjs-2';
+import { Line, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type Opportunity } from "@db/schema";
 import { addMonths, format, startOfMonth } from "date-fns";

@@ -56,8 +56,25 @@ interface MonthlyPerformance {
   yearOverYear: number;
 }
 
-type StageAnalysisMap = Record<StageId, StageAnalysis>;
+type StageAnalysisMap = Partial<Record<StageId, StageAnalysis>>;
 type MonthlyPerformanceMap = Record<string, MonthlyPerformance>;
+
+// Initialize empty stage analysis with default values
+const createEmptyStageAnalysis = (): StageAnalysis => ({
+  won: 0,
+  lost: 0,
+  total: 0,
+  wonValue: 0,
+  lostValue: 0,
+  totalValue: 0,
+  winRate: 0,
+  avgTimeInStage: 0,
+  conversionRate: 0,
+  productWins: {},
+  productLosses: {}
+});
+
+// Stage Analysis Type Guard - Removed as it's currently not used
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -99,42 +116,36 @@ export function WinLossAnalytics() {
     
     const stageId = opp.stage as StageId;
     if (!acc[stageId]) {
-      acc[stageId] = {
-        won: 0,
-        lost: 0,
-        total: 0,
-        wonValue: 0,
-        lostValue: 0,
-        totalValue: 0,
-        winRate: 0,
-        avgTimeInStage: 0,
-        conversionRate: 0,
-        productWins: {},
-        productLosses: {}
-      };
+      acc[stageId] = createEmptyStageAnalysis();
     }
 
-    const value = Number(opp.value) || 0;
     const stage = acc[stageId];
+    if (!stage) return acc;
+
+    const value = Number(opp.value) || 0;
     stage.totalValue += value;
 
     // Track wins and losses by product
     if (typeof opp.productId === 'number') {
-      if (!stage.productWins[opp.productId]) {
+      // Initialize product tracking if needed
+      stage.productWins = stage.productWins || {};
+      stage.productLosses = stage.productLosses || {};
+      
+      if (!(opp.productId in stage.productWins)) {
         stage.productWins[opp.productId] = 0;
       }
-      if (!stage.productLosses[opp.productId]) {
+      if (!(opp.productId in stage.productLosses)) {
         stage.productLosses[opp.productId] = 0;
       }
 
       if (opp.status === 'closed-won') {
         stage.won++;
         stage.wonValue += value;
-        stage.productWins[opp.productId]++;
+        stage.productWins[opp.productId] = (stage.productWins[opp.productId] || 0) + 1;
       } else if (opp.status === 'closed-lost') {
         stage.lost++;
         stage.lostValue += value;
-        stage.productLosses[opp.productId]++;
+        stage.productLosses[opp.productId] = (stage.productLosses[opp.productId] || 0) + 1;
       }
     }
 
@@ -214,13 +225,17 @@ export function WinLossAnalytics() {
   const avgMonthlyGrowth = lastThreeMonths.reduce((acc, month, index) => {
     if (index === 0) return acc;
     
-    const prevMonth = lastThreeMonths[index - 1];
-    const currentMonth = monthlyPerformance[month];
-    const prevMonthData = monthlyPerformance[prevMonth];
+    if (index === 0) return acc;
     
-    if (!currentMonth || !prevMonthData) return acc;
+    const prevMonthKey = lastThreeMonths[index - 1];
+    const currentMonthKey = month;
     
-    const currentValue = currentMonth.wonValue;
+    const currentMonthData = monthlyPerformance[currentMonthKey];
+    const prevMonthData = prevMonthKey ? monthlyPerformance[prevMonthKey] : undefined;
+    
+    if (!currentMonthData || !prevMonthData) return acc;
+    
+    const currentValue = currentMonthData.wonValue;
     const prevValue = Math.max(prevMonthData.wonValue, 1); // Prevent division by zero
     const growth = (currentValue / prevValue) - 1;
     
@@ -228,8 +243,8 @@ export function WinLossAnalytics() {
   }, 0) / Math.max(lastThreeMonths.length - 1, 1);
 
   // Project next 6 months
-  const lastMonth = monthKeys[monthKeys.length - 1];
-  const lastMonthData = monthlyPerformance[lastMonth];
+  const lastMonth = monthKeys.length > 0 ? monthKeys[monthKeys.length - 1] : '';
+  const lastMonthData = lastMonth ? monthlyPerformance[lastMonth] : undefined;
   const baseValue = lastMonthData?.wonValue ?? 0;
 
   const projectedMonths = Array.from({ length: 6 }).reduce<ProjectedMonthMap>((acc, _, index) => {
@@ -377,24 +392,13 @@ export function WinLossAnalytics() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {stages.map((stage) => {
-              const metrics = stageAnalysis[stage.id] ?? {
-                avgTimeInStage: 0,
-                total: 0,
-                won: 0,
-                lost: 0,
-                conversionRate: 0,
-                winRate: 0,
-                wonValue: 0,
-                lostValue: 0,
-                totalValue: 0,
-                productWins: {} as Record<number, number>,
-                productLosses: {} as Record<number, number>
-              };
+              const metrics = stageAnalysis[stage.id] ?? createEmptyStageAnalysis();
               
               const timeInDays = Math.round(metrics.avgTimeInStage / (1000 * 60 * 60 * 24));
               const stageIndex = stages.findIndex(s => s.id === stage.id);
-              const previousStageTotal = stageIndex === 0 ? metrics.total :
-                (stageAnalysis[stages[stageIndex - 1].id]?.total ?? 0);
+              const previousStageId = stageIndex > 0 ? stages[stageIndex - 1]?.id : undefined;
+              const previousStage = previousStageId ? stageAnalysis[previousStageId] : undefined;
+              const previousStageTotal = stageIndex === 0 ? metrics.total : (previousStage?.total ?? 0);
               const conversionRate = previousStageTotal > 0 ? (metrics.total / previousStageTotal) * 100 : 0;
               
               return (

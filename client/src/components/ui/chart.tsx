@@ -133,16 +133,19 @@ const ChartTooltipContent = React.forwardRef<
 
     const tooltipLabel = React.useMemo(() => {
       if (hideLabel || !payload?.length) {
-        return null
+        return null;
       }
 
-      const [item] = payload
-      const key = `${labelKey || item.dataKey || item.name || "value"}`
-      const itemConfig = getPayloadConfigFromPayload(config, item, key)
+      const item = payload[0];
+      if (!item) return null;
+
+      const key = `${labelKey || (item?.dataKey ?? item?.name ?? "value")}`;
+      const itemConfig = item ? getPayloadConfigFromPayload(config, item, key) : undefined;
+
       const value =
         !labelKey && typeof label === "string"
           ? config[label as keyof typeof config]?.label || label
-          : itemConfig?.label
+          : itemConfig?.label;
 
       if (labelFormatter) {
         return (
@@ -153,7 +156,7 @@ const ChartTooltipContent = React.forwardRef<
       }
 
       if (!value) {
-        return null
+        return null;
       }
 
       return <div className={cn("font-medium", labelClassName)}>{value}</div>
@@ -168,7 +171,7 @@ const ChartTooltipContent = React.forwardRef<
     ])
 
     if (!active || !payload?.length) {
-      return null
+      return null;
     }
 
     const nestLabel = payload.length === 1 && indicator !== "dot"
