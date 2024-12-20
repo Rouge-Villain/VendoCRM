@@ -17,7 +17,7 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
-import { Line, Bar, Pie } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type Customer, type Opportunity } from "@db/schema";
 
@@ -68,20 +68,27 @@ export function AdvancedAnalytics() {
   }
 
   const territoryCoverage = customers?.reduce<TerritoryCoverageMap>((acc, customer) => {
-    if (customer.serviceTerritory) {
+    const territory = customer.serviceTerritory;
+    if (territory) {
       const territoryRevenue = opportunities?.reduce((sum, opp) => 
         opp.customerId === customer.id ? sum + Number(opp.value) : sum
-      , 0) || 0;
+      , 0) ?? 0;
 
-      acc[customer.serviceTerritory] = {
-        customers: (acc[customer.serviceTerritory]?.customers || 0) + 1,
-        machines: (acc[customer.serviceTerritory]?.machines || 0) + 
+      const currentTerritory = acc[territory] ?? {
+        customers: 0,
+        machines: 0,
+        revenue: 0
+      };
+
+      acc[territory] = {
+        customers: currentTerritory.customers + 1,
+        machines: currentTerritory.machines + 
           (Array.isArray(customer.machineTypes) ? customer.machineTypes.length : 0),
-        revenue: (acc[customer.serviceTerritory]?.revenue || 0) + territoryRevenue
+        revenue: currentTerritory.revenue + territoryRevenue
       };
     }
     return acc;
-  }, {});
+  }, {}) ?? {};
 
   // Calculate sales performance by quarter
   interface QuarterlyPerformance {
@@ -90,59 +97,66 @@ export function AdvancedAnalytics() {
     conversion: number;
   }
 
-  const calculateQuarterlyOpportunities = (opportunities: Opportunity[], date: Date): Opportunity[] => {
-    return opportunities.filter(o => {
-      const oppDate = new Date(o.createdAt!);
+  type QuarterlyPerformanceMap = Record<string, QuarterlyPerformance>;
+
+  const calculateQuarterlyOpportunities = (
+    opportunities: Opportunity[], 
+    date: Date
+  ): Opportunity[] => {
+    return opportunities.filter(opp => {
+      const createdAt = opp.createdAt;
+      if (!createdAt) return false;
+      
+      const oppDate = new Date(createdAt);
       return oppDate.getFullYear() === date.getFullYear() && 
              Math.floor(oppDate.getMonth() / 3) === Math.floor(date.getMonth() / 3);
     });
   };
 
-  const quarterlyPerformance = opportunities?.reduce<Record<string, QuarterlyPerformance>>((acc, opp) => {
-    if (opp.createdAt) {
-      const date = new Date(opp.createdAt);
-      const quarter = `Q${Math.floor((date.getMonth() + 3) / 3)} ${date.getFullYear()}`;
-      
-      // Get all opportunities for this quarter
-      const quarterlyOpps = calculateQuarterlyOpportunities(opportunities || [], date);
-      const closedOpps = quarterlyOpps.filter(o => o.status === 'closed');
-      const conversionRate = quarterlyOpps.length > 0 
-        ? (closedOpps.length / quarterlyOpps.length) * 100 
-        : 0;
+  const quarterlyPerformance = opportunities?.reduce<QuarterlyPerformanceMap>((acc, opp) => {
+    const createdAt = opp.createdAt;
+    if (!createdAt) return acc;
 
-      acc[quarter] = {
-        revenue: (acc[quarter]?.revenue || 0) + Number(opp.value),
-        count: (acc[quarter]?.count || 0) + 1,
-        conversion: conversionRate
-      };
-    }
+    const date = new Date(createdAt);
+    const quarter = `Q${Math.floor((date.getMonth() + 3) / 3)} ${date.getFullYear()}`;
+    
+    // Get all opportunities for this quarter
+    const quarterlyOpps = calculateQuarterlyOpportunities(opportunities, date);
+    const closedOpps = quarterlyOpps.filter(o => o.status === 'closed');
+    const conversionRate = quarterlyOpps.length > 0 
+      ? (closedOpps.length / quarterlyOpps.length) * 100 
+      : 0;
+
+    const currentQuarter = acc[quarter] ?? {
+      revenue: 0,
+      count: 0,
+      conversion: 0
+    };
+
+    acc[quarter] = {
+      revenue: currentQuarter.revenue + Number(opp.value),
+      count: currentQuarter.count + 1,
+      conversion: conversionRate
+    };
+    
     return acc;
-  }, {});
+  }, {}) ?? {};
 
-  const territoryData: ChartData<'bar', number[], string> = {
-    labels: Object.keys(territoryCoverage || {}),
+  const territoryData: ChartData<'bar'> = {
+    labels: Object.keys(territoryCoverage),
     datasets: [
       {
         label: 'Customers',
-        data: Object.values(territoryCoverage || {}).map(t => t.customers),
+        data: Object.values(territoryCoverage).map(t => t.customers),
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
       },
       {
         label: 'Machines',
-        data: Object.values(territoryCoverage || {}).map(t => t.machines),
+        data: Object.values(territoryCoverage).map(t => t.machines),
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
       },
     ],
   };
-
-  interface PerformanceChartDataset {
-    type: 'line';
-    label: string;
-    data: number[];
-    borderColor: string;
-    yAxisID: string;
-    tension?: number;
-  }
 
   const performanceData: ChartData<'line'> = {
     labels: Object.keys(quarterlyPerformance || {}),
@@ -232,7 +246,7 @@ export function AdvancedAnalytics() {
                     beginAtZero: true,
                   },
                 },
-              } as ChartOptions<'bar'>}
+              } satisfies ChartOptions<'bar'>}
             />
           </div>
         </CardContent>
@@ -285,7 +299,7 @@ export function AdvancedAnalytics() {
                     },
                   },
                 },
-              } as ChartOptions<'line'>}
+              } satisfies ChartOptions<'line'>}
             />
           </div>
         </CardContent>

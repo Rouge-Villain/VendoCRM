@@ -4,7 +4,7 @@ import { AdvancedAnalytics } from "../components/analytics/AdvancedAnalytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type FC } from 'react';
 
-const Analytics: FC = () => {
+const Analytics: FC = (): JSX.Element => {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
