@@ -220,70 +220,122 @@ export function AdvancedAnalytics(): JSX.Element {
   const handleExportPDF = async (): Promise<void> => {
     if (!customers || !opportunities) return;
     
-    const html2canvas = (await import('html2canvas')).default;
+    let loadingToast: HTMLDivElement | null = null;
     
-    // Capture territory chart
-    const territoryChartElement = document.querySelector('.territory-chart') as HTMLElement;
-    const territoryChartImage = territoryChartElement ? await html2canvas(territoryChartElement) : null;
-    const territoryChartDataUrl = territoryChartImage?.toDataURL('image/png');
+    try {
+      // Import html2canvas dynamically to reduce initial bundle size
+      const html2canvas = (await import('html2canvas')).default;
+      
+      // Show loading state
+      loadingToast = document.createElement('div');
+      loadingToast.className = 'fixed top-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded shadow';
+      loadingToast.textContent = 'Generating PDF...';
+      document.body.appendChild(loadingToast);
+      
+      // Capture territory chart
+      const territoryChartElement = document.querySelector('.territory-chart');
+      if (!territoryChartElement || !(territoryChartElement instanceof HTMLElement)) {
+        throw new Error('Territory chart element not found');
+      }
+      
+      const territoryChartImage = await html2canvas(territoryChartElement, {
+        scale: 2,
+        logging: false,
+        useCORS: true
+      });
+      const territoryChartDataUrl = territoryChartImage.toDataURL('image/png');
 
-    // Capture performance chart
-    const performanceChartElement = document.querySelector('.performance-chart') as HTMLElement;
-    const performanceChartImage = performanceChartElement ? await html2canvas(performanceChartElement) : null;
-    const performanceChartDataUrl = performanceChartImage?.toDataURL('image/png');
+      // Capture performance chart
+      const performanceChartElement = document.querySelector('.performance-chart');
+      if (!performanceChartElement || !(performanceChartElement instanceof HTMLElement)) {
+        throw new Error('Performance chart element not found');
+      }
+      
+      const performanceChartImage = await html2canvas(performanceChartElement, {
+        scale: 2,
+        logging: false,
+        useCORS: true
+      });
+      const performanceChartDataUrl = performanceChartImage.toDataURL('image/png');
 
-    // Create a new window/tab with a printable version of the analytics
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    // Add content to the new window
-    const content = `
-      <html>
-        <head>
-          <title>Territory Performance Analysis</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            .chart-container { margin: 20px 0; page-break-inside: avoid; }
-            h1, h2 { color: #1a56db; }
-            .territory-data { margin: 20px 0; }
-            .chart-image { width: 100%; max-width: 800px; margin: 20px auto; }
-          </style>
-        </head>
-        <body>
-          <h1>Territory Performance Analysis</h1>
-          
-          <h2>Territory Distribution Analysis</h2>
-          ${territoryChartDataUrl ? `
+      // Create and download PDF
+      const content = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>Territory Performance Analysis</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+              .chart-container { margin: 20px 0; page-break-inside: avoid; }
+              h1 { color: #1a56db; font-size: 24px; margin-bottom: 20px; }
+              h2 { color: #1a56db; font-size: 20px; margin-top: 30px; margin-bottom: 15px; }
+              h3 { color: #374151; font-size: 16px; margin-top: 20px; }
+              .territory-data { margin: 20px 0; background: #f9fafb; padding: 15px; border-radius: 8px; }
+              .chart-image { width: 100%; max-width: 800px; margin: 20px auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+              .data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+              .metric { font-size: 14px; color: #4b5563; }
+            </style>
+          </head>
+          <body>
+            <h1>Territory Performance Analysis</h1>
+            
+            <h2>Territory Distribution Analysis</h2>
             <div class="chart-container">
               <img src="${territoryChartDataUrl}" alt="Territory Distribution Chart" class="chart-image" />
             </div>
-          ` : ''}
-          
-          <div class="territory-data">
-            ${Object.entries(territoryCoverage).map(([territory, data]) => `
-              <h3>${territory}</h3>
-              <p>Customers: ${data.customers}</p>
-              <p>Machines: ${data.machines}</p>
-              <p>Revenue: $${data.revenue.toLocaleString()}</p>
-            `).join('')}
-          </div>
+            
+            <div class="territory-data">
+              ${Object.entries(territoryCoverage).map(([territory, data]) => `
+                <h3>${territory}</h3>
+                <div class="data-grid">
+                  <div class="metric">Customers: ${data.customers}</div>
+                  <div class="metric">Machines: ${data.machines}</div>
+                  <div class="metric">Revenue: $${data.revenue.toLocaleString()}</div>
+                </div>
+              `).join('')}
+            </div>
 
-          <h2>Quarterly Performance Metrics</h2>
-          ${performanceChartDataUrl ? `
+            <h2>Quarterly Performance Metrics</h2>
             <div class="chart-container">
               <img src="${performanceChartDataUrl}" alt="Quarterly Performance Chart" class="chart-image" />
             </div>
-          ` : ''}
-        </body>
-      </html>
-    `;
+            
+            <div style="margin-top: 30px; font-size: 12px; color: #6b7280; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+              Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
+            </div>
+          </body>
+        </html>
+      `;
 
-    printWindow.document.write(content);
-    printWindow.document.close();
-    
-    // Wait for images to load before printing
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    printWindow.print();
+      // Create a new window/tab with the content
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        throw new Error('Unable to open print window');
+      }
+
+      printWindow.document.write(content);
+      printWindow.document.close();
+      
+      // Wait for images to load before printing
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Print/Save as PDF
+      printWindow.print();
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      // Show error message to user
+      const errorToast = document.createElement('div');
+      errorToast.className = 'fixed top-4 right-4 bg-destructive text-destructive-foreground px-4 py-2 rounded shadow';
+      errorToast.textContent = 'Error generating PDF. Please try again.';
+      document.body.appendChild(errorToast);
+      setTimeout(() => document.body.removeChild(errorToast), 3000);
+    } finally {
+      // Clean up loading toast if it exists
+      if (loadingToast && loadingToast.parentNode) {
+        loadingToast.parentNode.removeChild(loadingToast);
+      }
+    }
   };
 
   return (
@@ -296,11 +348,17 @@ export function AdvancedAnalytics(): JSX.Element {
               Export Data
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleExportData}>
+          <DropdownMenuContent align="end" className="min-w-[160px]">
+            <DropdownMenuItem 
+              onClick={handleExportData}
+              className="flex items-center cursor-pointer"
+            >
               <span className="mr-2">📊</span> Export as CSV
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExportPDF()}>
+            <DropdownMenuItem 
+              onClick={() => handleExportPDF()}
+              className="flex items-center cursor-pointer"
+            >
               <span className="mr-2">📄</span> Export as PDF
             </DropdownMenuItem>
           </DropdownMenuContent>
