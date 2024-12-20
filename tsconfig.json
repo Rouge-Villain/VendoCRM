@@ -2,11 +2,17 @@
   "include": ["client/src/**/*", "db/**/*", "server/**/*"],
   "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
   "compilerOptions": {
+    // Project Options
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "moduleResolution": "Bundler",
+    "jsx": "preserve",
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
-    "target": "ESNext",
     "noEmit": true,
-    "module": "ESNext",
+
+    // Strict Type Checking
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -14,39 +20,46 @@
     "strictBindCallApply": true,
     "strictPropertyInitialization": true,
     "noImplicitThis": true,
-    "useUnknownInCatchVariables": true,
     "alwaysStrict": true,
+    "useUnknownInCatchVariables": true,
+
+    // Additional Type Checking
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "exactOptionalPropertyTypes": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "allowJs": false,
-    "checkJs": false,
+    "exactOptionalPropertyTypes": true,
+    
+    // Code Quality
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
-    "verbatimModuleSyntax": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "Bundler",
-    "allowSyntheticDefaultImports": true,
-    "lib": ["esnext", "dom", "dom.iterable"],
-    "jsx": "preserve",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "bundler",
+    "noErrorTruncation": true,
+    "preserveWatchOutput": true,
+    "pretty": true,
+
+    // Module Resolution
     "baseUrl": ".",
-    "types": ["node", "vite/client"],
     "paths": {
       "@/*": ["./client/src/*"],
       "@db/*": ["./db/*"]
-    }
+    },
+    "types": ["node", "vite/client"],
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+
+    // Interop Constraints
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    // Language and Environment
+    "allowJs": false,
+    "checkJs": false
   }
 }

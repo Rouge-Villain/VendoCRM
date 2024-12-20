@@ -118,7 +118,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd client && npx tsc --noEmit"
+args = "cd client && npx tsc --noEmit --pretty"
 
 [[workflows.workflow]]
 name = "Build and Start"
