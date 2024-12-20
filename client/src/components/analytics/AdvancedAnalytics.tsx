@@ -26,7 +26,6 @@ import {
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { type Customer, type Opportunity } from "@db/schema";
 
 ChartJS.register(
@@ -73,11 +72,9 @@ export function AdvancedAnalytics(): JSX.Element {
     revenue: number;
   }
 
-  interface TerritoryCoverageMap {
-    [territory: string]: TerritoryCoverage;
-  }
+  type TerritoryCoverageMap = Record<string, TerritoryCoverage>;
 
-  const territoryCoverage = customers?.reduce<TerritoryCoverageMap>((acc, customer) => {
+  const territoryCoverage: TerritoryCoverageMap = customers?.reduce<TerritoryCoverageMap>((acc, customer) => {
     const territory = customer.serviceTerritory;
     if (territory) {
       const territoryRevenue = opportunities?.reduce((sum, opp) => 
@@ -98,7 +95,7 @@ export function AdvancedAnalytics(): JSX.Element {
       };
     }
     return acc;
-  }, {}) ?? {};
+  }, {} as TerritoryCoverageMap) ?? {} as TerritoryCoverageMap;
 
   // Calculate sales performance by quarter
   interface QuarterlyPerformance {
@@ -214,21 +211,33 @@ export function AdvancedAnalytics(): JSX.Element {
     );
   }
 
-  const handleExportData = () => {
+  const handleExportData = (): void => {
     if (!customers || !opportunities) return;
     const analyticsData = prepareAnalyticsData(customers, opportunities);
     exportToCSV(analyticsData, 'territory-performance-analysis');
   };
 
-  const handleExportPDF = async () => {
+  const handleExportPDF = async (): Promise<void> => {
     if (!customers || !opportunities) return;
     
+    const html2canvas = (await import('html2canvas')).default;
+    
+    // Capture territory chart
+    const territoryChartElement = document.querySelector('.territory-chart') as HTMLElement;
+    const territoryChartImage = territoryChartElement ? await html2canvas(territoryChartElement) : null;
+    const territoryChartDataUrl = territoryChartImage?.toDataURL('image/png');
+
+    // Capture performance chart
+    const performanceChartElement = document.querySelector('.performance-chart') as HTMLElement;
+    const performanceChartImage = performanceChartElement ? await html2canvas(performanceChartElement) : null;
+    const performanceChartDataUrl = performanceChartImage?.toDataURL('image/png');
+
     // Create a new window/tab with a printable version of the analytics
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
     // Add content to the new window
-    printWindow.document.write(`
+    const content = `
       <html>
         <head>
           <title>Territory Performance Analysis</title>
@@ -237,24 +246,43 @@ export function AdvancedAnalytics(): JSX.Element {
             .chart-container { margin: 20px 0; page-break-inside: avoid; }
             h1, h2 { color: #1a56db; }
             .territory-data { margin: 20px 0; }
+            .chart-image { width: 100%; max-width: 800px; margin: 20px auto; }
           </style>
         </head>
         <body>
           <h1>Territory Performance Analysis</h1>
+          
+          <h2>Territory Distribution Analysis</h2>
+          ${territoryChartDataUrl ? `
+            <div class="chart-container">
+              <img src="${territoryChartDataUrl}" alt="Territory Distribution Chart" class="chart-image" />
+            </div>
+          ` : ''}
+          
           <div class="territory-data">
             ${Object.entries(territoryCoverage).map(([territory, data]) => `
-              <h2>${territory}</h2>
+              <h3>${territory}</h3>
               <p>Customers: ${data.customers}</p>
               <p>Machines: ${data.machines}</p>
               <p>Revenue: $${data.revenue.toLocaleString()}</p>
             `).join('')}
           </div>
+
+          <h2>Quarterly Performance Metrics</h2>
+          ${performanceChartDataUrl ? `
+            <div class="chart-container">
+              <img src="${performanceChartDataUrl}" alt="Quarterly Performance Chart" class="chart-image" />
+            </div>
+          ` : ''}
         </body>
       </html>
-    `);
+    `;
 
-    // Print the window as PDF
+    printWindow.document.write(content);
     printWindow.document.close();
+    
+    // Wait for images to load before printing
+    await new Promise(resolve => setTimeout(resolve, 1000));
     printWindow.print();
   };
 
@@ -283,7 +311,7 @@ export function AdvancedAnalytics(): JSX.Element {
           <CardTitle>Territory Performance Analysis</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[400px]">
+          <div className="h-[400px] territory-chart">
             <Bar
               data={territoryData}
               options={{
@@ -314,7 +342,7 @@ export function AdvancedAnalytics(): JSX.Element {
           <CardTitle>Quarterly Performance Metrics</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[400px]">
+          <div className="h-[400px] performance-chart">
             <Line
               data={performanceData}
               options={{
